@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: minibank
+
+  datasource:
+    url: jdbc://postgresql:5432/minibank_db
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+    name: minibank_data_connection
+
+  liquibase:
+    change-log: classpath:/db/changelog/db.changelog-master.yaml
+    contexts: main
+    default-schema: public
+    enabled: true
+    drop-first: true
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+    enabled: true
+  swagger-ui:
+    path: /v3/api/doc.html
+
+
+server:
+  port: 8082

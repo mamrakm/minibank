@@ -1,0 +1,85 @@
+openapi: 3.0.1
+info:
+  title: Account API
+  version: 1.0.0
+paths:
+  /accounts/balance:
+    post:
+      summary: Show balance
+      operationId: showBalance
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+      responses:
+        '200':
+          description: Balance retrieved
+          content:
+            application/json:
+              schema:
+                type: number
+  /accounts/withdraw:
+    post:
+      summary: Withdraw amount
+      operationId: withdraw
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawRequest'
+      responses:
+        '200':
+          description: Amount withdrawn
+  /accounts:
+    post:
+      summary: Add new account
+      operationId: addAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDTO'
+      responses:
+        '201':
+          description: Account created
+  /accounts/delete:
+    post:
+      summary: Delete account
+      operationId: deleteAccount
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRequest'
+      responses:
+        '204':
+          description: Account deleted
+components:
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          type: string
+        balance:
+          type: number
+    AccountDTO:
+      type: object
+      properties:
+        id:
+          type: string
+        balance:
+          type: number
+    AccountRequest:
+      type: object
+      properties:
+        id:
+          type: string
+    WithdrawRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        amount:
+          type: number
