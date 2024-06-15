@@ -9,5 +9,4 @@ class MinibankApplicationTests {
     @Test
     void contextLoads() {
     }
-
 }
