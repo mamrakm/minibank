@@ -16,7 +16,7 @@ public interface CustomerMapper {
 
     @AfterMapping
     default void linkAccount(@MappingTarget Customer customer) {
-        customer.getAccount().forEach(account -> account.setCustomerId(customer));
+        customer.getAccounts().forEach(account -> account.setCustomerId(customer));
     }
 
     CustomerDto toDto(Customer customer);

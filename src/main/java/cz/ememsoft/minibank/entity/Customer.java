@@ -12,13 +12,19 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 @Entity
 @Table(name = "customer", schema = "bank")
 public class Customer {
+
+    @OneToMany(mappedBy = "customerId", orphanRemoval = true)
+    private Set<Account> accounts = new LinkedHashSet<>();
+
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "customer_seq")
     @SequenceGenerator(name = "customer_seq")
@@ -34,7 +40,5 @@ public class Customer {
     @Column(name = "last_name", nullable = false)
     private String last_name;
 
-    @OneToMany(mappedBy = "customerId", fetch = FetchType.LAZY)
-    private List<Account> account;
 
 }
