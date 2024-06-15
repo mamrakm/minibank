@@ -1,13 +1,10 @@
--- liquibase formatted sql
+CREATE SCHEMA IF NOT EXISTS bank;
 
--- changeset miroslav.mamrak:1718327092661-1
-CREATE SEQUENCE IF NOT EXISTS account_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS bank.account_seq START WITH 1 INCREMENT BY 50;
 
--- changeset miroslav.mamrak:1718327092661-2
-CREATE SEQUENCE IF NOT EXISTS customer_seq START WITH 1 INCREMENT BY 50;
+CREATE SEQUENCE IF NOT EXISTS bank.customer_seq START WITH 1 INCREMENT BY 50;
 
--- changeset miroslav.mamrak:1718327092661-3
-CREATE TABLE account
+CREATE TABLE bank.account
 (
     account_id  BIGINT NOT NULL,
     balance     BIGINT NOT NULL,
@@ -15,8 +12,7 @@ CREATE TABLE account
     CONSTRAINT pk_account PRIMARY KEY (account_id)
 );
 
--- changeset miroslav.mamrak:1718327092661-4
-CREATE TABLE customer
+CREATE TABLE bank.customer
 (
     customer_id BIGINT       NOT NULL,
     first_name  VARCHAR(255) NOT NULL,
@@ -25,7 +21,6 @@ CREATE TABLE customer
     CONSTRAINT pk_customer PRIMARY KEY (customer_id)
 );
 
--- changeset miroslav.mamrak:1718327092661-5
-ALTER TABLE account
-    ADD CONSTRAINT FK_ACCOUNT_ON_CUSTOMER FOREIGN KEY (customer_id) REFERENCES customer (customer_id);
+ALTER TABLE bank.account
+    ADD CONSTRAINT FK_ACCOUNT_ON_CUSTOMER FOREIGN KEY (customer_id) REFERENCES bank.customer (customer_id);
 
