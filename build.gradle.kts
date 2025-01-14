@@ -71,6 +71,12 @@ hibernate {
     }
 }
 
+kapt {
+    arguments {
+        arg("mapstruct.defaultComponentModel", "spring")
+    }
+}
+
 allOpen {
     annotation("jakarta.persistence.Entity")
     annotation("jakarta.persistence.MappedSuperclass")
