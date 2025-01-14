@@ -2,20 +2,26 @@ package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.api.dto.request.CustomerSaveRequest
 import org.springframework.http.HttpStatus
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/customers")
 class CustomerController {
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
+    @GetMapping("produces = [MediaType.APPLICATION_JSON_VALUE]")
     fun getCustomer() {
         // Get customer
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/{id}")
-    fun saveCustomer(val customerRequest: CustomerSaveRequest) {
+    fun saveCustomer(customerRequest: CustomerSaveRequest) {
 
         // Save customer
     }
