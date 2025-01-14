@@ -7,6 +7,7 @@ plugins {
     id("org.graalvm.buildtools.native") version "0.10.4"
     kotlin("plugin.jpa") version "1.9.25"
     kotlin("kapt") version "1.9.25"
+    id("org.springdoc.openapi-gradle-plugin") version "1.9.0"
 }
 
 group = "cz.ememsoft"
@@ -38,6 +39,11 @@ dependencies {
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
     implementation("org.mapstruct:mapstruct:1.6.3")
     implementation("org.springframework.boot:spring-boot-starter-validation")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3") {
+        exclude("jakarta.xml.bind", "jakarta.xml.bind-api")
+        exclude("com.fasterxml.jackson.core", "jackson-annotations")
+    }
+    implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
