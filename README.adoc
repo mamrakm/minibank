@@ -1,0 +1,3 @@
+= Minibank
+
+Example project in Spring Boot 3.4.1 with Kotlin and built by Gradle
