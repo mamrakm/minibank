@@ -1,6 +1,8 @@
 package cz.ememsoft.minibank.api
 
+import CustomerMapper
 import cz.ememsoft.minibank.api.dto.request.CustomerSaveRequest
+import cz.ememsoft.minibank.service.CustomerService
 import org.springframework.http.HttpStatus
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -12,40 +14,40 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/customers")
-class CustomerController {
+class CustomerController(val customerService: CustomerService, val customerMapper: CustomerMapper) {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("produces = [MediaType.APPLICATION_JSON_VALUE]")
     fun getCustomer() {
         // Get customer
     }
 
+    @PostMapping("/save, produces = [MediaType.APPLICATION_JSON_VALUE]")
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/{id}")
     fun saveCustomer(customerRequest: CustomerSaveRequest) {
 
         // Save customer
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
     @PatchMapping("/{id}")
+    @ResponseStatus(HttpStatus.CREATED)
     fun updateCustomer() {
         // Update customer
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteCustomer() {
         // Delete customer
     }
 
-    @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}/accounts")
+    @ResponseStatus(HttpStatus.OK)
     fun getCustomerAccounts() {
         // Get customer accounts
     }
 
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @GetMapping("/{id}/transactions")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun getCustomerTransactions() {
         // Get customer transactions
     }

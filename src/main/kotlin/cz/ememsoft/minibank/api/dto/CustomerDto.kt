@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.api.dto
 
-data class CustomerSaveDto(
+data class CustomerDto(
     val firstName: String,
     val lastName: String,
     val email: String,

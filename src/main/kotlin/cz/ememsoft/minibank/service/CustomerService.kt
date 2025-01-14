@@ -1,16 +1,20 @@
 package cz.ememsoft.minibank.service
 
-import cz.ememsoft.minibank.api.dto.request.CustomerSaveRequest
+import CustomerMapper
+import cz.ememsoft.minibank.dto.CustomerDto
 import cz.ememsoft.minibank.repository.CustomerRepository
+import org.springframework.stereotype.Service
 
-class CustomerService(CustomerRepository: CustomerRepository) {
+@Service
+class CustomerService(val customerRepository: CustomerRepository, val customerMapper: CustomerMapper) {
     fun getCustomer() {
         // Get customer
     }
 
-    fun saveCustomer(customerRequest: CustomerSaveRequest) {
-        customerRequest.
-        customerRequest.save(customerRequest)
+    fun saveCustomer(customerDto: CustomerDto) {
+        // Map DTO to Entity
+        val customerEntity = customerMapper.toEntity(customerDto)
+        customerRepository.save(customerEntity)
     }
 
     fun updateCustomer() {
