@@ -20,10 +20,11 @@ class CustomerService(val customerRepository: CustomerRepository, val customerMa
         }
     }
 
-    fun saveCustomer(customerDto: CustomerDto) {
+    fun saveCustomer(customerDto: CustomerDto):Long {
         // Map DTO to Entity
         val customerEntity = customerMapper.toEntity(customerDto)
-        customerRepository.save(customerEntity)
+        val id = customerRepository.save(customerEntity).id
+        return id
     }
 
     fun updateCustomer() {

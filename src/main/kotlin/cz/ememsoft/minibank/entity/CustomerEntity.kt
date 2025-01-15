@@ -16,7 +16,7 @@ class CustomerEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "customer_id")
-    private val id: Long = 0,
+    val id: Long,
 
     @NotNull
     @Column(name = "first_name", nullable = false)

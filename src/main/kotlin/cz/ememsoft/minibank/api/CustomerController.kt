@@ -1,6 +1,7 @@
 package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.api.dto.request.CustomerSaveRequest
+import cz.ememsoft.minibank.api.dto.response.CustomerSaveResponse
 import cz.ememsoft.minibank.mapper.CustomerMapper
 import cz.ememsoft.minibank.service.CustomerService
 import org.springframework.http.HttpStatus
@@ -20,15 +21,15 @@ class CustomerController(val customerService: CustomerService, val customerMappe
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("produces = [MediaType.APPLICATION_JSON_VALUE]")
     fun getCustomer() {
-
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/save", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveCustomer(@RequestBody customerRequest: CustomerSaveRequest) {
+    fun saveCustomer(@RequestBody customerRequest: CustomerSaveRequest): CustomerSaveResponse {
         // Save customer
         val customerDto = customerMapper.toDto(customerRequest)
-        customerService.saveCustomer(customerDto)
+        val id = customerService.saveCustomer(customerDto)
+        return CustomerSaveResponse(id)
     }
 
     @ResponseStatus(HttpStatus.CREATED)
