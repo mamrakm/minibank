@@ -20,7 +20,7 @@ class CustomerController(val customerService: CustomerService, val customerMappe
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("produces = [MediaType.APPLICATION_JSON_VALUE]")
     fun getCustomer() {
-        // Get customer
+
     }
 
     @ResponseStatus(HttpStatus.CREATED)
