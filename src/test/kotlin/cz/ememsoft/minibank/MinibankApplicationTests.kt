@@ -1,6 +1,7 @@
 package cz.ememsoft.minibank
 
 import cz.ememsoft.minibank.repository.CustomerRepository
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
@@ -30,9 +31,9 @@ class MinibankApplicationTests(
             {
                 "firstName": "Johnny",
                 "lastName": "Silverhand",
-                "email": "john.doe@example.com",
+                "email": "johnny.silverhand@nightcity.com",
                 "phone": "+123456789",
-                "address": "123 Main Street"
+                "address": "Mega Building 10, Litlle China, Watson, Night City"
             }
         """.trimIndent()
 
@@ -52,7 +53,15 @@ class MinibankApplicationTests(
             "http://localhost:$port/customers/save", HttpMethod.POST, request, String::class.java
         )
 
-        val results = customerRepository.findAll().forEach { println(it) }
-        sequenceOf(results)
+        val result = customerRepository.findAll()
+        result.forEach { println(it) }
+
+        assertThat(result)
+            .hasSize(1)
+        assertThat(result[0].firstName).isEqualTo("Johnny")
+        assertThat(result[0].lastName).isEqualTo("Silverhand")
+        assertThat(result[0].email).isEqualTo("johnny.silverhand@nightcity.com")
+        assertThat(result[0].phone).isEqualTo("+123456789")
+        assertThat(result[0].address).isEqualTo("Mega Building 10, Litlle China, Watson, Night City")
     }
 }
