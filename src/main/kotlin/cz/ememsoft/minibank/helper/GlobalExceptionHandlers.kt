@@ -1,4 +1,4 @@
-package cz.ememsoft.minibank.api
+package cz.ememsoft.minibank.helper
 
 import cz.ememsoft.minibank.exception.CustomerNotFoundException
 import org.springframework.http.HttpStatus
