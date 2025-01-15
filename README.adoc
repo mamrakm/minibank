@@ -1,3 +1,20 @@
 = Minibank
+EMeMSoft spol s r.o. <miroslav.mamrak@seznam.cz>
+:revnumber: v0.1
+:revdate: 15-01.2024
+:revremark: First version of the document
 
-Example project in Spring Boot 3.4.1 with Kotlin and built by Gradle
+Example project in Spring Boot 3.4.1 with Kotlin and built by Gradle.
+
+== Prerequisites
+
+You must have docker and docker-compose installed on a system where you want to run this project.
+Also if you want to use GraalVM native image, you must have GraalVM JDK installed on your system.
+Next you must generate metadata for native image as described in documentation: https://graalvm.github.io/native-build-tools/latest/gradle-plugin-quickstart.html[GraalVM Quickstart Documentation]
+https://graalvm.github.io/native-build-tools/latest/gradle-plugin-quickstart.html#build-a-native-executable-with-resources-autodetection[Gradle Native Image Plugin Documentation]
+
+
+== How to run
+
+In the project directory, you run:
+./gradlew bootBuildImage docker-compose up -d
