@@ -47,16 +47,22 @@ dependencies {
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-    runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
     runtimeOnly("org.postgresql:postgresql")
     annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.boot:spring-boot-testcontainers")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:mariadb")
     testImplementation("org.testcontainers:postgresql")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+kapt {
+    keepJavacAnnotationProcessors = true
+    arguments {
+        arg("mapstruct.defaultComponentModel", "spring")
+        arg("mapstruct.unmappedTargetPolicy", "IGNORE")
+    }
 }
 
 kotlin {
@@ -68,12 +74,6 @@ kotlin {
 hibernate {
     enhancement {
         enableAssociationManagement = true
-    }
-}
-
-kapt {
-    arguments {
-        arg("mapstruct.defaultComponentModel", "spring")
     }
 }
 

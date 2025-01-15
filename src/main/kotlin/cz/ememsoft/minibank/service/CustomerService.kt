@@ -1,7 +1,7 @@
 package cz.ememsoft.minibank.service
 
-import CustomerMapper
-import cz.ememsoft.minibank.dto.CustomerDto
+import cz.ememsoft.minibank.api.dto.CustomerDto
+import cz.ememsoft.minibank.mapper.CustomerMapper
 import cz.ememsoft.minibank.repository.CustomerRepository
 import org.springframework.stereotype.Service
 
