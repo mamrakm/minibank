@@ -63,4 +63,8 @@ class CustomerEntity(
         result = 31 * result + address.hashCode()
         return result
     }
+
+    override fun toString(): String {
+        return "CustomerEntity(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
+    }
 }
