@@ -11,6 +11,20 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # Map the SQL script with schema creation
+  app:
+    image: minibank:0.0.1-SNAPSHOT
+    restart: always
+    ports:
+      - "8082:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/minibank-database
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DDL_AUTO: none
+      SPRING_SERVER_PORT: 8082
+      SPRING_ACTIVE_PROFILE: dev
+      SPRING_LIQUIBASE_ENABLE_LAZY_INIT: false
 
 volumes:
   postgres_data:
