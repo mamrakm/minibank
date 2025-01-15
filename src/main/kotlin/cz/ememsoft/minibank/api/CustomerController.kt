@@ -1,13 +1,15 @@
 package cz.ememsoft.minibank.api
 
-import CustomerMapper
 import cz.ememsoft.minibank.api.dto.request.CustomerSaveRequest
+import cz.ememsoft.minibank.mapper.CustomerMapper
 import cz.ememsoft.minibank.service.CustomerService
 import org.springframework.http.HttpStatus
+import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
@@ -21,33 +23,34 @@ class CustomerController(val customerService: CustomerService, val customerMappe
         // Get customer
     }
 
-    @PostMapping("/save, produces = [MediaType.APPLICATION_JSON_VALUE]")
     @ResponseStatus(HttpStatus.CREATED)
-    fun saveCustomer(customerRequest: CustomerSaveRequest) {
-
+    @PostMapping("/save", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun saveCustomer(@RequestBody customerRequest: CustomerSaveRequest) {
         // Save customer
+        val customerDto = customerMapper.toDto(customerRequest)
+        customerService.saveCustomer(customerDto)
     }
 
-    @PatchMapping("/{id}")
     @ResponseStatus(HttpStatus.CREATED)
+    @PatchMapping("/{id}")
     fun updateCustomer() {
         // Update customer
     }
 
-    @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
     fun deleteCustomer() {
         // Delete customer
     }
 
-    @GetMapping("/{id}/accounts")
     @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{id}/accounts")
     fun getCustomerAccounts() {
         // Get customer accounts
     }
 
-    @GetMapping("/{id}/transactions")
     @ResponseStatus(HttpStatus.NO_CONTENT)
+    @GetMapping("/{id}/transactions")
     fun getCustomerTransactions() {
         // Get customer transactions
     }
