@@ -5,3 +5,4 @@ spring:
     active: dev
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: bank

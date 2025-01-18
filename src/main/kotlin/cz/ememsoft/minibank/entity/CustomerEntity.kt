@@ -11,7 +11,7 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 
 @Entity
-@Table(name = "customer")
+@Table(name = "customer", schema = "bank")
 class CustomerEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
