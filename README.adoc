@@ -12,9 +12,13 @@ You must have docker and docker-compose installed on a system where you want to 
 Also if you want to use GraalVM native image, you must have GraalVM JDK installed on your system.
 Next you must generate metadata for native image as described in documentation: https://graalvm.github.io/native-build-tools/latest/gradle-plugin-quickstart.html[GraalVM Quickstart Documentation]
 https://graalvm.github.io/native-build-tools/latest/gradle-plugin-quickstart.html#build-a-native-executable-with-resources-autodetection[Gradle Native Image Plugin Documentation]
+Create schema 'bank' in your PostgreSQL database.
 
 
 == How to run
 
 In the project directory, you run:
-./gradlew bootBuildImage docker-compose up -d
+[.line-through]#./gradlew bootBuildImage docker-compose up -d#
+
+Currently native image doesn't work at my machine for reasons unknown GraalVM doesn't seem fit for easy deployment yet. This is the classic way how to run application with JVM.
+./gradlew -x test bootRun
