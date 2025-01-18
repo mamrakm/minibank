@@ -88,23 +88,23 @@ allOpen {
 
 graalvmNative {
     metadataRepository {
-//        version = "0.3.15"
-        enabled = false
+        version = "0.3.15"
+//        enabled = false
     }
     agent {
         defaultMode = "standard" // Default agent mode if one isn't specified using `-Pagent=mode_name`
         enabled = true // Enables the agent
         builtinCallerFilter = true
         builtinHeuristicFilter = true
-        enableExperimentalPredefinedClasses = false
-        enableExperimentalUnsafeAllocationTracing = false
+        enableExperimentalPredefinedClasses = true
+        enableExperimentalUnsafeAllocationTracing = true
         trackReflectionMetadata = true
     }
     binaries {
         all {
             buildArgs.add("-H:+UnlockExperimentalVMOptions")
             buildArgs.add("-H:+AllowIncompleteClasspath")
-            buildArgs.add("-H:-SupportPredefinedClasses")
+            buildArgs.add("-H:+SupportPredefinedClasses")
             buildArgs.add("-H:+BuildReport")
 
             resources.autodetect()
