@@ -1,13 +1,13 @@
 package cz.ememsoft.minibank.repository
 
-import cz.ememsoft.minibank.entity.CustomerEntity
+import cz.ememsoft.minibank.entity.ClientEntity
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface CustomerRepository : JpaRepository<CustomerEntity, Long>  {
+interface ClientRepository : JpaRepository<ClientEntity, Long>  {
 
     // Custom query method to find a customer by email
-    fun findByEmail(email: String): CustomerEntity?
+    fun findByEmail(email: String): ClientEntity?
 
     // Custom query method to find a customer by phone number
-    fun findByPhone(phone: String): CustomerEntity?
+    fun findByPhone(phone: String): ClientEntity?
 }

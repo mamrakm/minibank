@@ -2,7 +2,7 @@ package cz.ememsoft.minibank.service
 
 import cz.ememsoft.minibank.api.dto.CustomerDto
 
-interface CustomerService {
+interface ClientService {
     fun getCustomer(id: Long): CustomerDto
     fun saveCustomer(customerDto: CustomerDto): Long
     fun updateCustomer()

@@ -11,11 +11,11 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 
 @Entity
-@Table(name = "customer", schema = "bank")
-class CustomerEntity(
+@Table(name = "client", schema = "bank")
+class ClientEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "customer_id")
+    @Column(name = "client_id")
     val id: Long,
 
     @NotNull
@@ -42,7 +42,7 @@ class CustomerEntity(
 ) {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is CustomerEntity) return false
+        if (other !is ClientEntity) return false
 
         if (id != other.id) return false
         if (firstName != other.firstName) return false
@@ -65,6 +65,6 @@ class CustomerEntity(
     }
 
     override fun toString(): String {
-        return "CustomerEntity(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
+        return "ClientEntity(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
     }
 }

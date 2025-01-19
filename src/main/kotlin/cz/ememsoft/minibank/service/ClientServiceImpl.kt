@@ -2,18 +2,18 @@ package cz.ememsoft.minibank.service
 
 import cz.ememsoft.minibank.api.dto.CustomerDto
 import cz.ememsoft.minibank.exception.CustomerNotFoundException
-import cz.ememsoft.minibank.mapper.CustomerMapper
-import cz.ememsoft.minibank.repository.CustomerRepository
+import cz.ememsoft.minibank.mapper.ClientMapper
+import cz.ememsoft.minibank.repository.ClientRepository
 import org.springframework.stereotype.Service
 
 @Service
-class CustomerServiceImpl(val customerRepository: CustomerRepository, val customerMapper: CustomerMapper) : CustomerService {
+class ClientServiceImpl(val clientRepository: ClientRepository, val clientMapper: ClientMapper) : ClientService {
     override fun getCustomer(id: Long): CustomerDto {
         // Get customer
-        val foundCustomer = customerRepository.findById(id)
+        val foundCustomer = clientRepository.findById(id)
         if (foundCustomer.isPresent) {
             val customerEntity = foundCustomer.get()
-            val customerDto = customerMapper.toDtoFromEntity(customerEntity)
+            val customerDto = clientMapper.toDtoFromEntity(customerEntity)
             return customerDto
         } else {
             throw CustomerNotFoundException()
@@ -22,8 +22,8 @@ class CustomerServiceImpl(val customerRepository: CustomerRepository, val custom
 
     override fun saveCustomer(customerDto: CustomerDto):Long {
         // Map DTO to Entity
-        val customerEntity = customerMapper.toEntity(customerDto)
-        val id = customerRepository.save(customerEntity).id
+        val customerEntity = clientMapper.toEntity(customerDto)
+        val id = clientRepository.save(customerEntity).id
         return id
     }
 
