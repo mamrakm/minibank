@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/customers")
-class CustomerController(val customerService: CustomerService, val customerMapper: CustomerMapper) {
+class CustomerController(val customerServiceImpl: CustomerService, val customerMapper: CustomerMapper) {
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("produces = [MediaType.APPLICATION_JSON_VALUE]")
     fun getCustomer() {
@@ -28,7 +28,7 @@ class CustomerController(val customerService: CustomerService, val customerMappe
     fun saveCustomer(@RequestBody customerRequest: CustomerSaveRequest): CustomerSaveResponse {
         // Save customer
         val customerDto = customerMapper.toDto(customerRequest)
-        val id = customerService.saveCustomer(customerDto)
+        val id = customerServiceImpl.saveCustomer(customerDto)
         return CustomerSaveResponse(id)
     }
 
