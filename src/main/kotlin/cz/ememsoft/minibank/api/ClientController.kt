@@ -57,7 +57,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PatchMapping("/{id}")
-    fun updateclient() {
+    fun updateClient() {
         // Update client
     }
 
@@ -68,7 +68,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
-    fun deleteclient(@PathVariable id: Long) {
+    fun deleteClient(@PathVariable id: Long) {
         clientService.deleteclient(id)
     }
 
