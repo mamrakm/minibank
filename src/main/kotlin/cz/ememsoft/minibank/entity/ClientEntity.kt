@@ -1,15 +1,22 @@
 package cz.ememsoft.minibank.entity
 
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
+import jakarta.persistence.*
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 
+/**
+ * Entity representing a client in the system.
+ *
+ * This entity maps to the "client" table in the "bank" schema.
+ *
+ * @property id The unique identifier for the client.
+ * @property firstName The first name of the client. This field is required.
+ * @property lastName The last name of the client. This field is required.
+ * @property email The email address of the client. This field is required and must be unique.
+ * @property phone The phone number of the client. This field is required and must match a valid phone number format.
+ * @property address The address of the client. This field is required.
+ */
 @Entity
 @Table(name = "client", schema = "bank")
 class ClientEntity(
@@ -40,6 +47,13 @@ class ClientEntity(
     @Column(name = "address", nullable = false)
     val address: String,
 ) {
+
+    /**
+     * Checks equality between two `ClientEntity` objects based on their properties.
+     *
+     * @param other The object to compare with.
+     * @return `true` if the objects are equal, `false` otherwise.
+     */
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ClientEntity) return false
@@ -54,6 +68,11 @@ class ClientEntity(
         return true
     }
 
+    /**
+     * Generates a hash code for the `ClientEntity` object.
+     *
+     * @return The hash code based on the object's properties.
+     */
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + firstName.hashCode()
@@ -64,6 +83,11 @@ class ClientEntity(
         return result
     }
 
+    /**
+     * Returns a string representation of the `ClientEntity` object.
+     *
+     * @return A string containing the values of the entity's properties.
+     */
     override fun toString(): String {
         return "ClientEntity(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
     }

@@ -6,15 +6,37 @@ import cz.ememsoft.minibank.entity.ClientEntity
 import org.mapstruct.Mapper
 import org.mapstruct.MappingConstants
 
+/**
+ * Mapper interface for converting between API requests, DTOs, and entities related to clients.
+ *
+ * This interface uses MapStruct for mapping objects, ensuring seamless conversion
+ * between different layers of the application. The generated implementation is registered
+ * as a Spring Bean.
+ */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 interface ClientMapper {
 
-    // Map API request to internal DTO
+    /**
+     * Maps a [ClientSaveRequest] to a [ClientDto].
+     *
+     * @param request The API request object containing client information.
+     * @return The corresponding [ClientDto].
+     */
     fun toDto(request: ClientSaveRequest): ClientDto
 
-    // Map DTO to Entity
+    /**
+     * Maps a [ClientDto] to a [ClientEntity].
+     *
+     * @param dto The internal DTO object containing client information.
+     * @return The corresponding [ClientEntity] ready for persistence.
+     */
     fun toEntity(dto: ClientDto): ClientEntity
 
-    // Map Entity back to DTO
+    /**
+     * Maps a [ClientEntity] back to a [ClientDto].
+     *
+     * @param entity The entity object representing a client in the database.
+     * @return The corresponding [ClientDto] for use in the application layers.
+     */
     fun toDtoFromEntity(entity: ClientEntity): ClientDto
 }
