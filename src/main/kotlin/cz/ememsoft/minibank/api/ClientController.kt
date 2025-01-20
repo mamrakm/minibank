@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.api
 
+import cz.ememsoft.minibank.api.dto.request.ClientDeleteRequest
 import cz.ememsoft.minibank.api.dto.request.ClientSaveRequest
 import cz.ememsoft.minibank.api.dto.response.ClientSaveResponse
 import cz.ememsoft.minibank.mapper.ClientMapper
@@ -9,86 +10,87 @@ import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.*
 
 /**
- * REST controller for managing customer-related operations.
+ * REST controller for managing client-related operations.
  *
- * This controller provides endpoints for creating, updating, deleting, and retrieving customer
+ * This controller provides endpoints for creating, updating, deleting, and retrieving client
  * information, as well as their associated accounts and transactions.
  *
- * @property clientServiceImpl The service layer responsible for business logic.
+ * @property clientService The service layer responsible for business logic.
  * @property clientMapper The mapper for converting between request/response objects and DTOs.
  */
 @RestController
-@RequestMapping("/customers")
+@RequestMapping("/clients")
 class ClientController(
-    val clientServiceImpl: ClientService,
+    val clientService: ClientService,
     val clientMapper: ClientMapper
 ) {
 
     /**
-     * Retrieves customer details.
+     * Retrieves all clients stored in DB.
      *
      * **Note:** This method currently has no implementation.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("produces = [MediaType.APPLICATION_JSON_VALUE]")
-    fun getCustomer() {
+    fun getClients() {
+        clientService.getAllclients()
     }
 
     /**
-     * Creates a new customer.
+     * Creates a new client.
      *
-     * @param customerRequest The request body containing customer information to be saved.
-     * @return A response containing the ID of the newly created customer.
+     * @param clientRequest The request body containing client information to be saved.
+     * @return A response containing the ID of the newly created client.
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/save", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveCustomer(@RequestBody customerRequest: ClientSaveRequest): ClientSaveResponse {
-        val customerDto = clientMapper.toDto(customerRequest)
-        val id = clientServiceImpl.saveCustomer(customerDto)
+    fun saveclient(@RequestBody clientRequest: ClientSaveRequest): ClientSaveResponse {
+        val clientDto = clientMapper.toDto(clientRequest)
+        val id = clientService.saveclient(clientDto)
         return ClientSaveResponse(id)
     }
 
     /**
-     * Updates an existing customer's information.
+     * Updates an existing client's information.
      *
      * **Note:** This method currently has no implementation.
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PatchMapping("/{id}")
-    fun updateCustomer() {
-        // Update customer
+    fun updateclient() {
+        // Update client
     }
 
     /**
-     * Deletes a customer by their ID.
+     * Deletes a client by their ID.
      *
      * **Note:** This method currently has no implementation.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
-    fun deleteCustomer() {
-        // Delete customer
+    fun deleteclient(@RequestBody clientDeleteRequest: ClientDeleteRequest) {
+        clientService.deleteclient(clientDeleteRequest.id)
     }
 
     /**
-     * Retrieves accounts associated with a customer.
+     * Retrieves accounts associated with a client.
      *
      * **Note:** This method currently has no implementation.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}/accounts")
-    fun getCustomerAccounts() {
-        // Get customer accounts
+    fun getClientAccount() {
+        // Get client accounts
     }
 
     /**
-     * Retrieves transactions associated with a customer.
+     * Retrieves transactions associated with a client.
      *
      * **Note:** This method currently has no implementation.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @GetMapping("/{id}/transactions")
-    fun getCustomerTransactions() {
-        // Get customer transactions
+    fun getClientTransactions() {
+        // Get client transactions
     }
 }

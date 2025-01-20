@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 class GlobalExceptionHandler {
 
     /**
-     * Handles [CustomerNotFoundException].
+     * Handles [ClientNotFoundException].
      *
      * Returns a response with HTTP status `404 Not Found` and an error message
      * indicating that the customer could not be found.
@@ -24,9 +24,9 @@ class GlobalExceptionHandler {
      * @param exception The exception instance.
      * @return A map containing the error type and the exception message.
      */
-    @ExceptionHandler(CustomerNotFoundException::class)
+    @ExceptionHandler(ClientNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleCustomerNotFoundException(exception: CustomerNotFoundException): Map<String, String> {
+    fun handleCustomerNotFoundException(exception: ClientNotFoundException): Map<String, String> {
         return mapOf(
             "error" to "Customer Not Found",
             "message" to exception.message!!

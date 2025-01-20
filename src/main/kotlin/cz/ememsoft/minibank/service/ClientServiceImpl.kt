@@ -1,7 +1,7 @@
 package cz.ememsoft.minibank.service
 
 import cz.ememsoft.minibank.dto.ClientDto
-import cz.ememsoft.minibank.exception.CustomerNotFoundException
+import cz.ememsoft.minibank.exception.ClientNotFoundException
 import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.repository.ClientRepository
 import org.springframework.stereotype.Service
@@ -19,68 +19,78 @@ class ClientServiceImpl(
 ) : ClientService {
 
     /**
-     * Retrieves a customer by their ID.
+     * Retrieves a client by their ID.
      *
-     * @param id The ID of the customer to retrieve.
+     * @param id The ID of the client to retrieve.
      * @return The corresponding [ClientDto] for the given ID.
-     * @throws CustomerNotFoundException If no customer is found with the given ID.
+     * @throws clientNotFoundException If no client is found with the given ID.
      */
-    override fun getCustomer(id: Long): ClientDto {
-        val foundCustomer = clientRepository.findById(id)
-        if (foundCustomer.isPresent) {
-            val customerEntity = foundCustomer.get()
-            val customerDto = clientMapper.toDtoFromEntity(customerEntity)
-            return customerDto
+    override fun getclient(id: Long): ClientDto {
+        val foundClient = clientRepository.findById(id)
+        if (foundClient.isPresent) {
+            val clientEntity = foundClient.get()
+            val clientDto = clientMapper.toDtoFromEntity(clientEntity)
+            return clientDto
         } else {
-            throw CustomerNotFoundException()
+            throw ClientNotFoundException()
         }
     }
 
     /**
-     * Saves a new customer to the database.
-     *
-     * @param clientDto The DTO containing customer information to save.
-     * @return The ID of the saved customer.
-     */
-    override fun saveCustomer(clientDto: ClientDto): Long {
-        val customerEntity = clientMapper.toEntity(clientDto)
-        val id = clientRepository.save(customerEntity).id
-        return id
-    }
-
-    /**
-     * Updates an existing customer's information.
+     * Retrieves accounts associated with clients.
      *
      * **Note:** This method currently has no implementation.
      */
-    override fun updateCustomer() {
-        // Update customer
+    override fun getclientAccounts() {
+        // Get client accounts
     }
 
     /**
-     * Deletes a customer by their ID.
+     * Retrieves transactions associated with clients.
      *
-     * @param id The ID of the customer to delete.
+     * **Note:** This method currently has no implementation.
      */
-    override fun deleteCustomer(id: Long) {
-        clientRepository.deleteById(id)
+    override fun getclientTransactions() {
+        // Get client transactions
     }
 
     /**
-     * Retrieves a list of all customers, mapped to [ClientDto] objects.
+     * Retrieves a list of all clients.
      *
-     * @return A list of all customers as [ClientDto].
+     * @return A list of all clients as [ClientDto].
      */
-    override fun getCustomerAccounts(): List<ClientDto> {
+    override fun getAllclients(): List<ClientDto> {
         return clientRepository.findAll().map { clientMapper.toDtoFromEntity(it) }
     }
 
     /**
-     * Retrieves transactions associated with customers.
+     * Saves a new client to the database.
+     *
+     * @param clientDto The DTO containing client information to save.
+     * @return The ID of the saved client.
+     */
+    override fun saveclient(clientDto: ClientDto): Long {
+        val clientEntity = clientMapper.toEntity(clientDto)
+        val id = clientRepository.save(clientEntity).id
+        return id
+    }
+
+    /**
+     * Deletes a client by their ID.
+     *
+     * @param id The ID of the client to delete.
+     */
+    override fun deleteclient(id: Long) {
+        clientRepository.deleteById(id)
+    }
+
+    /**
+     * Updates an existing client's information.
      *
      * **Note:** This method currently has no implementation.
      */
-    override fun getCustomerTransactions() {
-        // Get customer transactions
+    override fun updateclient() {
+        // Update client
     }
+
 }

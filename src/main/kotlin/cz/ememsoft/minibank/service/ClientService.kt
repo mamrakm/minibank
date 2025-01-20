@@ -6,48 +6,55 @@ import cz.ememsoft.minibank.dto.ClientDto
  * Service interface for managing clients in the application.
  */
 interface ClientService {
-
     /**
-     * Deletes a customer by their ID.
+     * Retrieves a client by their ID.
      *
-     * @param id The ID of the customer to delete.
-     */
-    fun deleteCustomer(id: Long)
-
-    /**
-     * Retrieves a customer by their ID.
-     *
-     * @param id The ID of the customer to retrieve.
+     * @param id The ID of the client to retrieve.
      * @return The corresponding [ClientDto] for the given ID.
      */
-    fun getCustomer(id: Long): ClientDto
+    fun getclient(id: Long): ClientDto
 
     /**
-     * Retrieves a list of all customers, mapped to [ClientDto] objects.
+     * Retrieves a list of all clients, mapped to [ClientDto] objects.
      *
-     * @return A list of all customers as [ClientDto].
+     * @return A list of all clients as [ClientDto].
      */
-    fun getCustomerAccounts(): List<ClientDto>
+    fun getclientAccounts()
 
     /**
-     * Retrieves transactions associated with customers.
+     * Retrieves transactions associated with clients.
      *
-     * **Note:** This method is intended to fetch customer transactions but has no detailed implementation here.
+     * **Note:** This method is intended to fetch client transactions but has no detailed implementation here.
      */
-    fun getCustomerTransactions()
+    fun getclientTransactions()
 
     /**
-     * Saves a new customer to the database.
+     * Retrieves a list of all clients.
      *
-     * @param clientDto The DTO containing customer information to save.
-     * @return The ID of the saved customer.
+     * @return A list of all clients as [ClientDto].
      */
-    fun saveCustomer(clientDto: ClientDto): Long
+    fun getAllclients(): List<ClientDto>
 
     /**
-     * Updates an existing customer's information.
+     * Saves a new client to the database.
      *
-     * **Note:** This method is intended for updating customer details but has no detailed implementation here.
+     * @param clientDto The DTO containing client information to save.
+     * @return The ID of the saved client.
      */
-    fun updateCustomer()
+    fun saveclient(clientDto: ClientDto): Long
+
+    /**
+     * Deletes a client by their ID.
+     *
+     * @param id The ID of the client to delete.
+     */
+    fun deleteclient(id: Long)
+
+    /**
+     * Updates an existing client's information.
+     *
+     * **Note:** This method is intended for updating client details but has no detailed implementation here.
+     */
+    fun updateclient()
+
 }
