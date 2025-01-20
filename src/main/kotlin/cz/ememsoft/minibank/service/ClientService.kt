@@ -6,6 +6,7 @@ import cz.ememsoft.minibank.dto.ClientDto
  * Service interface for managing clients in the application.
  */
 interface ClientService {
+
     /**
      * Retrieves a client by their ID.
      *
@@ -15,25 +16,11 @@ interface ClientService {
     fun getClient(id: Long): ClientDto
 
     /**
-     * Retrieves a list of all clients, mapped to [ClientDto] objects.
+     * Retrieves all clients in the system.
      *
      * @return A list of all clients as [ClientDto].
      */
-    fun getClientAccounts()
-
-    /**
-     * Retrieves transactions associated with clients.
-     *
-     * **Note:** This method is intended to fetch client transactions but has no detailed implementation here.
-     */
-    fun getClientTransactions()
-
-    /**
-     * Retrieves a list of all clients.
-     *
-     * @return A list of all clients as [ClientDto].
-     */
-    fun getAllclients(): List<ClientDto>
+    fun getAllClients(): List<ClientDto>
 
     /**
      * Saves a new client to the database.
@@ -44,6 +31,15 @@ interface ClientService {
     fun saveClient(clientDto: ClientDto): Long
 
     /**
+     * Updates an existing client's information.
+     *
+     * @param id The ID of the client to update.
+     * @param updatedClientDto The updated client data.
+     * @return The updated [ClientDto].
+     */
+    fun updateClient(id: Long, updatedClientDto: ClientDto): ClientDto
+
+    /**
      * Deletes a client by their ID.
      *
      * @param id The ID of the client to delete.
@@ -51,10 +47,18 @@ interface ClientService {
     fun deleteClient(id: Long)
 
     /**
-     * Updates an existing client's information.
+     * Searches for a client by their email.
      *
-     * **Note:** This method is intended for updating client details but has no detailed implementation here.
+     * @param email The email address to search for.
+     * @return The corresponding [ClientDto] if found, or null otherwise.
      */
-    fun updateClient()
+    fun findClientByEmail(email: String): ClientDto?
 
+    /**
+     * Searches for clients by their first name.
+     *
+     * @param firstName The first name of the client(s) to search for.
+     * @return A list of clients matching the first name as [ClientDto].
+     */
+    fun findClientsByFirstName(firstName: String): List<ClientDto>
 }

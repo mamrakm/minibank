@@ -1,96 +1,131 @@
 package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.api.dto.request.ClientSaveRequest
-import cz.ememsoft.minibank.api.dto.response.ClientSaveResponse
 import cz.ememsoft.minibank.dto.ClientDto
-import cz.ememsoft.minibank.mapper.ClientMapper
+import cz.ememsoft.minibank.mapper.ClientRequestMapper
 import cz.ememsoft.minibank.service.ClientService
+import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
+
+private val logger = KotlinLogging.logger {}
 
 /**
- * REST controller for managing client-related operations.
+ * REST controller for managing clients in the application.
  *
- * This controller provides endpoints for creating, updating, deleting, and retrieving client
- * information, as well as their associated accounts and transactions.
+ * Provides endpoints for CRUD operations and search functionality related to clients.
  *
- * @property clientService The service layer responsible for business logic.
- * @property clientMapper The mapper for converting between request/response objects and DTOs.
+ * @property clientService The service layer for client-related operations.
+ * @property clientRequestMapper The mapper for converting request DTOs to internal DTOs.
  */
 @RestController
 @RequestMapping("/clients")
 class ClientController(
-    val clientService: ClientService,
-    val clientMapper: ClientMapper
+    private val clientService: ClientService,
+    private val clientRequestMapper: ClientRequestMapper
 ) {
 
     /**
-     * Retrieves all clients stored in DB.
+     * Retrieves a client by their ID.
      *
-     * **Note:** This method currently has no implementation.
+     * @param id The ID of the client to retrieve.
+     * @return The corresponding [ClientDto].
+     */
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getClient(@PathVariable id: Long): ClientDto {
+        logger.info { "Fetching client with ID: $id" }
+        return clientService.getClient(id)
+    }
+
+    /**
+     * Retrieves all clients in the system.
+     *
+     * @return A list of all clients as [ClientDto].
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getClients(): List<ClientDto> {
-        return clientService.getAllclients()
+    fun getAllClients(): List<ClientDto> {
+        logger.info { "Fetching all clients" }
+        return clientService.getAllClients()
     }
 
     /**
      * Creates a new client.
      *
-     * @param clientRequest The request body containing client information to be saved.
-     * @return A response containing the ID of the newly created client.
+     * @param clientSaveRequest The request body containing client data.
+     * @return The ID of the created client.
      */
     @ResponseStatus(HttpStatus.CREATED)
-    @PostMapping("/save", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveClient(@RequestBody clientRequest: ClientSaveRequest): ClientSaveResponse {
-        val clientDto = clientMapper.toDto(clientRequest)
-        val id = clientService.saveClient(clientDto)
-        return ClientSaveResponse(id)
+    @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun saveClient(@RequestBody clientSaveRequest: ClientSaveRequest): Long {
+        logger.info { "Creating new client: $clientSaveRequest" }
+        val clientDto = clientRequestMapper.toDto(clientSaveRequest)
+        return clientService.saveClient(clientDto)
     }
 
     /**
      * Updates an existing client's information.
      *
-     * **Note:** This method currently has no implementation.
+     * @param id The ID of the client to update.
+     * @param clientSaveRequest The request body containing updated client data.
+     * @return The updated [ClientDto].
      */
-    @ResponseStatus(HttpStatus.CREATED)
-    @PatchMapping("/{id}")
-    fun updateClient() {
-        // Update client
+    @ResponseStatus(HttpStatus.OK)
+    @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun updateClient(
+        @PathVariable id: Long,
+        @RequestBody clientSaveRequest: ClientSaveRequest
+    ): ClientDto {
+        logger.info { "Updating client with ID: $id" }
+        val updatedClientDto = clientRequestMapper.toDto(clientSaveRequest)
+        return clientService.updateClient(id, updatedClientDto)
     }
 
     /**
      * Deletes a client by their ID.
      *
-     * **Note:** This method currently has no implementation.
+     * @param id The ID of the client to delete.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
+    @DeleteMapping("/{id}")
     fun deleteClient(@PathVariable id: Long) {
+        logger.info { "Deleting client with ID: $id" }
         clientService.deleteClient(id)
     }
 
     /**
-     * Retrieves accounts associated with a client.
+     * Searches for clients by their first name.
      *
-     * **Note:** This method currently has no implementation.
+     * @param firstName The first name of the client(s) to search for.
+     * @return A list of clients matching the first name as [ClientDto].
      */
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/{id}/accounts")
-    fun getClientAccount() {
-        // Get client accounts
+    @GetMapping("/search-by-name/{firstName}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun findClientsByFirstName(@PathVariable firstName: String): List<ClientDto> {
+        logger.info { "Searching for clients with first name: $firstName" }
+        return clientService.findClientsByFirstName(firstName)
     }
 
     /**
-     * Retrieves transactions associated with a client.
+     * Searches for a client by their email.
      *
-     * **Note:** This method currently has no implementation.
+     * @param email The email address of the client to search for.
+     * @return The corresponding [ClientDto] or null if not found.
      */
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @GetMapping("/{id}/transactions")
-    fun getClientTransactions() {
-        // Get client transactions
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/search-by-email/{email}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun findClientByEmail(@PathVariable email: String): ClientDto? {
+        logger.info { "Searching for client with email: $email" }
+        return clientService.findClientByEmail(email)
     }
 }

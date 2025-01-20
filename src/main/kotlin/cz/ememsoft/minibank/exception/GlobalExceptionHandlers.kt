@@ -19,17 +19,71 @@ class GlobalExceptionHandler {
      * Handles [ClientNotFoundException].
      *
      * Returns a response with HTTP status `404 Not Found` and an error message
-     * indicating that the customer could not be found.
+     * indicating that the client could not be found.
      *
      * @param exception The exception instance.
      * @return A map containing the error type and the exception message.
      */
     @ExceptionHandler(ClientNotFoundException::class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
-    fun handleCustomerNotFoundException(exception: ClientNotFoundException): Map<String, String> {
+    fun handleClientNotFoundException(exception: ClientNotFoundException): Map<String, String> {
         return mapOf(
-            "error" to "Customer Not Found",
-            "message" to exception.message!!
+            "error" to "Client Not Found",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [DuplicateClientException].
+     *
+     * Returns a response with HTTP status `409 Conflict` and an error message
+     * indicating that a duplicate client entry exists.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(DuplicateClientException::class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    fun handleDuplicateClientException(exception: DuplicateClientException): Map<String, String> {
+        return mapOf(
+            "error" to "Duplicate Client",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [InvalidClientDataException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that the client data provided is invalid.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(InvalidClientDataException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleInvalidClientDataException(exception: InvalidClientDataException): Map<String, String> {
+        return mapOf(
+            "error" to "Invalid Client Data",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [ClientDeletionException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that the client could not be deleted due to associated data.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(ClientDeletionException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleClientDeletionException(exception: ClientDeletionException): Map<String, String> {
+        return mapOf(
+            "error" to "Client Deletion Failed",
+            "message" to exception.message.orEmpty()
         )
     }
 
@@ -47,7 +101,7 @@ class GlobalExceptionHandler {
     fun handleIllegalArgumentException(exception: IllegalArgumentException): Map<String, String> {
         return mapOf(
             "error" to "Invalid Argument",
-            "message" to exception.message!!
+            "message" to exception.message.orEmpty()
         )
     }
 
@@ -65,7 +119,7 @@ class GlobalExceptionHandler {
     fun handleGenericException(exception: Exception): Map<String, String> {
         return mapOf(
             "error" to "Internal Server Error",
-            "message" to exception.message!!
+            "message" to exception.message.orEmpty()
         )
     }
 }

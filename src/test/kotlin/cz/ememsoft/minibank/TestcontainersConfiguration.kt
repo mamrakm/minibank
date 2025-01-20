@@ -15,5 +15,6 @@ class TestcontainersConfiguration {
             .withUsername("test")
             .withPassword("test")
             .withDatabaseName("minibank-test")
+            .withInitScript("init-db.sql")
     }
 }

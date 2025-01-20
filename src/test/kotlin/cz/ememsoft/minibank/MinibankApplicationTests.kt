@@ -83,7 +83,7 @@ class MinibankApplicationTests(
         val request = HttpEntity(customerJson, headers)
 
         restTemplate.exchange(
-            "http://localhost:$port/customers/save", HttpMethod.POST, request, String::class.java
+            "http://localhost:$port/clients/save", HttpMethod.POST, request, String::class.java
         )
 
         val result = clientRepository.findAll()
