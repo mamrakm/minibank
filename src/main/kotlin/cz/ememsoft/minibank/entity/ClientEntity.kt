@@ -46,6 +46,8 @@ class ClientEntity(
 
     @Column(name = "address", nullable = false)
     val address: String,
+    @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
+    val accountEntities: Set<AccountEntity> = emptySet()
 ) {
 
     /**
@@ -91,4 +93,6 @@ class ClientEntity(
     override fun toString(): String {
         return "ClientEntity(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
     }
+
+
 }
