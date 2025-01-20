@@ -25,7 +25,7 @@ class ClientServiceImpl(
      * @return The corresponding [ClientDto] for the given ID.
      * @throws clientNotFoundException If no client is found with the given ID.
      */
-    override fun getclient(id: Long): ClientDto {
+    override fun getClient(id: Long): ClientDto {
         val foundClient = clientRepository.findById(id)
         if (foundClient.isPresent) {
             val clientEntity = foundClient.get()
@@ -41,7 +41,7 @@ class ClientServiceImpl(
      *
      * **Note:** This method currently has no implementation.
      */
-    override fun getclientAccounts() {
+    override fun getClientAccounts() {
         // Get client accounts
     }
 
@@ -50,7 +50,7 @@ class ClientServiceImpl(
      *
      * **Note:** This method currently has no implementation.
      */
-    override fun getclientTransactions() {
+    override fun getClientTransactions() {
         // Get client transactions
     }
 
@@ -69,7 +69,7 @@ class ClientServiceImpl(
      * @param clientDto The DTO containing client information to save.
      * @return The ID of the saved client.
      */
-    override fun saveclient(clientDto: ClientDto): Long {
+    override fun saveClient(clientDto: ClientDto): Long {
         val clientEntity = clientMapper.toEntity(clientDto)
         val id = clientRepository.save(clientEntity).id
         return id
@@ -80,7 +80,7 @@ class ClientServiceImpl(
      *
      * @param id The ID of the client to delete.
      */
-    override fun deleteclient(id: Long) {
+    override fun deleteClient(id: Long) {
         clientRepository.deleteById(id)
     }
 
@@ -89,7 +89,7 @@ class ClientServiceImpl(
      *
      * **Note:** This method currently has no implementation.
      */
-    override fun updateclient() {
+    override fun updateClient() {
         // Update client
     }
 

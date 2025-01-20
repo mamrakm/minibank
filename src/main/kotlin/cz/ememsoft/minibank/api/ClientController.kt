@@ -44,9 +44,9 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/save", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveclient(@RequestBody clientRequest: ClientSaveRequest): ClientSaveResponse {
+    fun saveClient(@RequestBody clientRequest: ClientSaveRequest): ClientSaveResponse {
         val clientDto = clientMapper.toDto(clientRequest)
-        val id = clientService.saveclient(clientDto)
+        val id = clientService.saveClient(clientDto)
         return ClientSaveResponse(id)
     }
 
@@ -69,7 +69,7 @@ class ClientController(
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
     fun deleteClient(@PathVariable id: Long) {
-        clientService.deleteclient(id)
+        clientService.deleteClient(id)
     }
 
     /**

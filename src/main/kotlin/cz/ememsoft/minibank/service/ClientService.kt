@@ -12,21 +12,21 @@ interface ClientService {
      * @param id The ID of the client to retrieve.
      * @return The corresponding [ClientDto] for the given ID.
      */
-    fun getclient(id: Long): ClientDto
+    fun getClient(id: Long): ClientDto
 
     /**
      * Retrieves a list of all clients, mapped to [ClientDto] objects.
      *
      * @return A list of all clients as [ClientDto].
      */
-    fun getclientAccounts()
+    fun getClientAccounts()
 
     /**
      * Retrieves transactions associated with clients.
      *
      * **Note:** This method is intended to fetch client transactions but has no detailed implementation here.
      */
-    fun getclientTransactions()
+    fun getClientTransactions()
 
     /**
      * Retrieves a list of all clients.
@@ -41,20 +41,20 @@ interface ClientService {
      * @param clientDto The DTO containing client information to save.
      * @return The ID of the saved client.
      */
-    fun saveclient(clientDto: ClientDto): Long
+    fun saveClient(clientDto: ClientDto): Long
 
     /**
      * Deletes a client by their ID.
      *
      * @param id The ID of the client to delete.
      */
-    fun deleteclient(id: Long)
+    fun deleteClient(id: Long)
 
     /**
      * Updates an existing client's information.
      *
      * **Note:** This method is intended for updating client details but has no detailed implementation here.
      */
-    fun updateclient()
+    fun updateClient()
 
 }
