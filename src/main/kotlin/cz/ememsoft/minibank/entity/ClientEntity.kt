@@ -51,10 +51,12 @@ class ClientEntity(
     @Column(name = "phone", nullable = false)
     val phone: String,
 
-    @Column(name = "address", nullable = true)
+    @Column(name = "address", nullable = false)
     val address: String,
+
+    @Column(name = "account", nullable = true)
     @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
-    val accountEntities: Set<AccountEntity> = emptySet()
+    val accountEntities: MutableSet<AccountEntity>? = mutableSetOf()
 ) {
 
     /**
