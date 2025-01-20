@@ -1,6 +1,6 @@
-package cz.ememsoft.minibank.api.dto
+package cz.ememsoft.minibank.dto
 
-data class CustomerDto(
+data class ClientDto(
     val firstName: String,
     val lastName: String,
     val email: String,

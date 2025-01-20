@@ -1,7 +1,7 @@
 package cz.ememsoft.minibank.mapper
 
-import cz.ememsoft.minibank.api.dto.CustomerDto
 import cz.ememsoft.minibank.api.dto.request.ClientSaveRequest
+import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
 import org.mapstruct.Mapper
 import org.mapstruct.MappingConstants
@@ -10,11 +10,11 @@ import org.mapstruct.MappingConstants
 interface ClientMapper {
 
     // Map API request to internal DTO
-    fun toDto(request: ClientSaveRequest): CustomerDto
+    fun toDto(request: ClientSaveRequest): ClientDto
 
     // Map DTO to Entity
-    fun toEntity(dto: CustomerDto): ClientEntity
+    fun toEntity(dto: ClientDto): ClientEntity
 
     // Map Entity back to DTO
-    fun toDtoFromEntity(entity: ClientEntity): CustomerDto
+    fun toDtoFromEntity(entity: ClientEntity): ClientDto
 }
