@@ -1,6 +1,5 @@
 package cz.ememsoft.minibank.api
 
-import cz.ememsoft.minibank.api.dto.request.ClientDeleteRequest
 import cz.ememsoft.minibank.api.dto.request.ClientSaveRequest
 import cz.ememsoft.minibank.api.dto.response.ClientSaveResponse
 import cz.ememsoft.minibank.dto.ClientDto
@@ -69,8 +68,8 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}, produces = [MediaType.APPLICATION_JSON_VALUE]")
-    fun deleteclient(@RequestBody clientDeleteRequest: ClientDeleteRequest) {
-        clientService.deleteclient(clientDeleteRequest.id)
+    fun deleteclient(@PathVariable id: Long) {
+        clientService.deleteclient(id)
     }
 
     /**
