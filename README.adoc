@@ -10,8 +10,19 @@ Example project in Spring Boot 3.4.1 with Kotlin and built by Gradle.
 
 Install Docker and docker-compose on a system where you want to run this project.
 
-- run database with `docker-compose up -d postgres`
+- run database with
+
+[bash]
+----
+docker-compose up -d postgres
+----
+
 - create schema `bank` in your PostgreSQL database
+
+[bash]
+----
+docker-compose exec postgres psql -U postgres -c "CREATE SCHEMA bank"
+----
 
 // You must have docker and docker-compose installed on a system where you want to run this project.
 // Also if you want to use GraalVM native image, you must have GraalVM JDK installed on your system.
@@ -19,8 +30,18 @@ Install Docker and docker-compose on a system where you want to run this project
 // https://graalvm.github.io/native-build-tools/latest/gradle-plugin-quickstart.html#build-a-native-executable-with-resources-autodetection[Gradle Native Image Plugin Documentation]
 // Create schema 'bank' in your PostgreSQL database.
 
+== Build
+
+`./gradlew clean bootBuildImage`
+
 == How to run
 
-`./gradlew -x test bootRun`
+Database should be already running since schema creation.
+Now you can run the application with
+
+[bash]
+----
+docker-compose up -d
+----
 
 application should be accepting requests on `http://localhost:8082`
