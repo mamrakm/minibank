@@ -3,6 +3,7 @@ package cz.ememsoft.minibank.api
 import cz.ememsoft.minibank.api.dto.request.ClientDeleteRequest
 import cz.ememsoft.minibank.api.dto.request.ClientSaveRequest
 import cz.ememsoft.minibank.api.dto.response.ClientSaveResponse
+import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.service.ClientService
 import org.springframework.http.HttpStatus
@@ -31,9 +32,9 @@ class ClientController(
      * **Note:** This method currently has no implementation.
      */
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("produces = [MediaType.APPLICATION_JSON_VALUE]")
-    fun getClients() {
-        clientService.getAllclients()
+    @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun getClients(): List<ClientDto> {
+        return clientService.getAllclients()
     }
 
     /**
