@@ -19,8 +19,7 @@ data class ClientSaveRequest(
         message = "Invalid phone number"
     )
     val phone: String,
-
-    val address: String
+    val address: String,
 ) {
     override fun toString(): String {
         return "CustomerSaveRequest(firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"

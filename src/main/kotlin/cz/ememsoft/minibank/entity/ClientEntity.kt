@@ -54,7 +54,6 @@ class ClientEntity(
     @Column(name = "address", nullable = false)
     val address: String,
 
-    // TODO: remove nullable = true, it's true only for testing purposes
     @Column(name = "account", nullable = true)
     @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
     val accountEntities: MutableSet<AccountEntity>? = mutableSetOf()
