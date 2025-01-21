@@ -9,6 +9,8 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import jakarta.validation.constraints.NotNull
+import java.math.BigDecimal
 
 /**
  * Entity representing an account in the system.
@@ -28,8 +30,12 @@ class AccountEntity(
     val id: Long,
 
     @ManyToOne(cascade = [CascadeType.REFRESH], optional = false)
-    @JoinColumn(name = "client_entity_client_id", nullable = false)
-    var clientEntity: ClientEntity
+    @JoinColumn(name = "client_id", nullable = false)
+    var clientEntity: ClientEntity,
+
+    @Column(name = "balance", nullable = false)
+    @NotNull
+    val balance: BigDecimal
 ) {
 
     /**
