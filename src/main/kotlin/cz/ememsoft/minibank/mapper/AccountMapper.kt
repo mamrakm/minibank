@@ -22,7 +22,7 @@ import org.mapstruct.ReportingPolicy
  *   `componentModel = MappingConstants.ComponentModel.SPRING`.
  */
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
-abstract class AccountEntityMapper {
+abstract class AccountMapper {
 
     /**
      * Maps an [AccountDto] to an [AccountEntity].

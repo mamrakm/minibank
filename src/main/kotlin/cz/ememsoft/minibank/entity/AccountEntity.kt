@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.entity
 
+import cz.ememsoft.minibank.enum.AccountTypeEnum
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -29,14 +30,23 @@ class AccountEntity(
     @Column(name = "account_id")
     val id: Long,
 
+    @Column(name = "account_name")
+    @NotNull
+    val name: String,
+
     @ManyToOne(cascade = [CascadeType.REFRESH], optional = false)
     @JoinColumn(name = "client_id", nullable = false)
     var clientEntity: ClientEntity,
 
     @Column(name = "balance", nullable = false)
     @NotNull
-    val balance: BigDecimal
-) {
+    val balance: BigDecimal,
+
+    @Column(name = "account_type")
+    @NotNull
+    val accountType: AccountTypeEnum,
+
+    ) {
 
     /**
      * Compares this [AccountEntity] with another object for equality.

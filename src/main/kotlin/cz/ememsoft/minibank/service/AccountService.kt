@@ -1,46 +1,60 @@
 package cz.ememsoft.minibank.service
 
+import cz.ememsoft.minibank.entity.AccountEntity
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
+
 /**
- * Service interface for managing accounts in the application.
- *
- * This interface defines the core operations related to accounts, such as retrieving,
- * saving, updating, and deleting account information, as well as handling transactions
- * associated with accounts.
+ * Service interface for managing account-related operations.
+ * Provides reactive methods for performing CRUD operations on accounts.
  */
 interface AccountService {
 
     /**
-     * Retrieves an account by its identifier.
+     * Retrieves all accounts.
      *
-     * This method is intended to fetch detailed information about a specific account.
+     * @return A [Flux] emitting all [AccountEntity] objects.
      */
-    fun getAccount()
+    fun getAllAccounts(): Flux<AccountEntity>
 
     /**
-     * Saves a new account to the database.
+     * Retrieves an account by its ID.
      *
-     * This method is used to create a new account in the system.
+     * @param id The ID of the account to retrieve.
+     * @return A [Mono] emitting the [AccountEntity] if found, or empty if not.
      */
-    fun saveAccount()
+    fun getAccountById(id: Long): Mono<AccountEntity>
 
     /**
-     * Updates an existing account in the database.
+     * Creates a new account.
      *
-     * This method is used to modify details of an existing account.
+     * @param accountEntity The account details to create.
+     * @return A [Mono] emitting the created [AccountEntity].
      */
-    fun updateAccount()
+    fun createAccount(accountEntity: AccountEntity): Mono<AccountEntity>
 
     /**
-     * Deletes an account by its identifier.
+     * Updates an existing account.
      *
-     * This method removes an account from the system based on its ID.
+     * @param id The ID of the account to update.
+     * @param accountEntity The updated account details.
+     * @return A [Mono] emitting the updated [AccountEntity] if found, or empty if not.
      */
-    fun deleteAccount()
+    fun updateAccount(id: Long, accountEntity: AccountEntity): Mono<AccountEntity>
 
     /**
-     * Retrieves transactions associated with an account.
+     * Deletes an account by its ID.
      *
-     * This method fetches the transaction history of a specific account.
+     * @param id The ID of the account to delete.
+     * @return A [Mono] indicating the completion of the operation.
      */
-    fun getAccountTransactions()
+    fun deleteAccount(id: Long): Mono<Void>
+
+    /**
+     * Retrieves all accounts for a specific client ID.
+     *
+     * @param clientId The ID of the client whose accounts are to be retrieved.
+     * @return A [Flux] emitting all [AccountEntity] objects associated with the client.
+     */
+    fun getAccountsByClientId(clientId: Long): Flux<AccountEntity>
 }

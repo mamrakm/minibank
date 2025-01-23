@@ -203,16 +203,16 @@ class MinibankApplicationTests(
 //        assertThat(result.firstName).isEqualTo(initialClient.firstName)
 //    }
 //
-//    @Test
-//    fun `search clients by first name`() {
-//        val result = restTemplate.exchange(
-//            "http://localhost:$port/clients/search-by-name/${initialClient.firstName}",
-//            HttpMethod.GET,
-//            null,
-//            Array<ClientDto>::class.java
-//        ).body!!
-//
-//        assertThat(result).hasSize(1)
-//        assertThat(result[0].firstName).isEqualTo(initialClient.firstName)
-//    }
+    @Test
+    fun `search clients by first name`() {
+        val result = restTemplate.exchange(
+            "http://localhost:$port/clients/search-by-name/${initialClient.firstName}",
+            HttpMethod.GET,
+            null,
+            Array<ClientDto>::class.java
+        ).body!!
+
+        assertThat(result).hasSize(1)
+        assertThat(result[0].firstName).isEqualTo(initialClient.firstName)
+    }
 }
