@@ -1,8 +1,12 @@
 package cz.ememsoft.minibank.service
 
+import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import cz.ememsoft.minibank.exception.AccountNotFoundException
+import cz.ememsoft.minibank.mapper.AccountMapper
+import cz.ememsoft.minibank.mapper.AccountRequestToDtoMapper
 import cz.ememsoft.minibank.repository.AccountRepository
+import org.mapstruct.factory.Mappers
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Flux
@@ -26,9 +30,11 @@ class AccountServiceImpl(private val accountRepository: AccountRepository) : Acc
             .doOnError { logger.error("Error fetching account with ID: $id", it) }
     }
 
-    override fun createAccount(accountEntity: AccountEntity): Mono<AccountEntity> {
+    override fun createAccount(accountDto: AccountDto): Mono<AccountEntity> {
         logger.info("Creating new account")
-        return accountRepository.save(accountEntity)
+        val mapper = Mappers.getMapper(AccountMapper::class.java)
+
+        return accountRepository.save(mapper.toEntity(accountDto))
             .doOnSuccess { logger.info("Account created: $it") }
             .doOnError { logger.error("Error creating account", it) }
     }

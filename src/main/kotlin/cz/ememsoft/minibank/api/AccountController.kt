@@ -1,7 +1,10 @@
 package cz.ememsoft.minibank.api
 
+import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
 import cz.ememsoft.minibank.entity.AccountEntity
+import cz.ememsoft.minibank.mapper.AccountRequestToDtoMapper
 import cz.ememsoft.minibank.service.AccountService
+import org.mapstruct.factory.Mappers
 import org.slf4j.LoggerFactory
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -49,9 +52,10 @@ class AccountController(private val accountService: AccountService) {
      * @return A [Mono] emitting the created [AccountEntity].
      */
     @PostMapping
-    fun createAccount(@RequestBody accountEntity: AccountEntity): Mono<ResponseEntity<AccountEntity>> {
+    fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<ResponseEntity<AccountEntity>> {
         logger.info("Creating new account")
-        return accountService.createAccount(accountEntity)
+        val mapper = Mappers.getMapper(AccountRequestToDtoMapper::class.java)
+        return accountService.createAccount(mapper.toDto(accountRequest))
             .map { ResponseEntity.ok(it) }
             .doOnSuccess { logger.info("Account created: $it") }
             .doOnError { logger.error("Error creating account", it) }
@@ -65,7 +69,10 @@ class AccountController(private val accountService: AccountService) {
      * @return A [Mono] emitting the updated [AccountEntity] if found, or a not found response.
      */
     @PutMapping("/{id}")
-    fun updateAccount(@PathVariable id: Long, @RequestBody accountEntity: AccountEntity): Mono<ResponseEntity<AccountEntity>> {
+    fun updateAccount(
+        @PathVariable id: Long,
+        @RequestBody accountEntity: AccountEntity,
+    ): Mono<ResponseEntity<AccountEntity>> {
         logger.info("Updating account with ID: $id")
         return accountService.updateAccount(id, accountEntity)
             .map { ResponseEntity.ok(it) }
@@ -83,7 +90,7 @@ class AccountController(private val accountService: AccountService) {
     fun deleteAccount(@PathVariable id: Long): Mono<ResponseEntity<Void>> {
         logger.info("Deleting account with ID: $id")
         return accountService.deleteAccount(id)
-            .map { ResponseEntity.noContent().build<Void>() }
+            .then(Mono.fromCallable { ResponseEntity.noContent().build<Void>() })
             .defaultIfEmpty(ResponseEntity.notFound().build())
             .doOnError { logger.error("Error deleting account with ID: $id", it) }
     }

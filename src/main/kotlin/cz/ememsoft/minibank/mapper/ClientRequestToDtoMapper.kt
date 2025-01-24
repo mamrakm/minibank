@@ -9,7 +9,7 @@ import org.mapstruct.MappingConstants
  * Mapper for converting between [ClientSaveRequest] and [ClientDto].
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
-interface ClientRequestMapper {
+interface ClientRequestToDtoMapper {
 
     /**
      * Maps a [ClientSaveRequest] to a [ClientDto].
