@@ -1,11 +1,13 @@
 package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
+import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
-import cz.ememsoft.minibank.mapper.AccountRequestToDtoMapper
+import cz.ememsoft.minibank.mapper.AccountMapper
 import cz.ememsoft.minibank.service.AccountService
 import org.mapstruct.factory.Mappers
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 import reactor.core.publisher.Flux
@@ -23,10 +25,11 @@ class AccountController(private val accountService: AccountService) {
      * @return A [Flux] emitting all [AccountEntity] objects.
      */
     @GetMapping
-    fun getAllAccounts(): Flux<ResponseEntity<AccountEntity>> {
+    @ResponseStatus(HttpStatus.OK)
+    fun getAllAccounts(): Flux<AccountDto> {
         logger.info("Fetching all accounts")
         return accountService.getAllAccounts()
-            .map { ResponseEntity.ok(it) }
+            .map { Mappers.getMapper(AccountMapper::class.java).toDto(it) }
             .doOnError { logger.error("Error fetching all accounts", it) }
     }
 
@@ -54,8 +57,7 @@ class AccountController(private val accountService: AccountService) {
     @PostMapping
     fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<ResponseEntity<AccountEntity>> {
         logger.info("Creating new account")
-        val mapper = Mappers.getMapper(AccountRequestToDtoMapper::class.java)
-        return accountService.createAccount(mapper.toDto(accountRequest))
+        return accountService.createAccount(accountRequest)
             .map { ResponseEntity.ok(it) }
             .doOnSuccess { logger.info("Account created: $it") }
             .doOnError { logger.error("Error creating account", it) }

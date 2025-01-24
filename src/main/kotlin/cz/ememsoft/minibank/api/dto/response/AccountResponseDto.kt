@@ -4,11 +4,17 @@
  * You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
  *
  * Author: EMeMSoft spol. s r.o.
- * 1/23/25, 11:09 PM
+ * 1/24/25, 3:03 PM
  */
 
 package cz.ememsoft.minibank.api.dto.response
 
-class AccountCreatedResponse {
+import java.math.BigDecimal
 
-}
+data class AccountResponseDto(
+    val id: Long,
+    val accountType: String,
+    val balance: BigDecimal,
+    val currency: String,
+    val clientId: Long,
+) {}

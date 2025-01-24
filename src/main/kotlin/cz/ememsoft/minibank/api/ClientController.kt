@@ -1,8 +1,8 @@
 package cz.ememsoft.minibank.api
 
-import cz.ememsoft.minibank.api.dto.request.ClientSaveRequest
+import cz.ememsoft.minibank.api.dto.request.CreateClientRequest
 import cz.ememsoft.minibank.dto.ClientDto
-import cz.ememsoft.minibank.mapper.ClientRequestToDtoMapper
+import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.service.ClientService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
@@ -25,13 +25,13 @@ private val logger = KotlinLogging.logger {}
  * Provides endpoints for CRUD operations and search functionality related to clients.
  *
  * @property clientService The service layer for client-related operations.
- * @property clientRequestToDtoMapper The mapper for converting request DTOs to internal DTOs.
+ * @property clientRequestMapper The mapper for converting request DTOs to internal DTOs.
  */
 @RestController
 @RequestMapping("/clients")
 class ClientController(
     private val clientService: ClientService,
-    private val clientRequestToDtoMapper: ClientRequestToDtoMapper
+    private val clientMapper: ClientMapper
 ) {
 
     /**
@@ -62,14 +62,14 @@ class ClientController(
     /**
      * Creates a new client.
      *
-     * @param clientSaveRequest The request body containing client data.
+     * @param createClientRequest The request body containing client data.
      * @return The ID of the created client.
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveClient(@RequestBody clientSaveRequest: ClientSaveRequest): Long {
-        logger.info { "Creating new client: $clientSaveRequest" }
-        val clientDto = clientRequestToDtoMapper.toDto(clientSaveRequest)
+    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Long {
+        logger.info { "Creating new client: $createClientRequest" }
+        val clientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.saveClient(clientDto)
     }
 
@@ -77,17 +77,17 @@ class ClientController(
      * Updates an existing client's information.
      *
      * @param id The ID of the client to update.
-     * @param clientSaveRequest The request body containing updated client data.
+     * @param createClientRequest The request body containing updated client data.
      * @return The updated [ClientDto].
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updateClient(
         @PathVariable id: Long,
-        @RequestBody clientSaveRequest: ClientSaveRequest
+        @RequestBody createClientRequest: CreateClientRequest
     ): ClientDto {
         logger.info { "Updating client with ID: $id" }
-        val updatedClientDto = clientRequestToDtoMapper.toDto(clientSaveRequest)
+        val updatedClientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.updateClient(id, updatedClientDto)
     }
 

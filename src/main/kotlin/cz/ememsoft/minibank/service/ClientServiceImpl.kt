@@ -32,7 +32,7 @@ class ClientServiceImpl(
             logger.warn { "Client with ID $id not found" }
             ClientNotFoundException("Client with ID $id not found")
         }
-        return clientMapper.toDtoFromEntity(clientEntity)
+        return clientMapper.entityToDto(clientEntity)
     }
 
     /**
@@ -42,7 +42,7 @@ class ClientServiceImpl(
      */
     override fun getAllClients(): List<ClientDto> {
         logger.info { "Fetching all clients" }
-        return clientRepository.findAll().map { clientMapper.toDtoFromEntity(it) }
+        return clientRepository.findAll().map { clientMapper.entityToDto(it) }
     }
 
     /**
@@ -57,7 +57,7 @@ class ClientServiceImpl(
         if (clientRepository.findByEmail(clientDto.email) != null) {
             throw DuplicateClientException("Client with email ${clientDto.email} already exists")
         }
-        val clientEntity = clientMapper.toEntity(clientDto)
+        val clientEntity = clientMapper.dtoToEntity(clientDto)
         return clientRepository.save(clientEntity).id.also {
             logger.info { "Client saved with ID: $it" }
         }
@@ -90,7 +90,7 @@ class ClientServiceImpl(
         )
 
         // Save updated entity and return the updated DTO
-        return clientMapper.toDtoFromEntity(clientRepository.save(updatedEntity)).also {
+        return clientMapper.entityToDto(clientRepository.save(updatedEntity)).also {
             logger.info { "Client with ID $id updated successfully" }
         }
     }
@@ -120,7 +120,7 @@ class ClientServiceImpl(
     override fun findClientByEmail(email: String): ClientDto? {
         logger.info { "Searching for client with email: $email" }
         return clientRepository.findByEmail(email)?.let {
-            clientMapper.toDtoFromEntity(it)
+            clientMapper.entityToDto(it)
         }.also {
             if (it == null) logger.warn { "Client with email $email not found" }
         }
@@ -136,6 +136,6 @@ class ClientServiceImpl(
         logger.info { "Searching for clients with first name: $firstName" }
         return clientRepository.findAll()
             .filter { it.firstName.equals(firstName, ignoreCase = true) }
-            .map { clientMapper.toDtoFromEntity(it) }
+            .map { clientMapper.entityToDto(it) }
     }
 }

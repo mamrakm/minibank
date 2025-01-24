@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.mapper
 
-import cz.ememsoft.minibank.api.dto.request.ClientSaveRequest
+import cz.ememsoft.minibank.api.dto.request.CreateClientRequest
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
 import org.mapstruct.Mapper
@@ -17,12 +17,12 @@ import org.mapstruct.MappingConstants
 interface ClientMapper {
 
     /**
-     * Maps a [ClientSaveRequest] to a [ClientDto].
+     * Maps a [CreateClientRequest] to a [ClientDto].
      *
      * @param request The API request object containing client information.
      * @return The corresponding [ClientDto].
      */
-    fun toDto(request: ClientSaveRequest): ClientDto
+    fun requestToDto(request: CreateClientRequest): ClientDto
 
     /**
      * Maps a [ClientDto] to a [ClientEntity].
@@ -30,7 +30,7 @@ interface ClientMapper {
      * @param dto The internal DTO object containing client information.
      * @return The corresponding [ClientEntity] ready for persistence.
      */
-    fun toEntity(dto: ClientDto): ClientEntity
+    fun dtoToEntity(dto: ClientDto): ClientEntity
 
     /**
      * Maps a [ClientEntity] back to a [ClientDto].
@@ -38,5 +38,5 @@ interface ClientMapper {
      * @param entity The entity object representing a client in the database.
      * @return The corresponding [ClientDto] for use in the application layers.
      */
-    fun toDtoFromEntity(entity: ClientEntity): ClientDto
+    fun entityToDto(entity: ClientEntity): ClientDto
 }

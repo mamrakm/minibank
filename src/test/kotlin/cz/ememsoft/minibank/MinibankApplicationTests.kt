@@ -116,7 +116,7 @@ class MinibankApplicationTests(
         )
 
         val anotherClient: ClientDto = clientRepository.findAll()[1].let {
-            Mappers.getMapper(ClientMapper::class.java).toDtoFromEntity(it)
+            Mappers.getMapper(ClientMapper::class.java).entityToDto(it)
         }
 
         val result = restTemplate.exchange(

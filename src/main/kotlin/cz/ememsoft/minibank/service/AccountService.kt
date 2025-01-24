@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.service
 
+import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import reactor.core.publisher.Flux
@@ -16,7 +17,7 @@ interface AccountService {
      *
      * @return A [Flux] emitting all [AccountEntity] objects.
      */
-    fun getAllAccounts(): Flux<AccountEntity>
+    fun getAllAccounts(): Flux<AccountDto>
 
     /**
      * Retrieves an account by its ID.
@@ -24,7 +25,7 @@ interface AccountService {
      * @param id The ID of the account to retrieve.
      * @return A [Mono] emitting the [AccountEntity] if found, or empty if not.
      */
-    fun getAccountById(id: Long): Mono<AccountEntity>
+    fun getAccountById(id: Long): Mono<AccountDto>
 
     /**
      * Creates a new account.
@@ -32,7 +33,7 @@ interface AccountService {
      * @param accountEntity The account details to create.
      * @return A [Mono] emitting the created [AccountEntity].
      */
-    fun createAccount(accountDto: AccountDto): Mono<AccountEntity>
+    fun createAccount(accountRequest: CreateAccountRequest): Mono<AccountDto>
 
     /**
      * Updates an existing account.
@@ -41,7 +42,7 @@ interface AccountService {
      * @param accountEntity The updated account details.
      * @return A [Mono] emitting the updated [AccountEntity] if found, or empty if not.
      */
-    fun updateAccount(id: Long, accountEntity: AccountEntity): Mono<AccountEntity>
+    fun updateAccount(id: Long, accountEntity: AccountEntity): Mono<AccountDto>
 
     /**
      * Deletes an account by its ID.
@@ -57,5 +58,5 @@ interface AccountService {
      * @param clientId The ID of the client whose accounts are to be retrieved.
      * @return A [Flux] emitting all [AccountEntity] objects associated with the client.
      */
-    fun getAccountsByClientId(clientId: Long): Flux<AccountEntity>
+    fun getAccountsByClientId(clientId: Long): Flux<AccountDto>
 }

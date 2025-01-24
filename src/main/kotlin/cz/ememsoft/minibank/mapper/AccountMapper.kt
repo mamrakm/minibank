@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.mapper
 
+import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import org.mapstruct.BeanMapping
@@ -10,15 +11,16 @@ import org.mapstruct.NullValuePropertyMappingStrategy
 import org.mapstruct.ReportingPolicy
 
 /**
- * Mapper for converting between [AccountDto] and [AccountEntity].
+ * Mapper for converting between [AccountDto], [AccountEntity], and related objects.
  *
- * This abstract class uses MapStruct to generate the implementation for mapping between
- * the `AccountDto` and `AccountEntity` objects. It includes full mapping, partial updates,
- * and configuration for handling null properties.
+ * This abstract class leverages MapStruct to automatically generate the implementation for:
+ * - Mapping between [AccountDto] and [AccountEntity]
+ * - Partially updating an [AccountEntity] from an [AccountDto]
+ * - Mapping from a [CreateAccountRequest] to [AccountDto] and [AccountEntity]
  *
- * - The `unmappedTargetPolicy` is set to [ReportingPolicy.IGNORE], meaning unmapped properties
- *   will not cause compilation errors.
- * - The generated implementation is registered as a Spring Bean using
+ * ### Configuration:
+ * - **Unmapped Target Policy**: [ReportingPolicy.IGNORE] - Unmapped properties will be ignored.
+ * - **Spring Component**: The generated implementation is registered as a Spring Bean using
  *   `componentModel = MappingConstants.ComponentModel.SPRING`.
  */
 @Mapper(unmappedTargetPolicy = ReportingPolicy.IGNORE, componentModel = MappingConstants.ComponentModel.SPRING)
@@ -27,29 +29,30 @@ abstract class AccountMapper {
     /**
      * Maps an [AccountDto] to an [AccountEntity].
      *
-     * @param accountEntityDto The DTO to be mapped.
-     * @return The mapped [AccountEntity].
+     * @param accountDto The DTO to be converted.
+     * @return The resulting [AccountEntity].
      */
-    abstract fun toEntity(accountEntityDto: AccountDto): AccountEntity
+    abstract fun dtoToEntity(accountDto: AccountDto): AccountEntity
 
     /**
      * Maps an [AccountEntity] to an [AccountDto].
      *
-     * @param accountEntity The entity to be mapped.
-     * @return The mapped [AccountDto].
+     * @param accountEntity The entity to be converted.
+     * @return The resulting [AccountDto].
      */
-    abstract fun toDto(accountEntity: AccountEntity): AccountDto
+    abstract fun entityToDto(accountEntity: AccountEntity): AccountDto
 
     /**
-     * Partially updates an [AccountEntity] with values from an [AccountDto].
+     * Partially updates an [AccountEntity] with non-null values from an [AccountDto].
      *
-     * Only non-null properties in the [AccountDto] will overwrite corresponding
-     * properties in the target [AccountEntity].
+     * This method ensures that only the non-null properties in the [AccountDto] overwrite
+     * the corresponding properties in the target [AccountEntity].
      *
-     * - Uses the [NullValuePropertyMappingStrategy.IGNORE] to ignore null values
-     *   during the mapping process.
+     * ### Configuration:
+     * - **Null Value Handling**: [NullValuePropertyMappingStrategy.IGNORE] ensures null properties in the DTO
+     *   do not overwrite existing values in the target entity.
      *
-     * @param accountEntityDto The DTO containing the updated values.
+     * @param accountEntityDto The DTO containing updated values.
      * @param accountEntity The target entity to be updated.
      * @return The updated [AccountEntity].
      */
@@ -58,4 +61,20 @@ abstract class AccountMapper {
         accountEntityDto: AccountDto,
         @MappingTarget accountEntity: AccountEntity
     ): AccountEntity
+
+    /**
+     * Maps a [CreateAccountRequest] to an [AccountDto].
+     *
+     * @param request The request object containing account creation details.
+     * @return The resulting [AccountDto].
+     */
+    abstract fun requestToDto(request: CreateAccountRequest): AccountDto
+
+    /**
+     * Maps a [CreateAccountRequest] to an [AccountEntity].
+     *
+     * @param request The request object containing account creation details.
+     * @return The resulting [AccountEntity].
+     */
+    abstract fun requestToEntity(request: CreateAccountRequest): AccountEntity
 }

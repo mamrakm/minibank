@@ -15,8 +15,6 @@ import java.io.Serializable
  */
 data class AccountDto(
     val id: Long,
-
-
     @NotNull(message = "clientEntity must not be null")
     val clientEntity: ClientEntity
 ) : Serializable
