@@ -45,3 +45,5 @@ docker-compose up -d
 ----
 
 application should be accepting requests on `http://localhost:8082`
+
+image::https://github.com/mamrakm/minibank/actions/workflows/github-actions.yml/badge.svg[Build Status]
