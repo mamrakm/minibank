@@ -34,9 +34,10 @@ class AccountEntity(
     @NotNull
     val name: String,
 
+    @NotNull(message = "Client must be provided")
     @ManyToOne(cascade = [CascadeType.REFRESH], optional = false)
     @JoinColumn(name = "client_id", nullable = false)
-    var clientEntity: ClientEntity,
+    val clientEntity: ClientEntity,
 
     @Column(name = "balance", nullable = false)
     @NotNull
