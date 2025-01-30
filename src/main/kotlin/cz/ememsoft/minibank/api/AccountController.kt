@@ -2,7 +2,6 @@ package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
 import cz.ememsoft.minibank.dto.AccountDto
-import cz.ememsoft.minibank.entity.AccountEntity
 import cz.ememsoft.minibank.mapper.AccountMapper
 import cz.ememsoft.minibank.service.AccountService
 import org.slf4j.LoggerFactory
@@ -21,7 +20,7 @@ class AccountController(private val accountService: AccountService, private val 
     /**
      * Retrieves all accounts.
      *
-     * @return A [Flux] emitting all [AccountEntity] objects.
+     * @return A [Flux] emitting all [AccountDto] objects.
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -36,7 +35,7 @@ class AccountController(private val accountService: AccountService, private val 
      * Retrieves an account by its ID.
      *
      * @param id The ID of the account to retrieve.
-     * @return A [Mono] emitting the [AccountEntity] if found, or a not found response.
+     * @return A [Mono] emitting the [AccountDto] if found, or a not found response.
      */
     @GetMapping("/{id}")
     fun getAccountById(@PathVariable id: Long): Mono<AccountDto> {
@@ -49,7 +48,7 @@ class AccountController(private val accountService: AccountService, private val 
      * Creates a new account.
      *
      * @param accountEntity The account details to create.
-     * @return A [Mono] emitting the created [AccountEntity].
+     * @return A [Mono] emitting the created [AccountDto].
      */
     @PostMapping
     fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<ResponseEntity<AccountDto>> {
@@ -65,7 +64,7 @@ class AccountController(private val accountService: AccountService, private val 
      *
      * @param id The ID of the account to update.
      * @param accountDto The updated account details.
-     * @return A [Mono] emitting the updated [AccountEntity] if found, or a not found response.
+     * @return A [Mono] emitting the updated [AccountDto] if found, or a not found response.
      */
     @PutMapping("/{id}")
     fun updateAccount(
@@ -98,7 +97,7 @@ class AccountController(private val accountService: AccountService, private val 
      * Retrieves all accounts for a specific client ID.
      *
      * @param clientId The ID of the client whose accounts are to be retrieved.
-     * @return A [Flux] emitting all [AccountEntity] objects associated with the client.
+     * @return A [Flux] emitting all [AccountDto] objects associated with the client.
      */
     @GetMapping("/client/{clientId}")
     fun getAccountsByClientId(@PathVariable clientId: Long): Flux<ResponseEntity<AccountDto>> {
