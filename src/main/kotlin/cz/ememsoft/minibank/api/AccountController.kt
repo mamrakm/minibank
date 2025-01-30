@@ -5,7 +5,6 @@ import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import cz.ememsoft.minibank.mapper.AccountMapper
 import cz.ememsoft.minibank.service.AccountService
-import org.mapstruct.factory.Mappers
 import org.slf4j.LoggerFactory
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
@@ -15,7 +14,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/accounts")
-class AccountController(private val accountService: AccountService) {
+class AccountController(private val accountService: AccountService, private val mapper: AccountMapper) {
 
     private val logger = LoggerFactory.getLogger(AccountController::class.java)
 
@@ -29,8 +28,8 @@ class AccountController(private val accountService: AccountService) {
     fun getAllAccounts(): Flux<AccountDto> {
         logger.info("Fetching all accounts")
         return accountService.getAllAccounts()
-            .map { Mappers.getMapper(AccountMapper::class.java).toDto(it) }
             .doOnError { logger.error("Error fetching all accounts", it) }
+            .onErrorResume { Flux.empty() }
     }
 
     /**
@@ -40,11 +39,9 @@ class AccountController(private val accountService: AccountService) {
      * @return A [Mono] emitting the [AccountEntity] if found, or a not found response.
      */
     @GetMapping("/{id}")
-    fun getAccountById(@PathVariable id: Long): Mono<ResponseEntity<AccountEntity>> {
+    fun getAccountById(@PathVariable id: Long): Mono<AccountDto> {
         logger.info("Fetching account with ID: $id")
         return accountService.getAccountById(id)
-            .map { ResponseEntity.ok(it) }
-            .defaultIfEmpty(ResponseEntity.notFound().build())
             .doOnError { logger.error("Error fetching account with ID: $id", it) }
     }
 
@@ -55,7 +52,7 @@ class AccountController(private val accountService: AccountService) {
      * @return A [Mono] emitting the created [AccountEntity].
      */
     @PostMapping
-    fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<ResponseEntity<AccountEntity>> {
+    fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<ResponseEntity<AccountDto>> {
         logger.info("Creating new account")
         return accountService.createAccount(accountRequest)
             .map { ResponseEntity.ok(it) }
@@ -67,16 +64,16 @@ class AccountController(private val accountService: AccountService) {
      * Updates an existing account.
      *
      * @param id The ID of the account to update.
-     * @param accountEntity The updated account details.
+     * @param accountDto The updated account details.
      * @return A [Mono] emitting the updated [AccountEntity] if found, or a not found response.
      */
     @PutMapping("/{id}")
     fun updateAccount(
         @PathVariable id: Long,
-        @RequestBody accountEntity: AccountEntity,
-    ): Mono<ResponseEntity<AccountEntity>> {
+        @RequestBody accountDto: AccountDto,
+    ): Mono<ResponseEntity<AccountDto>> {
         logger.info("Updating account with ID: $id")
-        return accountService.updateAccount(id, accountEntity)
+        return accountService.updateAccount(id, mapper.dtoToEntity(accountDto))
             .map { ResponseEntity.ok(it) }
             .defaultIfEmpty(ResponseEntity.notFound().build())
             .doOnError { logger.error("Error updating account with ID: $id", it) }
@@ -104,7 +101,7 @@ class AccountController(private val accountService: AccountService) {
      * @return A [Flux] emitting all [AccountEntity] objects associated with the client.
      */
     @GetMapping("/client/{clientId}")
-    fun getAccountsByClientId(@PathVariable clientId: Long): Flux<ResponseEntity<AccountEntity>> {
+    fun getAccountsByClientId(@PathVariable clientId: Long): Flux<ResponseEntity<AccountDto>> {
         logger.info("Fetching accounts for client ID: $clientId")
         return accountService.getAccountsByClientId(clientId)
             .map { ResponseEntity.ok(it) }
