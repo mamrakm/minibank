@@ -178,31 +178,31 @@ class MinibankApplicationTests(
 //        assertThat(result.address).isEqualTo("Updated Address, Night City")
 //    }
 //
-//    @Test
-//    fun `delete a client`() {
-//        restTemplate.exchange(
-//            "http://localhost:$port/clients/${initialClient.id}",
-//            HttpMethod.DELETE,
-//            null,
-//            Void::class.java
-//        )
-//
-//        val result = clientRepository.findAll()
-//        assertThat(result).isEmpty()
-//    }
-//
-//    @Test
-//    fun `search client by email`() {
-//        val result = restTemplate.exchange(
-//            "http://localhost:$port/clients/search-by-email/${initialClient.email}",
-//            HttpMethod.GET,
-//            null,
-//            ClientDto::class.java
-//        ).body!!
-//
-//        assertThat(result.firstName).isEqualTo(initialClient.firstName)
-//    }
-//
+    @Test
+    fun `delete a client`() {
+        restTemplate.exchange(
+            "http://localhost:$port/clients/${clientId}",
+            HttpMethod.DELETE,
+            null,
+            Void::class.java
+        )
+
+        val result = clientRepository.findAll()
+        assertThat(result).isEmpty()
+    }
+
+    @Test
+    fun `search client by email`() {
+        val result = restTemplate.exchange(
+            "http://localhost:$port/clients/search-by-email/${initialClient.email}",
+            HttpMethod.GET,
+            null,
+            ClientDto::class.java
+        ).body!!
+
+        assertThat(result.firstName).isEqualTo(initialClient.firstName)
+    }
+
     @Test
     fun `search clients by first name`() {
         val result = restTemplate.exchange(

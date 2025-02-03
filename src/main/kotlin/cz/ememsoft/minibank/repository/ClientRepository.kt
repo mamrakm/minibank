@@ -2,6 +2,7 @@ package cz.ememsoft.minibank.repository
 
 import cz.ememsoft.minibank.entity.ClientEntity
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.stereotype.Repository
 
 /**
  * Repository interface for managing [ClientEntity] persistence.
@@ -9,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaRepository
  * This interface provides CRUD operations and custom query methods for the client entity.
  * It extends [JpaRepository] to leverage Spring Data JPA functionalities.
  */
+@Repository
 interface ClientRepository : JpaRepository<ClientEntity, Long> {
 
     /**

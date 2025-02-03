@@ -6,3 +6,11 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     default-schema: bank
+  task:
+    execution:
+      pool:
+        core-size: 5          # Minimum number of threads
+        max-size: 10          # Maximum number of threads
+        queue-capacity: 25    # Size of the queue for pending tasks
+        allow-core-thread-timeout: true # Allow core threads to time out
+      thread-name-prefix: "AsyncExecutor-" # Custom thread name prefix

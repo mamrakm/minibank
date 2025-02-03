@@ -3,11 +3,21 @@ package cz.ememsoft.minibank.api
 import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.mapper.AccountMapper
+
 import cz.ememsoft.minibank.service.AccountService
 import org.slf4j.LoggerFactory
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.DeleteMapping
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestMapping
+import org.springframework.web.bind.annotation.ResponseStatus
+import org.springframework.web.bind.annotation.RestController
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -51,10 +61,9 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Mono] emitting the created [AccountDto].
      */
     @PostMapping
-    fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<ResponseEntity<AccountDto>> {
+    fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<AccountDto> {
         logger.info("Creating new account")
         return accountService.createAccount(accountRequest)
-            .map { ResponseEntity.ok(it) }
             .doOnSuccess { logger.info("Account created: $it") }
             .doOnError { logger.error("Error creating account", it) }
     }
@@ -70,13 +79,11 @@ class AccountController(private val accountService: AccountService, private val 
     fun updateAccount(
         @PathVariable id: Long,
         @RequestBody accountDto: AccountDto,
-    ): Mono<ResponseEntity<AccountDto>> {
+    ): Mono<AccountDto> {
         logger.info("Updating account with ID: $id")
         return accountService.updateAccount(id, mapper.dtoToEntity(accountDto))
-            .map { ResponseEntity.ok(it) }
-            .defaultIfEmpty(ResponseEntity.notFound().build())
-            .doOnError { logger.error("Error updating account with ID: $id", it) }
     }
+
 
     /**
      * Deletes an account by its ID.
@@ -85,11 +92,9 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Mono] indicating completion of the operation.
      */
     @DeleteMapping("/{id}")
-    fun deleteAccount(@PathVariable id: Long): Mono<ResponseEntity<Void>> {
+    fun deleteAccount(@PathVariable id: Long): Mono<Void> {
         logger.info("Deleting account with ID: $id")
         return accountService.deleteAccount(id)
-            .then(Mono.fromCallable { ResponseEntity.noContent().build<Void>() })
-            .defaultIfEmpty(ResponseEntity.notFound().build())
             .doOnError { logger.error("Error deleting account with ID: $id", it) }
     }
 
@@ -100,10 +105,9 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Flux] emitting all [AccountDto] objects associated with the client.
      */
     @GetMapping("/client/{clientId}")
-    fun getAccountsByClientId(@PathVariable clientId: Long): Flux<ResponseEntity<AccountDto>> {
+    fun getAccountsByClientId(@PathVariable clientId: Long): Mono<AccountDto> {
         logger.info("Fetching accounts for client ID: $clientId")
         return accountService.getAccountsByClientId(clientId)
-            .map { ResponseEntity.ok(it) }
             .doOnError { logger.error("Error fetching accounts for client ID: $clientId", it) }
     }
 }

@@ -31,7 +31,7 @@ private val logger = KotlinLogging.logger {}
 @RequestMapping("/clients")
 class ClientController(
     private val clientService: ClientService,
-    private val clientMapper: ClientMapper
+    private val clientMapper: ClientMapper,
 ) {
 
     /**
@@ -42,7 +42,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getClient(@PathVariable id: Long): ClientDto {
+    suspend fun getClient(@PathVariable id: Long): ClientDto {
         logger.info { "Fetching client with ID: $id" }
         return clientService.getClient(id)
     }
@@ -54,7 +54,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAllClients(): List<ClientDto> {
+    suspend fun getAllClients(): List<ClientDto> {
         logger.info { "Fetching all clients" }
         return clientService.getAllClients()
     }
@@ -67,7 +67,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Long {
+    suspend fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Long {
         logger.info { "Creating new client: $createClientRequest" }
         val clientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.saveClient(clientDto)
@@ -82,9 +82,9 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateClient(
+    suspend fun updateClient(
         @PathVariable id: Long,
-        @RequestBody createClientRequest: CreateClientRequest
+        @RequestBody createClientRequest: CreateClientRequest,
     ): ClientDto {
         logger.info { "Updating client with ID: $id" }
         val updatedClientDto = clientMapper.requestToDto(createClientRequest)
@@ -98,7 +98,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    fun deleteClient(@PathVariable id: Long) {
+    suspend fun deleteClient(@PathVariable id: Long) {
         logger.info { "Deleting client with ID: $id" }
         clientService.deleteClient(id)
     }
@@ -111,7 +111,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-name/{firstName}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun findClientsByFirstName(@PathVariable firstName: String): List<ClientDto> {
+    suspend fun findClientsByFirstName(@PathVariable firstName: String): List<ClientDto> {
         logger.info { "Searching for clients with first name: $firstName" }
         return clientService.findClientsByFirstName(firstName)
     }
@@ -124,7 +124,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-email/{email}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun findClientByEmail(@PathVariable email: String): ClientDto? {
+    suspend fun findClientByEmail(@PathVariable email: String): ClientDto? {
         logger.info { "Searching for client with email: $email" }
         return clientService.findClientByEmail(email)
     }

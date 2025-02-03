@@ -7,6 +7,8 @@ import cz.ememsoft.minibank.exception.DuplicateClientException
 import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.repository.ClientRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -16,7 +18,7 @@ private val logger = KotlinLogging.logger {}
 @Transactional
 class ClientServiceImpl(
     private val clientRepository: ClientRepository,
-    private val clientMapper: ClientMapper
+    private val clientMapper: ClientMapper,
 ) : ClientService {
 
     /**
@@ -26,13 +28,15 @@ class ClientServiceImpl(
      * @return The corresponding [ClientDto] for the given ID.
      * @throws ClientNotFoundException If no client is found with the given ID.
      */
-    override fun getClient(id: Long): ClientDto {
+    override suspend fun getClient(id: Long): ClientDto {
         logger.info { "Fetching client with ID: $id" }
-        val clientEntity = clientRepository.findById(id).orElseThrow {
-            logger.warn { "Client with ID $id not found" }
-            ClientNotFoundException("Client with ID $id not found")
+        return withContext(Dispatchers.IO) {
+            val clientEntity = clientRepository.findById(id).orElseThrow {
+                logger.warn { "Client with ID $id not found" }
+                ClientNotFoundException("Client with ID $id not found")
+            }
+            clientMapper.entityToDto(clientEntity)
         }
-        return clientMapper.entityToDto(clientEntity)
     }
 
     /**
@@ -40,9 +44,9 @@ class ClientServiceImpl(
      *
      * @return A list of all clients as [ClientDto].
      */
-    override fun getAllClients(): List<ClientDto> {
+    override suspend fun getAllClients(): List<ClientDto> {
         logger.info { "Fetching all clients" }
-        return clientRepository.findAll().map { clientMapper.entityToDto(it) }
+        return withContext(Dispatchers.IO) { clientRepository.findAll().map { clientMapper.entityToDto(it) } }
     }
 
     /**
@@ -52,14 +56,16 @@ class ClientServiceImpl(
      * @return The ID of the saved client.
      * @throws DuplicateClientException If a client with the same email already exists.
      */
-    override fun saveClient(clientDto: ClientDto): Long {
+    override suspend fun saveClient(clientDto: ClientDto): Long {
         logger.info { "Saving new client: $clientDto" }
-        if (clientRepository.findByEmail(clientDto.email) != null) {
-            throw DuplicateClientException("Client with email ${clientDto.email} already exists")
-        }
-        val clientEntity = clientMapper.dtoToEntity(clientDto)
-        return clientRepository.save(clientEntity).id.also {
-            logger.info { "Client saved with ID: $it" }
+        return withContext(Dispatchers.IO) {
+            if (clientRepository.findByEmail(clientDto.email) != null) {
+                throw DuplicateClientException("Client with email ${clientDto.email} already exists")
+            }
+            val clientEntity = clientMapper.dtoToEntity(clientDto)
+            clientRepository.save(clientEntity).id.also {
+                logger.info { "Client saved with ID: $it" }
+            }
         }
     }
 
@@ -71,37 +77,39 @@ class ClientServiceImpl(
      * @return The updated [ClientDto].
      * @throws ClientNotFoundException If no client is found with the given ID.
      */
-    override fun updateClient(id: Long, updatedClientDto: ClientDto): ClientDto {
+    override suspend fun updateClient(id: Long, updatedClientDto: ClientDto): ClientDto {
         logger.info { "Updating client with ID: $id" }
 
-        val existingClient = clientRepository.findById(id).orElseThrow {
-            logger.warn { "Client with ID $id not found for update" }
-            ClientNotFoundException("Client with ID $id not found")
-        }
+        return withContext(Dispatchers.IO) {
+            val existingClient = clientRepository.findById(id).orElseThrow {
+                logger.warn { "Client with ID $id not found for update" }
+                ClientNotFoundException("Client with ID $id not found")
+            }
 
-        // Create a new instance with updated fields
-        val updatedEntity = ClientEntity(
-            id = existingClient.id,
-            firstName = updatedClientDto.firstName,
-            lastName = updatedClientDto.lastName,
-            email = updatedClientDto.email,
-            phone = updatedClientDto.phone,
-            address = updatedClientDto.address
-        )
+            // Create a new instance with updated fields
+            val updatedEntity = ClientEntity(
+                id = existingClient.id,
+                firstName = updatedClientDto.firstName,
+                lastName = updatedClientDto.lastName,
+                email = updatedClientDto.email,
+                phone = updatedClientDto.phone,
+                address = updatedClientDto.address
+            )
 
-        // Save updated entity and return the updated DTO
-        return clientMapper.entityToDto(clientRepository.save(updatedEntity)).also {
-            logger.info { "Client with ID $id updated successfully" }
+            // Save updated entity and return the updated DTO
+            clientMapper.entityToDto(clientRepository.save(updatedEntity)).also {
+                logger.info { "Client with ID $id updated successfully" }
+            }
         }
     }
-    
+
     /**
      * Deletes a client by their ID.
      *
      * @param id The ID of the client to delete.
      * @throws ClientNotFoundException If no client is found with the given ID.
      */
-    override fun deleteClient(id: Long) {
+    override suspend fun deleteClient(id: Long) {
         logger.info { "Deleting client with ID: $id" }
         if (!clientRepository.existsById(id)) {
             logger.warn { "Client with ID $id not found for deletion" }
@@ -117,7 +125,7 @@ class ClientServiceImpl(
      * @param email The email address to search for.
      * @return The corresponding [ClientDto] if found, or null otherwise.
      */
-    override fun findClientByEmail(email: String): ClientDto? {
+    override suspend fun findClientByEmail(email: String): ClientDto? {
         logger.info { "Searching for client with email: $email" }
         return clientRepository.findByEmail(email)?.let {
             clientMapper.entityToDto(it)
@@ -132,10 +140,9 @@ class ClientServiceImpl(
      * @param firstName The first name of the client(s) to search for.
      * @return A list of clients matching the first name as [ClientDto].
      */
-    override fun findClientsByFirstName(firstName: String): List<ClientDto> {
+    override suspend fun findClientsByFirstName(firstName: String): List<ClientDto> {
         logger.info { "Searching for clients with first name: $firstName" }
-        return clientRepository.findAll()
-            .filter { it.firstName.equals(firstName, ignoreCase = true) }
+        return clientRepository.findAll().filter { it.firstName.equals(firstName, ignoreCase = true) }
             .map { clientMapper.entityToDto(it) }
     }
 }

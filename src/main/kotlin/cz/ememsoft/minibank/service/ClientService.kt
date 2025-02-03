@@ -13,14 +13,14 @@ interface ClientService {
      * @param id The ID of the client to retrieve.
      * @return The corresponding [ClientDto] for the given ID.
      */
-    fun getClient(id: Long): ClientDto
+    suspend fun getClient(id: Long): ClientDto
 
     /**
      * Retrieves all clients in the system.
      *
      * @return A list of all clients as [ClientDto].
      */
-    fun getAllClients(): List<ClientDto>
+    suspend fun getAllClients(): List<ClientDto>
 
     /**
      * Saves a new client to the database.
@@ -28,7 +28,7 @@ interface ClientService {
      * @param clientDto The DTO containing client information to save.
      * @return The ID of the saved client.
      */
-    fun saveClient(clientDto: ClientDto): Long
+    suspend fun saveClient(clientDto: ClientDto): Long
 
     /**
      * Updates an existing client's information.
@@ -37,14 +37,14 @@ interface ClientService {
      * @param updatedClientDto The updated client data.
      * @return The updated [ClientDto].
      */
-    fun updateClient(id: Long, updatedClientDto: ClientDto): ClientDto
+    suspend fun updateClient(id: Long, updatedClientDto: ClientDto): ClientDto
 
     /**
      * Deletes a client by their ID.
      *
      * @param id The ID of the client to delete.
      */
-    fun deleteClient(id: Long)
+    suspend fun deleteClient(id: Long)
 
     /**
      * Searches for a client by their email.
@@ -52,7 +52,7 @@ interface ClientService {
      * @param email The email address to search for.
      * @return The corresponding [ClientDto] if found, or null otherwise.
      */
-    fun findClientByEmail(email: String): ClientDto?
+    suspend fun findClientByEmail(email: String): ClientDto?
 
     /**
      * Searches for clients by their first name.
@@ -60,5 +60,5 @@ interface ClientService {
      * @param firstName The first name of the client(s) to search for.
      * @return A list of clients matching the first name as [ClientDto].
      */
-    fun findClientsByFirstName(firstName: String): List<ClientDto>
+    suspend fun findClientsByFirstName(firstName: String): List<ClientDto>
 }

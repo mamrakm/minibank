@@ -58,5 +58,5 @@ interface AccountService {
      * @param clientId The ID of the client whose accounts are to be retrieved.
      * @return A [Flux] emitting all [AccountEntity] objects associated with the client.
      */
-    fun getAccountsByClientId(clientId: Long): Flux<AccountDto>
+    fun getAccountsByClientId(clientId: Long): Mono<AccountDto>
 }
