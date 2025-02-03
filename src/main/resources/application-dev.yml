@@ -3,6 +3,11 @@ spring:
     url: jdbc:postgresql://localhost:5432/minibank-database
     username: postgres
     password: postgres
+
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/minibank-database
+    username: postgres
+    password: postgres
   jpa:
     hibernate:
       ddl-auto: none

@@ -3,12 +3,9 @@ package cz.ememsoft.minibank.api
 import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.mapper.AccountMapper
-
 import cz.ememsoft.minibank.service.AccountService
 import org.slf4j.LoggerFactory
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,7 +20,7 @@ import reactor.core.publisher.Mono
 
 @RestController
 @RequestMapping("/accounts")
-class AccountController(private val accountService: AccountService, private val mapper: AccountMapper) {
+class AccountController(private val accountService: AccountService, private val accountMapper: AccountMapper) {
 
     private val logger = LoggerFactory.getLogger(AccountController::class.java)
 
@@ -81,9 +78,8 @@ class AccountController(private val accountService: AccountService, private val 
         @RequestBody accountDto: AccountDto,
     ): Mono<AccountDto> {
         logger.info("Updating account with ID: $id")
-        return accountService.updateAccount(id, mapper.dtoToEntity(accountDto))
+        return accountService.updateAccount(id, accountMapper.dtoToEntity(accountDto))
     }
-
 
     /**
      * Deletes an account by its ID.
