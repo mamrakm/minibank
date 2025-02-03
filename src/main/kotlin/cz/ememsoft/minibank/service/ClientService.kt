@@ -1,6 +1,8 @@
 package cz.ememsoft.minibank.service
 
 import cz.ememsoft.minibank.dto.ClientDto
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 /**
  * Service interface for managing clients in the application.
@@ -13,14 +15,14 @@ interface ClientService {
      * @param id The ID of the client to retrieve.
      * @return The corresponding [ClientDto] for the given ID.
      */
-    suspend fun getClient(id: Long): ClientDto
+    fun getClient(id: Long): Mono<ClientDto>
 
     /**
      * Retrieves all clients in the system.
      *
      * @return A list of all clients as [ClientDto].
      */
-    suspend fun getAllClients(): List<ClientDto>
+    fun getAllClients(): Flux<ClientDto>
 
     /**
      * Saves a new client to the database.
@@ -28,7 +30,7 @@ interface ClientService {
      * @param clientDto The DTO containing client information to save.
      * @return The ID of the saved client.
      */
-    suspend fun saveClient(clientDto: ClientDto): Long
+    fun saveClient(clientDto: ClientDto): Mono<Long>
 
     /**
      * Updates an existing client's information.
@@ -37,14 +39,14 @@ interface ClientService {
      * @param updatedClientDto The updated client data.
      * @return The updated [ClientDto].
      */
-    suspend fun updateClient(id: Long, updatedClientDto: ClientDto): ClientDto
+    fun updateClient(id: Long, updatedClientDto: ClientDto): Mono<ClientDto>
 
     /**
      * Deletes a client by their ID.
      *
      * @param id The ID of the client to delete.
      */
-    suspend fun deleteClient(id: Long)
+    fun deleteClient(id: Long): Mono<Void>
 
     /**
      * Searches for a client by their email.
@@ -52,7 +54,7 @@ interface ClientService {
      * @param email The email address to search for.
      * @return The corresponding [ClientDto] if found, or null otherwise.
      */
-    suspend fun findClientByEmail(email: String): ClientDto?
+    fun findClientByEmail(email: String): Mono<ClientDto>
 
     /**
      * Searches for clients by their first name.
@@ -60,5 +62,5 @@ interface ClientService {
      * @param firstName The first name of the client(s) to search for.
      * @return A list of clients matching the first name as [ClientDto].
      */
-    suspend fun findClientsByFirstName(firstName: String): List<ClientDto>
+    fun findClientsByFirstName(firstName: String): Flux<ClientDto>
 }

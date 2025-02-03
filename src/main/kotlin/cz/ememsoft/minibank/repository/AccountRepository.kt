@@ -1,6 +1,7 @@
 package cz.ememsoft.minibank.repository
 
 import cz.ememsoft.minibank.entity.AccountEntity
+import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.data.repository.reactive.ReactiveCrudRepository
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Flux
@@ -12,6 +13,6 @@ import reactor.core.publisher.Flux
  * account-related data in a reactive manner.
  */
 @Repository
-interface AccountRepository : ReactiveCrudRepository<AccountEntity, Long> {
+interface AccountRepository : R2dbcRepository<AccountEntity, Long> {
 
 }

@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.ResponseStatus
 import org.springframework.web.bind.annotation.RestController
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 
 private val logger = KotlinLogging.logger {}
 
@@ -42,7 +44,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getClient(@PathVariable id: Long): ClientDto {
+    suspend fun getClient(@PathVariable id: Long): Mono<ClientDto> {
         logger.info { "Fetching client with ID: $id" }
         return clientService.getClient(id)
     }
@@ -54,7 +56,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllClients(): List<ClientDto> {
+    suspend fun getAllClients(): Flux<ClientDto> {
         logger.info { "Fetching all clients" }
         return clientService.getAllClients()
     }
@@ -67,7 +69,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Long {
+    suspend fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<Long> {
         logger.info { "Creating new client: $createClientRequest" }
         val clientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.saveClient(clientDto)
@@ -85,7 +87,7 @@ class ClientController(
     suspend fun updateClient(
         @PathVariable id: Long,
         @RequestBody createClientRequest: CreateClientRequest,
-    ): ClientDto {
+    ): Mono<ClientDto> {
         logger.info { "Updating client with ID: $id" }
         val updatedClientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.updateClient(id, updatedClientDto)
@@ -111,7 +113,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-name/{firstName}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun findClientsByFirstName(@PathVariable firstName: String): List<ClientDto> {
+    suspend fun findClientsByFirstName(@PathVariable firstName: String): Flux<ClientDto> {
         logger.info { "Searching for clients with first name: $firstName" }
         return clientService.findClientsByFirstName(firstName)
     }
@@ -124,7 +126,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-email/{email}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun findClientByEmail(@PathVariable email: String): ClientDto? {
+    suspend fun findClientByEmail(@PathVariable email: String): Mono<ClientDto> {
         logger.info { "Searching for client with email: $email" }
         return clientService.findClientByEmail(email)
     }

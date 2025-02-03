@@ -31,7 +31,7 @@ class AccountController(private val accountService: AccountService, private val 
      */
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    fun getAllAccounts(): Flux<AccountDto> {
+    suspend fun getAllAccounts(): Flux<AccountDto> {
         logger.info("Fetching all accounts")
         return accountService.getAllAccounts()
             .doOnError { logger.error("Error fetching all accounts", it) }
@@ -45,7 +45,7 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Mono] emitting the [AccountDto] if found, or a not found response.
      */
     @GetMapping("/{id}")
-    fun getAccountById(@PathVariable id: Long): Mono<AccountDto> {
+    suspend fun getAccountById(@PathVariable id: Long): Mono<AccountDto> {
         logger.info("Fetching account with ID: $id")
         return accountService.getAccountById(id)
             .doOnError { logger.error("Error fetching account with ID: $id", it) }
@@ -58,7 +58,7 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Mono] emitting the created [AccountDto].
      */
     @PostMapping
-    fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<AccountDto> {
+    suspend fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<AccountDto> {
         logger.info("Creating new account")
         return accountService.createAccount(accountRequest)
             .doOnSuccess { logger.info("Account created: $it") }
@@ -73,7 +73,7 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Mono] emitting the updated [AccountDto] if found, or a not found response.
      */
     @PutMapping("/{id}")
-    fun updateAccount(
+    suspend fun updateAccount(
         @PathVariable id: Long,
         @RequestBody accountDto: AccountDto,
     ): Mono<AccountDto> {
@@ -88,7 +88,7 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Mono] indicating completion of the operation.
      */
     @DeleteMapping("/{id}")
-    fun deleteAccount(@PathVariable id: Long): Mono<Void> {
+    suspend fun deleteAccount(@PathVariable id: Long): Mono<Void> {
         logger.info("Deleting account with ID: $id")
         return accountService.deleteAccount(id)
             .doOnError { logger.error("Error deleting account with ID: $id", it) }
@@ -101,7 +101,7 @@ class AccountController(private val accountService: AccountService, private val 
      * @return A [Flux] emitting all [AccountDto] objects associated with the client.
      */
     @GetMapping("/client/{clientId}")
-    fun getAccountsByClientId(@PathVariable clientId: Long): Mono<AccountDto> {
+    suspend fun getAccountsByClientId(@PathVariable clientId: Long): Mono<AccountDto> {
         logger.info("Fetching accounts for client ID: $clientId")
         return accountService.getAccountsByClientId(clientId)
             .doOnError { logger.error("Error fetching accounts for client ID: $clientId", it) }
