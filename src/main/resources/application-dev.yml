@@ -21,4 +21,11 @@ spring:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: false
 server:
-  port: 8082
+  port: 8888
+logging:
+  level:
+    root: INFO
+    cz.ememsoft.minibank: DEBUG  # Set DEBUG for your package
+    org.springframework: WARN  # Reduce Spring logs to WARN
+    reactor: ERROR  # Reduce Reactor logs to ERROR
+

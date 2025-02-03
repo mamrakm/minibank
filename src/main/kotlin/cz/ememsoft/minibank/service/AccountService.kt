@@ -17,7 +17,7 @@ interface AccountService {
      *
      * @return A [Flux] emitting all [AccountEntity] objects.
      */
-    suspend fun getAllAccounts(): Flux<AccountDto>
+    fun getAllAccounts(): Flux<AccountDto>
 
     /**
      * Retrieves an account by its ID.
@@ -25,7 +25,7 @@ interface AccountService {
      * @param id The ID of the account to retrieve.
      * @return A [Mono] emitting the [AccountEntity] if found, or empty if not.
      */
-    suspend fun getAccountById(id: Long): Mono<AccountDto>
+    fun getAccountById(id: Long): Mono<AccountDto>
 
     /**
      * Creates a new account.
@@ -33,7 +33,7 @@ interface AccountService {
      * @param accountEntity The account details to create.
      * @return A [Mono] emitting the created [AccountEntity].
      */
-    suspend fun createAccount(accountRequest: CreateAccountRequest): Mono<AccountDto>
+    fun createAccount(accountRequest: CreateAccountRequest): Mono<AccountDto>
 
     /**
      * Updates an existing account.
@@ -42,7 +42,7 @@ interface AccountService {
      * @param accountEntity The updated account details.
      * @return A [Mono] emitting the updated [AccountEntity] if found, or empty if not.
      */
-    suspend fun updateAccount(id: Long, accountEntity: AccountEntity): Mono<AccountDto>
+    fun updateAccount(id: Long, accountEntity: AccountEntity): Mono<AccountDto>
 
     /**
      * Deletes an account by its ID.
@@ -50,7 +50,7 @@ interface AccountService {
      * @param id The ID of the account to delete.
      * @return A [Mono] indicating the completion of the operation.
      */
-    suspend fun deleteAccount(id: Long): Mono<Void>
+    fun deleteAccount(id: Long): Mono<Void>
 
     /**
      * Retrieves all accounts for a specific client ID.
@@ -58,5 +58,5 @@ interface AccountService {
      * @param clientId The ID of the client whose accounts are to be retrieved.
      * @return A [Flux] emitting all [AccountEntity] objects associated with the client.
      */
-    suspend fun getAccountsByClientId(clientId: Long): Mono<AccountDto>
+    fun getAccountsByClientId(clientId: Long): Mono<AccountDto>
 }
