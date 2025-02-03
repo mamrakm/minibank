@@ -44,7 +44,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getClient(@PathVariable id: Long): Mono<ClientDto> {
+    fun getClient(@PathVariable id: Long): Mono<ClientDto> {
         logger.info { "Fetching client with ID: $id" }
         return clientService.getClient(id)
     }
@@ -56,7 +56,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun getAllClients(): Flux<ClientDto> {
+    fun getAllClients(): Flux<ClientDto> {
         logger.info { "Fetching all clients" }
         return clientService.getAllClients()
     }
@@ -69,7 +69,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<Long> {
+    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<Long> {
         logger.info { "Creating new client: $createClientRequest" }
         val clientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.saveClient(clientDto)
@@ -84,7 +84,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun updateClient(
+    fun updateClient(
         @PathVariable id: Long,
         @RequestBody createClientRequest: CreateClientRequest,
     ): Mono<ClientDto> {
@@ -100,7 +100,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    suspend fun deleteClient(@PathVariable id: Long) {
+    fun deleteClient(@PathVariable id: Long) {
         logger.info { "Deleting client with ID: $id" }
         clientService.deleteClient(id)
     }
@@ -113,7 +113,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-name/{firstName}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun findClientsByFirstName(@PathVariable firstName: String): Flux<ClientDto> {
+    fun findClientsByFirstName(@PathVariable firstName: String): Flux<ClientDto> {
         logger.info { "Searching for clients with first name: $firstName" }
         return clientService.findClientsByFirstName(firstName)
     }
@@ -126,7 +126,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-email/{email}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    suspend fun findClientByEmail(@PathVariable email: String): Mono<ClientDto> {
+    fun findClientByEmail(@PathVariable email: String): Mono<ClientDto> {
         logger.info { "Searching for client with email: $email" }
         return clientService.findClientByEmail(email)
     }

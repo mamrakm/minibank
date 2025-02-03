@@ -26,6 +26,6 @@ logging:
   level:
     root: INFO
     cz.ememsoft.minibank: DEBUG  # Set DEBUG for your package
-    org.springframework: WARN  # Reduce Spring logs to WARN
+    org.springframework: DEBUG  # Reduce Spring logs to WARN
     reactor: ERROR  # Reduce Reactor logs to ERROR
 
