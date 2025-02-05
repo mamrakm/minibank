@@ -10,7 +10,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Import(TestcontainersConfiguration::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
-class MinibankApplicationTests(
+class ClientTests(
     @Autowired private val clientRepository: ClientRepository,
     @Autowired private val restTemplateBuilder: RestTemplateBuilder,
 ) {
