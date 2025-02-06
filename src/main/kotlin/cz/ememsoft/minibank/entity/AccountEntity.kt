@@ -14,13 +14,16 @@ import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 
 /**
- * Entity representing an account in the system.
+ * Entity representing a bank account in the system.
  *
- * This entity maps to the `account` table in the `bank` schema.
+ * This entity is mapped to the `account` table within the `bank` schema.
+ * Each account is associated with a specific client through a `@ManyToOne` relationship.
  *
- * @property id The unique identifier for the account.
- * @property clientEntity The client associated with this account.
- *                      This relationship is managed with a `@ManyToOne` association.
+ * @property id The unique identifier for the account, generated automatically.
+ * @property name The name assigned to the account. Cannot be null.
+ * @property clientEntity The client associated with this account. Cannot be null.
+ * @property balance The current balance of the account. Cannot be null.
+ * @property accountType The type of the account, represented as an [AccountTypeEnum]. Cannot be null.
  */
 @Entity
 @Table(name = "account", schema = "bank")
@@ -30,7 +33,7 @@ class AccountEntity(
     @Column(name = "account_id")
     val id: Long,
 
-    @Column(name = "account_name")
+    @Column(name = "account_name", nullable = false)
     @NotNull
     val name: String,
 
@@ -43,17 +46,16 @@ class AccountEntity(
     @NotNull
     val balance: BigDecimal,
 
-    @Column(name = "account_type")
+    @Column(name = "account_type", nullable = false)
     @NotNull
     val accountType: AccountTypeEnum,
-
-    ) {
+) {
 
     /**
      * Compares this [AccountEntity] with another object for equality.
      *
-     * Two [AccountEntity] objects are considered equal if their IDs and associated
-     * [ClientEntity] objects are identical.
+     * Two [AccountEntity] objects are considered equal if their `id` and associated
+     * [ClientEntity] instances are identical.
      *
      * @param other The object to compare with this entity.
      * @return `true` if the objects are equal, `false` otherwise.
@@ -71,9 +73,10 @@ class AccountEntity(
     /**
      * Computes the hash code for this [AccountEntity].
      *
-     * The hash code is based on the `id` and `clientEntity` properties.
+     * The hash code is derived from the `id` and `clientEntity` properties,
+     * ensuring that two equal entities produce the same hash code.
      *
-     * @return The hash code of this entity.
+     * @return The computed hash code of this entity.
      */
     override fun hashCode(): Int {
         var result = id.hashCode()

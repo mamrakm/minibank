@@ -14,6 +14,15 @@ import reactor.core.publisher.Mono
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * Service implementation for managing clients in a reactive manner.
+ *
+ * This service provides CRUD operations and search functionality
+ * for clients using a non-blocking, reactive approach with Project Reactor.
+ *
+ * @property clientRepository The repository responsible for client data operations.
+ * @property clientMapper The mapper responsible for converting between entity and DTO representations.
+ */
 @Service
 @Transactional
 class ClientServiceImpl(
@@ -46,14 +55,13 @@ class ClientServiceImpl(
     }
 
     /**
-     * Saves a new client to the database reactively.
+     * Saves a new client to the database reactively, ensuring no duplicates exist.
      *
      * @param clientDto The DTO containing client information to save.
      * @return A [Mono] emitting the ID of the saved client.
      */
     override fun saveClient(clientDto: ClientDto): Mono<Long> {
         logger.info { "Saving new client: $clientDto" }
-
         return clientRepository.findByEmail(clientDto.email)
             .flatMap {
                 Mono.error<Long>(DuplicateClientException("Client with email ${clientDto.email} already exists"))
@@ -76,12 +84,11 @@ class ClientServiceImpl(
      */
     override fun updateClient(id: Long, updatedClientDto: ClientDto): Mono<ClientDto> {
         logger.info { "Updating client with ID: $id" }
-
         return clientRepository.findById(id)
             .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
             .flatMap { existingClient ->
-                val updatedEntity = ClientEntity(  // Manually create a new instance
-                    id = existingClient.id,  // Preserve the existing ID
+                val updatedEntity = ClientEntity(
+                    id = existingClient.id,
                     firstName = updatedClientDto.firstName,
                     lastName = updatedClientDto.lastName,
                     email = updatedClientDto.email,
@@ -93,7 +100,6 @@ class ClientServiceImpl(
             .map { clientMapper.entityToDto(it) }
             .doOnSuccess { logger.info { "Client with ID $id updated successfully" } }
     }
-
 
     /**
      * Deletes a client by their ID reactively.

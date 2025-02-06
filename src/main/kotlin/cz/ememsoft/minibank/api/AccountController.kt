@@ -21,6 +21,15 @@ import reactor.core.publisher.Mono
 
 private val logger = KotlinLogging.logger {}
 
+/**
+ * REST controller for managing bank accounts.
+ *
+ * This controller provides endpoints for retrieving, creating, updating,
+ * and deleting accounts in a reactive manner.
+ *
+ * @property accountService The service responsible for handling account operations.
+ * @property accountMapper The mapper responsible for converting between DTOs and entities.
+ */
 @RestController
 @RequestMapping("/accounts")
 class AccountController(
@@ -45,7 +54,7 @@ class AccountController(
      * Retrieves an account by its ID.
      *
      * @param id The ID of the account to retrieve.
-     * @return A [Mono] emitting the [AccountDto] if found, or a not found response.
+     * @return A [Mono] emitting the [AccountDto] if found, or an error if not found.
      */
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getAccountById(@PathVariable id: Long): Mono<AccountDto> {
@@ -56,8 +65,8 @@ class AccountController(
 
     /**
      * Creates a new account.
-     *Ò
-     * @param accountEntity The account details to create.
+     *
+     * @param accountRequest The request object containing the account details.
      * @return A [Mono] emitting the created [AccountDto].
      */
     @ResponseStatus(HttpStatus.CREATED)
@@ -74,7 +83,7 @@ class AccountController(
      *
      * @param id The ID of the account to update.
      * @param accountDto The updated account details.
-     * @return A [Mono] emitting the updated [AccountDto] if found, or a not found response.
+     * @return A [Mono] emitting the updated [AccountDto] if found, or an error if not found.
      */
     @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updateAccount(
@@ -83,6 +92,8 @@ class AccountController(
     ): Mono<AccountDto> {
         logger.info { "Updating account with ID: $id" }
         return accountService.updateAccount(id, accountMapper.dtoToEntity(accountDto))
+            .doOnSuccess { logger.info { "Account with ID: $id updated successfully" } }
+            .doOnError { logger.error(it) { "Error updating account with ID: $id" } }
     }
 
     /**
@@ -95,6 +106,7 @@ class AccountController(
     fun deleteAccount(@PathVariable id: Long): Mono<Void> {
         logger.info { "Deleting account with ID: $id" }
         return accountService.deleteAccount(id)
+            .doOnSuccess { logger.info { "Account with ID: $id deleted successfully" } }
             .doOnError { logger.error(it) { "Error deleting account with ID: $id" } }
     }
 
@@ -102,12 +114,13 @@ class AccountController(
      * Retrieves all accounts for a specific client ID.
      *
      * @param clientId The ID of the client whose accounts are to be retrieved.
-     * @return A [Flux] emitting all [AccountDto] objects associated with the client.
+     * @return A [Mono] emitting all [AccountDto] objects associated with the client.
      */
     @GetMapping("/client/{clientId}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getAccountsByClientId(@PathVariable clientId: Long): Mono<AccountDto> {
         logger.info { "Fetching accounts for client ID: $clientId" }
         return accountService.getAccountsByClientId(clientId)
+            .doOnSuccess { logger.info { "Accounts for client ID: $clientId fetched successfully" } }
             .doOnError { logger.error(it) { "Error fetching accounts for client ID: $clientId" } }
     }
 }
