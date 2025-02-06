@@ -47,6 +47,8 @@ class ClientController(
     fun getClient(@PathVariable id: Long): Mono<ClientDto> {
         logger.info { "Fetching client with ID: $id" }
         return clientService.getClient(id)
+            .doOnSuccess { logger.debug { "Successfully fetched client: $it" } }
+            .doOnError { logger.error(it) { "Error fetching client with ID: $id" } }
     }
 
     /**
@@ -59,6 +61,8 @@ class ClientController(
     fun getAllClients(): Flux<ClientDto> {
         logger.info { "Fetching all clients" }
         return clientService.getAllClients()
+            .doOnComplete { logger.debug { "Successfully fetched all clients" } }
+            .doOnError { logger.error(it) { "Error fetching all clients" } }
     }
 
     /**
@@ -73,6 +77,8 @@ class ClientController(
         logger.info { "Creating new client: $createClientRequest" }
         val clientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.saveClient(clientDto)
+            .doOnSuccess { logger.info { "Successfully created client with ID: $it" } }
+            .doOnError { logger.error(it) { "Error creating client" } }
     }
 
     /**
@@ -91,6 +97,8 @@ class ClientController(
         logger.info { "Updating client with ID: $id" }
         val updatedClientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.updateClient(id, updatedClientDto)
+            .doOnSuccess { logger.info { "Successfully updated client with ID: $id" } }
+            .doOnError { logger.error(it) { "Error updating client with ID: $id" } }
     }
 
     /**
@@ -103,6 +111,8 @@ class ClientController(
     fun deleteClient(@PathVariable id: Long) {
         logger.info { "Deleting client with ID: $id" }
         clientService.deleteClient(id)
+            .doOnSuccess { logger.info { "Successfully deleted client with ID: $id" } }
+            .doOnError { logger.error(it) { "Error deleting client with ID: $id" } }
     }
 
     /**
@@ -116,6 +126,8 @@ class ClientController(
     fun findClientsByFirstName(@PathVariable firstName: String): Flux<ClientDto> {
         logger.info { "Searching for clients with first name: $firstName" }
         return clientService.findClientsByFirstName(firstName)
+            .doOnComplete { logger.info { "Successfully completed search for clients with first name: $firstName" } }
+            .doOnError { logger.error(it) { "Error searching for clients with first name: $firstName" } }
     }
 
     /**
@@ -129,5 +141,7 @@ class ClientController(
     fun findClientByEmail(@PathVariable email: String): Mono<ClientDto> {
         logger.info { "Searching for client with email: $email" }
         return clientService.findClientByEmail(email)
+            .doOnSuccess { logger.info { "Successfully found client with email: $email" } }
+            .doOnError { logger.error(it) { "Error searching for client with email: $email" } }
     }
 }
