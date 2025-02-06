@@ -38,6 +38,12 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webflux")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("io.projectreactor.kotlin:reactor-kotlin-extensions")
+    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
+    testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+    implementation("org.springframework.boot:spring-boot-starter-data-r2dbc")
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.3") {
         exclude("jakarta.xml.bind", "jakarta.xml.bind-api")
         exclude("com.fasterxml.jackson.core", "jackson-annotations")
@@ -46,7 +52,8 @@ dependencies {
     implementation("io.projectreactor:reactor-core:3.7.2")
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
-    implementation("io.r2dbc:r2dbc-postgresql:0.8.13.RELEASE")
+    implementation("org.postgresql:r2dbc-postgresql:1.0.7.RELEASE")
+
     implementation("org.liquibase:liquibase-core")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
     implementation("org.mapstruct:mapstruct:1.6.3")
@@ -54,14 +61,12 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-core:6.1.1.Final")
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
-    developmentOnly("org.springframework.boot:spring-boot-devtools")
     runtimeOnly("org.postgresql:postgresql")
-    annotationProcessor("org.springframework.boot:spring-boot-configuration-processor")
-    testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.boot:spring-boot-testcontainers")
+
+    implementation("org.testcontainers:r2dbc:1.20.4")   // ✅ Match testcontainers version
+    implementation("org.testcontainers:postgresql:1.20.4") // ✅ Ensure matching versions
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-    testImplementation("org.testcontainers:junit-jupiter")
-    testImplementation("org.testcontainers:postgresql")
+    testImplementation("org.testcontainers:junit-jupiter:1.20.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
 
