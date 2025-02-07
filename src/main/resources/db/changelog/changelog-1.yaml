@@ -14,13 +14,12 @@ databaseChangeLog:
         - createTable:
             columns:
               - column:
-                  autoIncrement: true
                   constraints:
                     nullable: false
                     primaryKey: true
                     primaryKeyName: pk_client
                   name: id
-                  type: BIGSERIAL
+                  type: BIGINT
               - column:
                   name: first_name
                   type: VARCHAR(255)
@@ -38,6 +37,16 @@ databaseChangeLog:
                   type: VARCHAR(255)
             schemaName: bank
             tableName: client
+        - createSequence:
+            sequenceName: client_id_seq
+            schemaName: bank
+            startValue: 1
+            incrementBy: 1
+        - addDefaultValue:
+            columnName: id
+            tableName: client
+            schemaName: bank
+            defaultValueSequenceNext: client_id_seq
   - changeSet:
       id: 1738928423222-1
       author: miroslav.mamrak
@@ -46,13 +55,12 @@ databaseChangeLog:
         - createTable:
             columns:
               - column:
-                  autoIncrement: true
                   constraints:
                     nullable: false
                     primaryKey: true
                     primaryKeyName: pk_account
                   name: id
-                  type: BIGSERIAL
+                  type: BIGINT
               - column:
                   constraints:
                     nullable: false
@@ -73,9 +81,18 @@ databaseChangeLog:
                     nullable: false
                   name: account_type
                   type: SMALLINT
-              -
             schemaName: bank
             tableName: account
+        - createSequence:
+            sequenceName: account_id_seq
+            schemaName: bank
+            startValue: 1
+            incrementBy: 1
+        - addDefaultValue:
+            columnName: id
+            tableName: account
+            schemaName: bank
+            defaultValueSequenceNext: account_id_seq
   - changeSet:
       id: 1738928423222-2
       author: miroslav.mamrak
