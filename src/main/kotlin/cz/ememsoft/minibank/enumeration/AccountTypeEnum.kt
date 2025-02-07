@@ -7,7 +7,7 @@
  * 1/24/25, 12:19 AM
  */
 
-package cz.ememsoft.minibank.enum
+package cz.ememsoft.minibank.enumeration
 
 import java.io.Serializable
 

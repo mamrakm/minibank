@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.entity
 
-import cz.ememsoft.minibank.enum.AccountTypeEnum
+import cz.ememsoft.minibank.enumeration.AccountTypeEnum
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
@@ -22,19 +22,19 @@ import java.math.BigDecimal
 data class AccountEntity(
     @Id
     @Column("account_id")
-    var id: Long,
+    val id: Long,
 
     @Column("account_name")
-    var name: String,
+    val name: String,
 
     @Column("client_id")
-    var clientId: Long,
+    val clientId: Long,
 
     @Column("balance")
-    var balance: BigDecimal,
+    val balance: BigDecimal,
 
     @Column("account_type")
-    var accountType: AccountTypeEnum,
+    val accountType: AccountTypeEnum,
 )
 
 
@@ -45,6 +45,7 @@ import cz.ememsoft.minibank.enum.AccountTypeEnum
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -81,7 +82,7 @@ class AccountEntity(
     val name: String,
 
     @NotNull(message = "Client must be provided")
-    @ManyToOne(cascade = [CascadeType.REFRESH], optional = false)
+    @ManyToOne(cascade = [CascadeType.REFRESH], optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "client_id", nullable = false)
     val clientEntity: ClientEntity,
 

@@ -2,7 +2,7 @@ package cz.ememsoft.minibank.repository
 
 import cz.ememsoft.minibank.entity.ClientEntity
 import org.springframework.data.jpa.repository.JpaRepository
-import org.springframework.data.repository.reactive.ReactiveCrudRepository
+import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.stereotype.Repository
 import reactor.core.publisher.Mono
 
@@ -13,7 +13,7 @@ import reactor.core.publisher.Mono
  * It extends [JpaRepository] to leverage Spring Data JPA functionalities.
  */
 @Repository
-interface ClientRepository : ReactiveCrudRepository<ClientEntity, Long> {
+interface ClientRepository : R2dbcRepository<ClientEntity, Long> {
 
     /**
      * Finds a client by their email address.

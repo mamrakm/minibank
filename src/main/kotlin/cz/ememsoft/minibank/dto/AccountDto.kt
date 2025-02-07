@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.dto
 
-import cz.ememsoft.minibank.enum.AccountTypeEnum
+import cz.ememsoft.minibank.enumeration.AccountTypeEnum
 import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 

@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.mapper
 
+import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import org.mapstruct.Mapper
@@ -33,4 +34,6 @@ interface AccountMapper {
      */
 
     fun dtoToEntity(accountDto: AccountDto): AccountEntity
+
+    fun requestToEntity(createAccountRequest: CreateAccountRequest): AccountEntity
 }

@@ -28,23 +28,23 @@ data class ClientEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    @Column(name = "client_id")
-    @Column("client_id")
-    var id: Long,
+    @Column("id")
+    val id: Long,
 
     @Column("first_name")
     @NotNull
 //    @Column(name = "first_name", nullable = false)
-    var firstName: String,
+    val firstName: String,
 
     @Column("last_name")
     @NotNull
 //    @Column(name = "last_name", nullable = false)
-    var lastName: String,
+    val lastName: String,
 
     @Column("email")
     @Email(message = "Invalid email")
 //    @Column(name = "email", unique = true, nullable = false)
-    var email: String,
+    val email: String,
 
     @Pattern(
         regexp = "^\\+?[1-9]\\d{1,14}\$",
@@ -53,54 +53,17 @@ data class ClientEntity(
 
     @Column("phone")
 //    @Column(name = "phone", nullable = false)
-    var phone: String,
+    val phone: String,
 
     @Column("address")
 //    @Column(name = "address", nullable = false)
-    var address: String,
+    val address: String,
 
-    @Column("account")
 //    @Column(name = "account", nullable = true)
 //    @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
     @MappedCollection(idColumn = "client_id")
-    var accountEntities: MutableSet<AccountEntity> = mutableSetOf()
+    val accountEntities: MutableSet<AccountEntity> = mutableSetOf()
 ) {
-
-    /**
-     * Checks equality between two `ClientEntity` objects based on their properties.
-     *
-     * @param other The object to compare with.
-     * @return `true` if the objects are equal, `false` otherwise.
-     */
-//    override fun equals(other: Any?): Boolean {
-//        if (this === other) return true
-//        if (other !is ClientEntity) return false
-//
-//        if (id != other.id) return false
-//        if (firstName != other.firstName) return false
-//        if (lastName != other.lastName) return false
-//        if (email != other.email) return false
-//        if (phone != other.phone) return false
-//        if (address != other.address) return false
-//
-//        return true
-//    }
-//
-//    /**
-//     * Generates a hash code for the `ClientEntity` object.
-//     *
-//     * @return The hash code based on the object's properties.
-//     */
-//    override fun hashCode(): Int {
-//        var result = id.hashCode()
-//        result = 31 * result + firstName.hashCode()
-//        result = 31 * result + lastName.hashCode()
-//        result = 31 * result + email.hashCode()
-//        result = 31 * result + phone.hashCode()
-//        result = 31 * result + address.hashCode()
-//        return result
-//    }
-
     /**
      * Returns a string representation of the `ClientEntity` object.
      *

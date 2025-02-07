@@ -53,6 +53,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
     implementation("org.postgresql:r2dbc-postgresql:1.0.7.RELEASE")
+    runtimeOnly("org.postgresql:postgresql")
+
 
     implementation("org.liquibase:liquibase-core")
     implementation("io.github.oshai:kotlin-logging-jvm:7.0.3")
@@ -61,10 +63,9 @@ dependencies {
     implementation("org.hibernate.orm:hibernate-core:6.1.1.Final")
     kapt("org.mapstruct:mapstruct-processor:1.6.3")
     annotationProcessor("org.mapstruct:mapstruct-processor:1.6.3")
-    runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.testcontainers:r2dbc:1.20.4")   // ✅ Match testcontainers version
-    implementation("org.testcontainers:postgresql:1.20.4") // ✅ Ensure matching versions
+    testImplementation("org.testcontainers:r2dbc:1.20.4")   // ✅ Match testcontainers version
+    testImplementation("org.testcontainers:postgresql:1.20.4") // ✅ Ensure matching versions
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
     testImplementation("org.testcontainers:junit-jupiter:1.20.4")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
