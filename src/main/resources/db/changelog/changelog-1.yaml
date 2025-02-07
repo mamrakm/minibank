@@ -1,0 +1,81 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1738928423201-1
+      author: miroslav.mamrak
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_client
+                  name: id
+                  type: BIGINT
+              - column:
+                  name: first_name
+                  type: VARCHAR(255)
+              - column:
+                  name: last_name
+                  type: VARCHAR(255)
+              - column:
+                  name: email
+                  type: VARCHAR(255)
+              - column:
+                  name: phone
+                  type: VARCHAR(255)
+              - column:
+                  name: address
+                  type: VARCHAR(255)
+            tableName: client
+  - changeSet:
+      id: 1738928423222-1
+      author: miroslav.mamrak
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - createTable:
+            columns:
+              - column:
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_account
+                  name: account_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: account_name
+                  type: VARCHAR(255)
+              - column:
+                  constraints:
+                    nullable: false
+                  name: client_id
+                  type: BIGINT
+              - column:
+                  constraints:
+                    nullable: false
+                  name: balance
+                  type: DECIMAL
+              - column:
+                  constraints:
+                    nullable: false
+                  name: account_type
+                  type: SMALLINT
+            schemaName: bank
+            tableName: account
+  - changeSet:
+      id: 1738928423222-2
+      author: miroslav.mamrak
+      objectQuotingStrategy: QUOTE_ONLY_RESERVED_WORDS
+      changes:
+        - addForeignKeyConstraint:
+            baseColumnNames: client_id
+            baseTableName: account
+            baseTableSchemaName: bank
+            constraintName: FK_ACCOUNT_ON_CLIENT
+            referencedColumnNames: id
+            referencedTableName: client

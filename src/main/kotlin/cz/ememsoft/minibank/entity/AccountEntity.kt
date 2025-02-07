@@ -1,6 +1,47 @@
 package cz.ememsoft.minibank.entity
 
 import cz.ememsoft.minibank.enum.AccountTypeEnum
+import org.springframework.data.annotation.Id
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.Table
+import java.math.BigDecimal
+
+/** R2DBC Entity
+ * Entity representing a bank account in the system.
+ *
+ * This entity is mapped to the `account` table within the `bank` schema.
+ * Each account is associated with a specific client through a Many-to-One relationship.
+ *
+ * @property id The unique identifier for the account.
+ * @property name The name assigned to the account. Cannot be null.
+ * @property clientId The ID of the client associated with this account. Cannot be null.
+ * @property balance The current balance of the account. Cannot be null.
+ * @property accountType The type of the account, represented as an [AccountTypeEnum]. Cannot be null.
+ */
+@Table("account")
+class AccountEntity(
+    @Id
+    @Column("account_id")
+    val id: Long,
+
+    @Column("account_name")
+    val name: String,
+
+    @Column("client_id")
+    val clientId: Long,
+
+    @Column("balance")
+    val balance: BigDecimal,
+
+    @Column("account_type")
+    val accountType: AccountTypeEnum,
+)
+
+
+/* JPA Entity
+package cz.ememsoft.minibank.entity
+
+import cz.ememsoft.minibank.enum.AccountTypeEnum
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -13,6 +54,7 @@ import jakarta.persistence.Table
 import jakarta.validation.constraints.NotNull
 import java.math.BigDecimal
 
+*/
 /**
  * Entity representing a bank account in the system.
  *
@@ -24,7 +66,8 @@ import java.math.BigDecimal
  * @property clientEntity The client associated with this account. Cannot be null.
  * @property balance The current balance of the account. Cannot be null.
  * @property accountType The type of the account, represented as an [AccountTypeEnum]. Cannot be null.
- */
+ *//*
+
 @Entity
 @Table(name = "account", schema = "bank")
 class AccountEntity(
@@ -51,15 +94,17 @@ class AccountEntity(
     val accountType: AccountTypeEnum,
 ) {
 
-    /**
-     * Compares this [AccountEntity] with another object for equality.
-     *
-     * Two [AccountEntity] objects are considered equal if their `id` and associated
-     * [ClientEntity] instances are identical.
-     *
-     * @param other The object to compare with this entity.
-     * @return `true` if the objects are equal, `false` otherwise.
-     */
+    */
+/**
+ * Compares this [AccountEntity] with another object for equality.
+ *
+ * Two [AccountEntity] objects are considered equal if their `id` and associated
+ * [ClientEntity] instances are identical.
+ *
+ * @param other The object to compare with this entity.
+ * @return `true` if the objects are equal, `false` otherwise.
+ *//*
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is AccountEntity) return false
@@ -70,17 +115,20 @@ class AccountEntity(
         return true
     }
 
-    /**
-     * Computes the hash code for this [AccountEntity].
-     *
-     * The hash code is derived from the `id` and `clientEntity` properties,
-     * ensuring that two equal entities produce the same hash code.
-     *
-     * @return The computed hash code of this entity.
-     */
+    */
+/**
+ * Computes the hash code for this [AccountEntity].
+ *
+ * The hash code is derived from the `id` and `clientEntity` properties,
+ * ensuring that two equal entities produce the same hash code.
+ *
+ * @return The computed hash code of this entity.
+ *//*
+
     override fun hashCode(): Int {
         var result = id.hashCode()
         result = 31 * result + clientEntity.hashCode()
         return result
     }
 }
+*/

@@ -1,8 +1,9 @@
 package cz.ememsoft.minibank.dto
 
-import cz.ememsoft.minibank.entity.ClientEntity
+import cz.ememsoft.minibank.enum.AccountTypeEnum
 import jakarta.validation.constraints.NotNull
 import java.io.Serializable
+import java.math.BigDecimal
 
 /**
  * Data Transfer Object (DTO) for representing an account.
@@ -11,10 +12,23 @@ import java.io.Serializable
  * It maps to the {@link cz.ememsoft.minibank.entity.AccountEntity} entity.
  *
  * @property id The unique identifier for the account.
- * @property clientEntity The client associated with this account. This field is mandatory.
+ * @property name The name of the account.
+ * @property clientId The ID of the client associated with this account. This field is mandatory.
+ * @property balance The current balance of the account.
+ * @property accountType The type of the account, represented as an [AccountTypeEnum].
  */
 data class AccountDto(
     val id: Long,
-    @NotNull(message = "clientEntity must not be null")
-    val clientEntity: ClientEntity
+
+    @NotNull(message = "Account name must not be null")
+    val name: String,
+
+    @NotNull(message = "Client ID must not be null")
+    val clientId: Long,
+
+    @NotNull(message = "Balance must not be null")
+    val balance: BigDecimal,
+
+    @NotNull(message = "Account type must not be null")
+    val accountType: AccountTypeEnum
 ) : Serializable

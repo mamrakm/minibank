@@ -1,18 +1,17 @@
 package cz.ememsoft.minibank.entity
 
-import jakarta.persistence.CascadeType
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
-import jakarta.persistence.OneToMany
-import jakarta.persistence.Table
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
+import org.springframework.data.relational.core.mapping.Column
+import org.springframework.data.relational.core.mapping.MappedCollection
+import org.springframework.data.relational.core.mapping.Table
 
-/**
+/** R2DBC Entity
  * Entity representing a client in the system.
  *
  * This entity maps to the "client" table in the "bank" schema.
@@ -24,39 +23,48 @@ import jakarta.validation.constraints.Pattern
  * @property phone The phone number of the client. This field is required and must match a valid phone number format.
  * @property address The address of the client. This field is required.
  */
-@Entity
+@Entity(name = "client")
 @Table(name = "client", schema = "bank")
 class ClientEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "client_id")
+//    @Column(name = "client_id")
+    @Column("client_id")
     val id: Long,
 
+    @Column("first_name")
     @NotNull
-    @Column(name = "first_name", nullable = false)
+//    @Column(name = "first_name", nullable = false)
     val firstName: String,
 
+    @Column("last_name")
     @NotNull
-    @Column(name = "last_name", nullable = false)
+//    @Column(name = "last_name", nullable = false)
     val lastName: String,
 
+    @Column("email")
     @Email(message = "Invalid email")
-    @Column(name = "email", unique = true, nullable = false)
+//    @Column(name = "email", unique = true, nullable = false)
     val email: String,
 
     @Pattern(
         regexp = "^\\+?[1-9]\\d{1,14}\$",
         message = "Invalid phone number"
     )
-    @Column(name = "phone", nullable = false)
+
+    @Column("phone")
+//    @Column(name = "phone", nullable = false)
     val phone: String,
 
-    @Column(name = "address", nullable = false)
+    @Column("address")
+//    @Column(name = "address", nullable = false)
     val address: String,
 
-    @Column(name = "account", nullable = true)
-    @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
-    val accountEntities: MutableSet<AccountEntity>? = mutableSetOf()
+    @Column("account")
+//    @Column(name = "account", nullable = true)
+//    @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
+    @MappedCollection(idColumn = "client_id")
+    val accountEntities: Set<AccountEntity> = emptySet()
 ) {
 
     /**
@@ -102,6 +110,4 @@ class ClientEntity(
     override fun toString(): String {
         return "ClientEntity(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
     }
-
-
 }

@@ -73,21 +73,23 @@ class AccountServiceImpl(private val accountRepository: AccountRepository, priva
      * @param accountEntity The updated account entity.
      * @return A [Mono] emitting the updated [AccountDto], or an error if the account is not found.
      */
+
     override fun updateAccount(id: Long, accountEntity: AccountEntity): Mono<AccountDto> {
-        logger.info("Updating account with ID: $id")
+        logger.info("Updating account with ID: \$id")
         return accountRepository.findById(id)
-            .switchIfEmpty(Mono.error(AccountNotFoundException("Account with ID $id not found")))
+            .switchIfEmpty(Mono.error(AccountNotFoundException("Account with ID \$id not found")))
             .flatMap { existingAccount ->
                 val updatedAccount = AccountEntity(
                     id = existingAccount.id,
-                    name = existingAccount.name,
-                    balance = existingAccount.balance,
-                    clientEntity = existingAccount.clientEntity,
-                    accountType = existingAccount.accountType
+                    name = accountEntity.name,
+                    balance = accountEntity.balance,
+                    clientId = existingAccount.clientId,
+                    accountType = accountEntity.accountType
                 )
                 accountRepository.save(updatedAccount).map { accountMapper.entityToDto(it) }
-            }.doOnSuccess { logger.info("Account updated: $id") }
-            .doOnError { logger.error("Error updating account with ID: $id", it) }
+            }
+            .doOnSuccess { logger.info("Account updated: \$id") }
+            .doOnError { logger.error("Error updating account with ID: \$id", it) }
     }
 
     /**
