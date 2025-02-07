@@ -20,7 +20,7 @@ databaseChangeLog:
                     primaryKey: true
                     primaryKeyName: pk_client
                   name: id
-                  type: BIGINT
+                  type: BIGSERIAL
               - column:
                   name: first_name
                   type: VARCHAR(255)
@@ -51,8 +51,8 @@ databaseChangeLog:
                     nullable: false
                     primaryKey: true
                     primaryKeyName: pk_account
-                  name: account_id
-                  type: BIGINT
+                  name: id
+                  type: BIGSERIAL
               - column:
                   constraints:
                     nullable: false

@@ -1,13 +1,10 @@
 package cz.ememsoft.minibank.entity
 
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 
 /** R2DBC Entity
@@ -26,24 +23,19 @@ import org.springframework.data.relational.core.mapping.Table
 @Table(name = "client", schema = "bank")
 data class ClientEntity(
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-//    @Column(name = "client_id")
     @Column("id")
     val id: Long,
 
     @Column("first_name")
     @NotNull
-//    @Column(name = "first_name", nullable = false)
     val firstName: String,
 
     @Column("last_name")
     @NotNull
-//    @Column(name = "last_name", nullable = false)
     val lastName: String,
 
     @Column("email")
     @Email(message = "Invalid email")
-//    @Column(name = "email", unique = true, nullable = false)
     val email: String,
 
     @Pattern(
@@ -52,24 +44,8 @@ data class ClientEntity(
     )
 
     @Column("phone")
-//    @Column(name = "phone", nullable = false)
     val phone: String,
 
     @Column("address")
-//    @Column(name = "address", nullable = false)
     val address: String,
-
-//    @Column(name = "account", nullable = true)
-//    @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
-    @MappedCollection(idColumn = "client_id")
-    val accountEntities: MutableSet<AccountEntity> = mutableSetOf()
-) {
-    /**
-     * Returns a string representation of the `ClientEntity` object.
-     *
-     * @return A string containing the values of the entity's properties.
-     */
-    override fun toString(): String {
-        return "ClientEntity(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
-    }
-}
+)
