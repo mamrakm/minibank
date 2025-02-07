@@ -2,7 +2,6 @@ package cz.ememsoft.minibank.dto
 
 import cz.ememsoft.minibank.enum.AccountTypeEnum
 import jakarta.validation.constraints.NotNull
-import java.io.Serializable
 import java.math.BigDecimal
 
 /**
@@ -31,4 +30,8 @@ data class AccountDto(
 
     @NotNull(message = "Account type must not be null")
     val accountType: AccountTypeEnum
-) : Serializable
+) {
+    override fun toString(): String {
+        return "AccountDto(id=$id, name='$name', clientId=$clientId, balance=$balance, accountType=$accountType)"
+    }
+}

@@ -1,6 +1,5 @@
 package cz.ememsoft.minibank.entity
 
-import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -23,29 +22,29 @@ import org.springframework.data.relational.core.mapping.Table
  * @property phone The phone number of the client. This field is required and must match a valid phone number format.
  * @property address The address of the client. This field is required.
  */
-@Entity(name = "client")
+//@Entity(name = "client")
 @Table(name = "client", schema = "bank")
-class ClientEntity(
+data class ClientEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
 //    @Column(name = "client_id")
     @Column("client_id")
-    val id: Long,
+    var id: Long,
 
     @Column("first_name")
     @NotNull
 //    @Column(name = "first_name", nullable = false)
-    val firstName: String,
+    var firstName: String,
 
     @Column("last_name")
     @NotNull
 //    @Column(name = "last_name", nullable = false)
-    val lastName: String,
+    var lastName: String,
 
     @Column("email")
     @Email(message = "Invalid email")
 //    @Column(name = "email", unique = true, nullable = false)
-    val email: String,
+    var email: String,
 
     @Pattern(
         regexp = "^\\+?[1-9]\\d{1,14}\$",
@@ -54,17 +53,17 @@ class ClientEntity(
 
     @Column("phone")
 //    @Column(name = "phone", nullable = false)
-    val phone: String,
+    var phone: String,
 
     @Column("address")
 //    @Column(name = "address", nullable = false)
-    val address: String,
+    var address: String,
 
     @Column("account")
 //    @Column(name = "account", nullable = true)
 //    @OneToMany(mappedBy = "clientEntity", cascade = [CascadeType.DETACH], orphanRemoval = true)
     @MappedCollection(idColumn = "client_id")
-    val accountEntities: Set<AccountEntity> = emptySet()
+    var accountEntities: MutableSet<AccountEntity> = mutableSetOf()
 ) {
 
     /**
@@ -73,34 +72,34 @@ class ClientEntity(
      * @param other The object to compare with.
      * @return `true` if the objects are equal, `false` otherwise.
      */
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is ClientEntity) return false
-
-        if (id != other.id) return false
-        if (firstName != other.firstName) return false
-        if (lastName != other.lastName) return false
-        if (email != other.email) return false
-        if (phone != other.phone) return false
-        if (address != other.address) return false
-
-        return true
-    }
-
-    /**
-     * Generates a hash code for the `ClientEntity` object.
-     *
-     * @return The hash code based on the object's properties.
-     */
-    override fun hashCode(): Int {
-        var result = id.hashCode()
-        result = 31 * result + firstName.hashCode()
-        result = 31 * result + lastName.hashCode()
-        result = 31 * result + email.hashCode()
-        result = 31 * result + phone.hashCode()
-        result = 31 * result + address.hashCode()
-        return result
-    }
+//    override fun equals(other: Any?): Boolean {
+//        if (this === other) return true
+//        if (other !is ClientEntity) return false
+//
+//        if (id != other.id) return false
+//        if (firstName != other.firstName) return false
+//        if (lastName != other.lastName) return false
+//        if (email != other.email) return false
+//        if (phone != other.phone) return false
+//        if (address != other.address) return false
+//
+//        return true
+//    }
+//
+//    /**
+//     * Generates a hash code for the `ClientEntity` object.
+//     *
+//     * @return The hash code based on the object's properties.
+//     */
+//    override fun hashCode(): Int {
+//        var result = id.hashCode()
+//        result = 31 * result + firstName.hashCode()
+//        result = 31 * result + lastName.hashCode()
+//        result = 31 * result + email.hashCode()
+//        result = 31 * result + phone.hashCode()
+//        result = 31 * result + address.hashCode()
+//        return result
+//    }
 
     /**
      * Returns a string representation of the `ClientEntity` object.

@@ -1,5 +1,7 @@
 package cz.ememsoft.minibank.dto
 
+import jakarta.validation.constraints.NotNull
+
 /**
  * Data Transfer Object (DTO) for representing client information.
  *
@@ -12,10 +14,15 @@ package cz.ememsoft.minibank.dto
  * @property address The address of the client.
  */
 data class ClientDto(
+    @NotNull
     val firstName: String,
+    @NotNull
     val lastName: String,
+    @NotNull
     val email: String,
+    @NotNull
     val phone: String,
+    @NotNull
     val address: String,
 ) {
     /**

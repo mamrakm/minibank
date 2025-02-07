@@ -18,23 +18,23 @@ import java.math.BigDecimal
  * @property balance The current balance of the account. Cannot be null.
  * @property accountType The type of the account, represented as an [AccountTypeEnum]. Cannot be null.
  */
-@Table("account")
-class AccountEntity(
+@Table(name = "account", schema = "bank")
+data class AccountEntity(
     @Id
     @Column("account_id")
-    val id: Long,
+    var id: Long,
 
     @Column("account_name")
-    val name: String,
+    var name: String,
 
     @Column("client_id")
-    val clientId: Long,
+    var clientId: Long,
 
     @Column("balance")
-    val balance: BigDecimal,
+    var balance: BigDecimal,
 
     @Column("account_type")
-    val accountType: AccountTypeEnum,
+    var accountType: AccountTypeEnum,
 )
 
 

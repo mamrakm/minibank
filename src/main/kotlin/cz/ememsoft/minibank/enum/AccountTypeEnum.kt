@@ -9,7 +9,9 @@
 
 package cz.ememsoft.minibank.enum
 
-enum class AccountTypeEnum {
+import java.io.Serializable
+
+enum class AccountTypeEnum : Serializable {
     CLASSIC,
     SAVINGS,
     INVESTMENT

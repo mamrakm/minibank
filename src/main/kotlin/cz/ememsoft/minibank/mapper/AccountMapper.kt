@@ -3,7 +3,6 @@ package cz.ememsoft.minibank.mapper
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import org.mapstruct.Mapper
-import org.mapstruct.Mapping
 import org.mapstruct.MappingConstants
 import org.mapstruct.ReportingPolicy
 
@@ -23,11 +22,7 @@ interface AccountMapper {
      * @param accountEntity The entity to be mapped.
      * @return The mapped [AccountDto].
      */
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "name", target = "name")
-    @Mapping(source = "clientId", target = "clientId")
-    @Mapping(source = "balance", target = "balance")
-    @Mapping(source = "accountType", target = "accountType")
+
     fun entityToDto(accountEntity: AccountEntity): AccountDto
 
     /**
@@ -36,10 +31,6 @@ interface AccountMapper {
      * @param accountDto The DTO to be mapped.
      * @return The mapped [AccountEntity].
      */
-    @Mapping(source = "id", target = "id")
-    @Mapping(source = "name", target = "name")
-    @Mapping(source = "clientId", target = "clientId")
-    @Mapping(source = "balance", target = "balance")
-    @Mapping(source = "accountType", target = "accountType")
+
     fun dtoToEntity(accountDto: AccountDto): AccountEntity
 }
