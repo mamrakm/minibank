@@ -1,27 +1,38 @@
--- Create schema 'bank' if it doesn't already exist
+-- Ensure the "bank" schema exists
 CREATE SCHEMA IF NOT EXISTS bank;
 
--- Create the 'client' table to store client details
-CREATE TABLE bank.client
+-- ===========================================
+-- Create "client" table with an auto-incrementing ID
+-- ===========================================
+CREATE SEQUENCE IF NOT EXISTS bank.client_id_seq START WITH 1 INCREMENT BY 1;
+
+CREATE TABLE IF NOT EXISTS bank.client
 (
-    id         BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unique ID for each client
-    first_name VARCHAR(255)        NOT NULL,                    -- First name of the client
-    last_name  VARCHAR(255)        NOT NULL,                    -- Last name of the client
-    email      VARCHAR(255) UNIQUE NOT NULL,                    -- Email must be unique and not null
-    phone      VARCHAR(255)        NOT NULL,                    -- Phone number of the client
-    address    VARCHAR(255)        NOT NULL                     -- Address of the client
+    id         BIGINT PRIMARY KEY DEFAULT nextval('bank.client_id_seq'),
+    first_name VARCHAR(255)        NOT NULL,
+    last_name  VARCHAR(255)        NOT NULL,
+    email      VARCHAR(255) UNIQUE NOT NULL,
+    phone      VARCHAR(255),
+    address    VARCHAR(255)
 );
 
--- Create the 'account' table to store client accounts
-CREATE TABLE bank.account
-(
-    id           BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY, -- Unique ID for each account
-    account_name VARCHAR(255)   NOT NULL,                         -- Name of the account
-    client_id    BIGINT         NOT NULL,                         -- Foreign key linking account to a client
-    balance      DECIMAL(19, 2) NOT NULL,                         -- Account balance (stores up to 19 digits with 2 decimal places)
-    account_type SMALLINT       NOT NULL,                         -- Account type (e.g., savings, checking)
+-- ===========================================
+-- Create "account" table with an auto-incrementing ID
+-- ===========================================
+CREATE SEQUENCE IF NOT EXISTS bank.account_id_seq START WITH 1 INCREMENT BY 1;
 
-    -- Foreign key constraint to enforce relationship with 'client' table
-    CONSTRAINT fk_account_on_client FOREIGN KEY (client_id)
-        REFERENCES bank.client (id) ON DELETE CASCADE
+CREATE TABLE IF NOT EXISTS bank.account
+(
+    id           BIGINT PRIMARY KEY DEFAULT nextval('bank.account_id_seq'),
+    account_name VARCHAR(255) NOT NULL,
+    client_id    BIGINT       NOT NULL,
+    balance      DECIMAL      NOT NULL,
+    account_type SMALLINT     NOT NULL,
+    CONSTRAINT fk_account_client FOREIGN KEY (client_id) REFERENCES bank.client (id) ON DELETE CASCADE
 );
+
+-- ===========================================
+-- Ensure indexes for faster lookup
+-- ===========================================
+CREATE INDEX IF NOT EXISTS idx_client_email ON bank.client (email);
+CREATE INDEX IF NOT EXISTS idx_account_client_id ON bank.account (client_id);

@@ -4,17 +4,35 @@ import cz.ememsoft.minibank.repository.ClientRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.web.client.RestTemplateBuilder
-import org.springframework.context.annotation.Import
+import org.springframework.test.context.DynamicPropertyRegistry
+import org.springframework.test.context.DynamicPropertySource
+import org.testcontainers.containers.PostgreSQLContainer
+import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
-@Import(TestcontainersConfiguration::class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Testcontainers
 class AccountTests(
     @Autowired private val clientRepository: ClientRepository,
     @Autowired private val restTemplateBuilder: RestTemplateBuilder,
 ) {
+    companion object {
+        @Container
+        val postgreSQLContainer = PostgreSQLContainer("postgres:latest").apply {
+            withDatabaseName("testdb")
+            withUsername("testuser")
+            withPassword("testpass")
+            withReuse(true) // ✅ Keeps container running for faster tests
+        }
 
+        @JvmStatic
+        @DynamicPropertySource
+        fun configureProperties(registry: DynamicPropertyRegistry) {
+            registry.add("spring.r2dbc.url") { "r2dbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/testdb" }
+            registry.add("spring.r2dbc.username") { "testuser" }
+            registry.add("spring.r2dbc.password") { "testpass" }
+        }
+    }
 
     /*    @LocalServerPort
         private var port: Int = 0

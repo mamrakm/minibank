@@ -4,6 +4,7 @@ import cz.ememsoft.minibank.entity.ClientEntity
 import org.springframework.data.jpa.repository.JpaRepository
 import org.springframework.data.r2dbc.repository.R2dbcRepository
 import org.springframework.stereotype.Repository
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
@@ -22,4 +23,5 @@ interface ClientRepository : R2dbcRepository<ClientEntity, Long> {
      * @return The [ClientEntity] with the specified email, or `null` if no client is found.
      */
     fun findByEmail(email: String): Mono<ClientEntity> // Ensure return type is non-nullable
+    fun findByFirstNameIgnoreCase(firstName: String): Flux<ClientEntity>
 }

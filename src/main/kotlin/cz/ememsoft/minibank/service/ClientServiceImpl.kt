@@ -160,8 +160,7 @@ class ClientServiceImpl(
      */
     override fun findClientsByFirstName(firstName: String): Flux<ClientDto> {
         logger.info { "Searching for clients with first name: $firstName" }
-        return clientRepository.findAll()
-            .filter { it.firstName.equals(firstName, ignoreCase = true) }
+        return clientRepository.findByFirstNameIgnoreCase(firstName)
             .map { clientMapper.entityToDto(it) }
             .doOnComplete { logger.debug { "Completed searching for clients with first name: $firstName" } }
             .doOnError { logger.error(it) { "Error searching for clients with first name: $firstName" } }
