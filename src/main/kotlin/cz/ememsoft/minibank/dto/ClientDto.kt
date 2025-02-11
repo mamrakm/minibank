@@ -14,6 +14,7 @@ import jakarta.validation.constraints.NotNull
  * @property address The address of the client.
  */
 data class ClientDto(
+    val id: Long,
     @NotNull
     val firstName: String,
     @NotNull

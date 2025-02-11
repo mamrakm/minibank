@@ -1,6 +1,7 @@
 package cz.ememsoft.minibank.mapper
 
 import cz.ememsoft.minibank.api.dto.request.CreateClientRequest
+import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
 import org.mapstruct.Mapper
@@ -9,9 +10,14 @@ import org.mapstruct.MappingConstants
 /**
  * Mapper interface for converting between API requests, DTOs, and entities related to clients.
  *
- * This interface uses MapStruct for mapping objects, ensuring seamless conversion
- * between different layers of the application. The generated implementation is registered
- * as a Spring Bean.
+ * This interface utilizes MapStruct for mapping objects, ensuring efficient and type-safe
+ * conversions between different layers of the application. The generated implementation
+ * is registered as a Spring Bean using `componentModel = MappingConstants.ComponentModel.SPRING`.
+ *
+ * ## Mapping Capabilities:
+ * - **API Layer ↔ DTOs**: Converts API request objects to internal DTOs.
+ * - **DTOs ↔ Entities**: Handles persistence-related mappings.
+ * - **Entities ↔ DTOs**: Transforms database records into application-friendly objects.
  */
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 interface ClientMapper {
@@ -19,24 +25,43 @@ interface ClientMapper {
     /**
      * Maps a [CreateClientRequest] to a [ClientDto].
      *
-     * @param request The API request object containing client information.
-     * @return The corresponding [ClientDto].
+     * This method converts an incoming API request containing client information
+     * into an internal DTO format used within the service layer.
+     *
+     * @param request The API request object containing client details.
+     * @return A corresponding [ClientDto] instance.
      */
     fun requestToDto(request: CreateClientRequest): ClientDto
 
     /**
-     * Maps a [ClientDto] to a [ClientEntity].
+     * Converts a [ClientDto] to a [ClientEntity] for persistence.
      *
-     * @param dto The internal DTO object containing client information.
-     * @return The corresponding [ClientEntity] ready for persistence.
+     * This mapping is used when saving or updating client data in the database.
+     *
+     * @param dto The internal DTO object containing client details.
+     * @return A [ClientEntity] instance ready for database persistence.
      */
     fun dtoToEntity(dto: ClientDto): ClientEntity
 
     /**
-     * Maps a [ClientEntity] back to a [ClientDto].
+     * Converts a [ClientEntity] retrieved from the database to a [ClientDto].
      *
-     * @param entity The entity object representing a client in the database.
-     * @return The corresponding [ClientDto] for use in the application layers.
+     * This transformation ensures the service and API layers receive a structured DTO
+     * rather than a direct database entity.
+     *
+     * @param entity The entity object representing a stored client.
+     * @return A corresponding [ClientDto] for application use.
      */
     fun entityToDto(entity: ClientEntity): ClientDto
+
+    /**
+     * Maps a [ClientDto] to a [CreateClientResponseDto] for API responses.
+     *
+     * This method prepares response objects that will be returned to clients after
+     * creating a new client entity.
+     *
+     * @param dto The DTO containing client data.
+     * @return A [CreateClientResponseDto] object to be sent as an API response.
+     */
+    fun dtoToCreateResponse(dto: ClientDto): CreateClientResponseDto
 }
