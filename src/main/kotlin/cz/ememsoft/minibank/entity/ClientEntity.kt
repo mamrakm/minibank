@@ -5,7 +5,6 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import org.springframework.data.relational.core.mapping.Column
-import org.springframework.data.relational.core.mapping.MappedCollection
 import org.springframework.data.relational.core.mapping.Table
 
 /** R2DBC Entity
@@ -49,8 +48,4 @@ data class ClientEntity(
 
     @Column("address")
     val address: String,
-
-    @Transient
-    @MappedCollection(idColumn = "client_id")
-    val accountEntities: MutableSet<AccountEntity> = mutableSetOf()
 )

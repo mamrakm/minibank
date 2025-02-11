@@ -65,11 +65,15 @@ class ClientTests @Autowired constructor(
             .exchange()
             .expectStatus().isCreated
             .expectBody()
-            .returnResult()
-        println("Response Body: ${response.responseBody ?: "No response"}")
-
 //            .jsonPath("$.id").isNotEmpty
 //            .jsonPath("$.firstName").isEqualTo("John")
+//            .jsonPath("$.lastName").isEqualTo("Doe")
 //            .jsonPath("$.email").isEqualTo("john.doe@example.com")
+//            .jsonPath("$.phone").isEqualTo("123456789")
+//            .jsonPath("$.address").isEqualTo("123 Street")
+            .returnResult()
+
+
+        println("XXXXXXXXXXXXXXXXX Response Body: ${response.responseBody?.decodeToString()}")
     }
 }
