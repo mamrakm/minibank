@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.api
 
-import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
+import cz.ememsoft.minibank.api.dto.request.CreateAccountRequestDto
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.mapper.AccountMapper
 import cz.ememsoft.minibank.service.AccountService
@@ -71,7 +71,7 @@ class AccountController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun createAccount(@RequestBody accountRequest: CreateAccountRequest): Mono<AccountDto> {
+    fun createAccount(@RequestBody accountRequest: CreateAccountRequestDto): Mono<AccountDto> {
         logger.info { "Creating new account" }
         return accountService.createAccount(accountRequest)
             .doOnSuccess { logger.info { "Account created: $it" } }

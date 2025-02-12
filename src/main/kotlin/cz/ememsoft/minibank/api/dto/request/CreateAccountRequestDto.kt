@@ -2,7 +2,7 @@ package cz.ememsoft.minibank.api.dto.request
 
 import java.math.BigDecimal
 
-data class CreateAccountRequest(
+data class CreateAccountRequestDto(
     val accountType: String,
     val balance: BigDecimal,
     val currency: String,

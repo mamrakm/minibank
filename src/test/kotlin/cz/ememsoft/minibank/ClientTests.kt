@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank
 
-import cz.ememsoft.minibank.api.dto.request.CreateClientRequest
+import cz.ememsoft.minibank.api.dto.request.CreateClientRequestDto
 import cz.ememsoft.minibank.repository.AccountRepository
 import cz.ememsoft.minibank.repository.ClientRepository
 import org.junit.jupiter.api.BeforeEach
@@ -50,7 +50,7 @@ class ClientTests @Autowired constructor(
 
     @Test
     fun `should create a client successfully`() {
-        val request = CreateClientRequest(
+        val request = CreateClientRequestDto(
             firstName = "John",
             lastName = "Doe",
             email = "john.doe@example.com",
@@ -73,7 +73,7 @@ class ClientTests @Autowired constructor(
             .jsonPath("$.address").isEqualTo("123 Street")
             .returnResult()
 
-        val secondRequest = CreateClientRequest(
+        val secondRequest = CreateClientRequestDto(
             firstName = "Benjamin",
             lastName = "Sisko",
             email = "bennyrussel@starfleet.com",

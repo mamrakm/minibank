@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.service
 
-import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
+import cz.ememsoft.minibank.api.dto.request.CreateAccountRequestDto
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import reactor.core.publisher.Flux
@@ -33,7 +33,7 @@ interface AccountService {
      * @param accountEntity The account details to create.
      * @return A [Mono] emitting the created [AccountEntity].
      */
-    fun createAccount(accountRequest: CreateAccountRequest): Mono<AccountDto>
+    fun createAccount(accountRequest: CreateAccountRequestDto): Mono<AccountDto>
 
     /**
      * Updates an existing account.

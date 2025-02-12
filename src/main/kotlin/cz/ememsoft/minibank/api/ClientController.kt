@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.api
 
-import cz.ememsoft.minibank.api.dto.request.CreateClientRequest
+import cz.ememsoft.minibank.api.dto.request.CreateClientRequestDto
 import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.mapper.ClientMapper
@@ -69,14 +69,14 @@ class ClientController(
     /**
      * Creates a new client.
      *
-     * @param createClientRequest The request body containing client data.
+     * @param createClientRequestDto The request body containing client data.
      * @return The ID of the created client.
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<CreateClientResponseDto> {
-        logger.info { "Creating new client: $createClientRequest" }
-        val clientDto = clientMapper.requestToDto(createClientRequest)
+    fun saveClient(@RequestBody createClientRequestDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
+        logger.info { "Creating new client: $createClientRequestDto" }
+        val clientDto = clientMapper.requestToDto(createClientRequestDto)
         return clientService.saveClient(clientDto)
             .doOnSuccess { logger.info { "Successfully created client with ID: $it" } }
             .doOnError { logger.error(it) { "Error creating client" } }
@@ -86,17 +86,17 @@ class ClientController(
      * Updates an existing client's information.
      *
      * @param id The ID of the client to update.
-     * @param createClientRequest The request body containing updated client data.
+     * @param createClientRequestDto The request body containing updated client data.
      * @return The updated [ClientDto].
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updateClient(
         @PathVariable id: Long,
-        @RequestBody createClientRequest: CreateClientRequest,
+        @RequestBody createClientRequestDto: CreateClientRequestDto,
     ): Mono<ClientDto> {
         logger.info { "Updating client with ID: $id" }
-        val updatedClientDto = clientMapper.requestToDto(createClientRequest)
+        val updatedClientDto = clientMapper.requestToDto(createClientRequestDto)
         return clientService.updateClient(id, updatedClientDto)
             .doOnSuccess { logger.info { "Successfully updated client with ID: $id" } }
             .doOnError { logger.error(it) { "Error updating client with ID: $id" } }

@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.mapper
 
-import cz.ememsoft.minibank.api.dto.request.CreateClientRequest
+import cz.ememsoft.minibank.api.dto.request.CreateClientRequestDto
 import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
@@ -24,7 +24,7 @@ import org.mapstruct.MappingConstants
 interface ClientMapper {
 
     /**
-     * Maps a [CreateClientRequest] to a [ClientDto].
+     * Maps a [CreateClientRequestDto] to a [ClientDto].
      *
      * This method converts an incoming API request containing client information
      * into an internal DTO format used within the service layer.
@@ -32,7 +32,7 @@ interface ClientMapper {
      * @param request The API request object containing client details.
      * @return A corresponding [ClientDto] instance.
      */
-    fun requestToDto(request: CreateClientRequest): ClientDto
+    fun requestToDto(request: CreateClientRequestDto): ClientDto
 
     /**
      * Converts a [ClientDto] to a [ClientEntity] for persistence.

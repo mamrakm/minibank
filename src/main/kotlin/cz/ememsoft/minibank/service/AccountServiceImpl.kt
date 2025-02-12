@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.service
 
-import cz.ememsoft.minibank.api.dto.request.CreateAccountRequest
+import cz.ememsoft.minibank.api.dto.request.CreateAccountRequestDto
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import cz.ememsoft.minibank.exception.AccountNotFoundException
@@ -59,7 +59,7 @@ class AccountServiceImpl(private val accountRepository: AccountRepository, priva
      * @param accountRequest The request object containing the account details.
      * @return A [Mono] emitting the created [AccountDto].
      */
-    override fun createAccount(accountRequest: CreateAccountRequest): Mono<AccountDto> {
+    override fun createAccount(accountRequest: CreateAccountRequestDto): Mono<AccountDto> {
         logger.info("Creating new account")
         return accountRepository.save(accountMapper.requestToEntity(accountRequest))
             .map { accountMapper.entityToDto(it) }.doOnSuccess { logger.info("Account created: $it") }
