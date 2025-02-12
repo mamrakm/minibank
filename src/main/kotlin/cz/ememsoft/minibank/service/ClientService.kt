@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.service
 
+import cz.ememsoft.minibank.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import reactor.core.publisher.Flux
@@ -36,7 +37,7 @@ interface ClientService {
      * @param clientDto The DTO containing client information to save.
      * @return A [Mono] emitting the ID of the saved client, or an error if a duplicate exists.
      */
-    fun saveClient(clientDto: ClientDto): Mono<CreateClientResponseDto>
+    fun saveClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto>
 
     /**
      * Updates an existing client's information.
@@ -45,7 +46,7 @@ interface ClientService {
      * @param updatedClientDto The updated client data.
      * @return A [Mono] emitting the updated [ClientDto], or an error if the client is not found.
      */
-    fun updateClient(id: Long, updatedClientDto: ClientDto): Mono<ClientDto>
+    fun updateClient(updatedClientDto: ClientDto): Mono<ClientDto>
 
     /**
      * Deletes a client by their ID.

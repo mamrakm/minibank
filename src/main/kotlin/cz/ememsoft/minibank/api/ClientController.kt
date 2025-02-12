@@ -76,8 +76,7 @@ class ClientController(
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun saveClient(@RequestBody createClientRequestDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
         logger.info { "Creating new client: $createClientRequestDto" }
-        val clientDto = clientMapper.requestToDto(createClientRequestDto)
-        return clientService.saveClient(clientDto)
+        return clientService.saveClient(createClientRequestDto)
             .doOnSuccess { logger.info { "Successfully created client with ID: $it" } }
             .doOnError { logger.error(it) { "Error creating client" } }
     }
@@ -97,7 +96,7 @@ class ClientController(
     ): Mono<ClientDto> {
         logger.info { "Updating client with ID: $id" }
         val updatedClientDto = clientMapper.requestToDto(createClientRequestDto)
-        return clientService.updateClient(id, updatedClientDto)
+        return clientService.updateClient(updatedClientDto)
             .doOnSuccess { logger.info { "Successfully updated client with ID: $id" } }
             .doOnError { logger.error(it) { "Error updating client with ID: $id" } }
     }

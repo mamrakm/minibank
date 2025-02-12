@@ -19,9 +19,9 @@ data class CreateClientResponseDto(
      * Returns a string representation of the ClientDto object.
      *
      * @return A string representation of the object in the format:
-     * "CustomerDto(firstName='value', lastName='value', email='value', phone='value', address='value')".
+     * "ClientDto(firstName='value', lastName='value', email='value', phone='value', address='value')".
      */
     override fun toString(): String {
-        return "CustomerDto(id= '$id', firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
+        return "ClientDto(id= '$id', firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
     }
 }

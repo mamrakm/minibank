@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.service
 
+import cz.ememsoft.minibank.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
@@ -74,7 +75,7 @@ class ClientServiceImpl(
      * @param clientDto The DTO containing client information to save.
      * @return A [Mono] emitting the saved [CreateClientResponseDto], or an error if a duplicate exists.
      */
-    override fun saveClient(clientDto: ClientDto): Mono<CreateClientResponseDto> {
+    override fun saveClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
         logger.info { "Saving new client: $clientDto" }
 
         return clientRepository.findByEmail(clientDto.email)
@@ -84,7 +85,7 @@ class ClientServiceImpl(
             }
             .switchIfEmpty(
                 Mono.defer {
-                    val clientEntity = clientMapper.dtoToEntity(clientDto)
+                    val clientEntity = clientMapper.requestToDto(clientDto)
                     logger.debug { "Persisting new client entity: $clientEntity" }
 
                     clientRepository.saveAndReturnId(
@@ -103,11 +104,11 @@ class ClientServiceImpl(
     /**
      * Updates an existing client's information.
      *
-     * @param id The ID of the client to update.
      * @param updatedClientDto The updated client data.
      * @return A [Mono] emitting the updated [ClientDto], or an error if the client is not found.
      */
-    override fun updateClient(id: Long, updatedClientDto: ClientDto): Mono<ClientDto> {
+    override fun updateClient(updatedClientDto: ClientDto): Mono<ClientDto> {
+        val id = updatedClientDto.id
         logger.info { "Updating client with ID: $id" }
         return clientRepository.findById(id)
             .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))

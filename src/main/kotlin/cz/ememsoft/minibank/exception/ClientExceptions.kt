@@ -8,7 +8,7 @@ package cz.ememsoft.minibank.exception
  *
  * @param message The detail message about the exception.
  */
-open class ClientException(message: String) : RuntimeException(message)
+sealed class ClientException(message: String) : RuntimeException(message)
 
 /**
  * Exception thrown when a client is not found.

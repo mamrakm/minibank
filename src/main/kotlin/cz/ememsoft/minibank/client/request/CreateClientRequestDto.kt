@@ -22,6 +22,6 @@ data class CreateClientRequestDto(
     val address: String,
 ) {
     override fun toString(): String {
-        return "CustomerSaveRequest(firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
+        return "ClientSaveRequest(firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
     }
 }
