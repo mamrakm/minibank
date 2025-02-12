@@ -60,12 +60,19 @@ class ClientServiceImpl(
     }
 
     /**
-     * Saves a new client to the database.
+     * Saves a new client to the database and returns the created client response.
      *
-     * Ensures no duplicate email exists before saving.
+     * This method ensures that no duplicate email exists before saving the client.
+     * If a client with the same email is found, an error is returned.
+     * Otherwise, the client is saved, and the generated ID is used to create a response DTO.
+     *
+     * ## Process:
+     * 1. Check if a client with the given email already exists.
+     * 2. If a duplicate exists, return an error.
+     * 3. If no duplicate exists, persist the new client and return a response DTO.
      *
      * @param clientDto The DTO containing client information to save.
-     * @return A [Mono] emitting the ID of the saved client, or an error if a duplicate exists.
+     * @return A [Mono] emitting the saved [CreateClientResponseDto], or an error if a duplicate exists.
      */
     override fun saveClient(clientDto: ClientDto): Mono<CreateClientResponseDto> {
         logger.info { "Saving new client: $clientDto" }
