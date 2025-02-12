@@ -1,6 +1,7 @@
 package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.api.dto.request.CreateClientRequest
+import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.service.ClientService
@@ -73,7 +74,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<Long?> {
+    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<CreateClientResponseDto> {
         logger.info { "Creating new client: $createClientRequest" }
         val clientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.saveClient(clientDto)

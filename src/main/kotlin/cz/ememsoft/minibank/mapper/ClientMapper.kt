@@ -66,4 +66,10 @@ interface ClientMapper {
      * @return A [CreateClientResponseDto] object to be sent as an API response.
      */
     fun dtoToCreateResponse(dto: ClientDto): CreateClientResponseDto
+
+    /**
+     * Converts a [ClientEntity] to a [CreateClientResponseDto] for API responses.
+     *
+     */
+    fun entityToCreateResponse(entity: ClientEntity): CreateClientResponseDto
 }

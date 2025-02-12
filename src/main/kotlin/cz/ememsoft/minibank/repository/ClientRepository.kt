@@ -26,12 +26,17 @@ interface ClientRepository : R2dbcRepository<ClientEntity, Long> {
     fun findByEmail(email: String): Mono<ClientEntity> // Ensure return type is non-nullable
     fun findByFirstNameIgnoreCase(firstName: String): Flux<ClientEntity>
 
-    @Query("INSERT INTO bank.client (first_name, last_name, email, phone, address) VALUES (:firstName, :lastName, :email, :phone, :address) RETURNING id")
+    @Query(
+        "INSERT INTO bank.client " +
+                "(first_name, last_name, email, phone, address) " +
+                "VALUES (:firstName, :lastName, :email, :phone, :address) " +
+                "RETURNING id, first_name, last_name, email, phone, address"
+    )
     fun saveAndReturnId(
         firstName: String,
         lastName: String,
         email: String,
         phone: String,
         address: String
-    ): Mono<Long>
+    ): Mono<ClientEntity>
 }

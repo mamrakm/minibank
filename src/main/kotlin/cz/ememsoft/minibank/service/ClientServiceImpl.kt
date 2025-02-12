@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.service
 
+import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
 import cz.ememsoft.minibank.exception.ClientNotFoundException
@@ -66,13 +67,13 @@ class ClientServiceImpl(
      * @param clientDto The DTO containing client information to save.
      * @return A [Mono] emitting the ID of the saved client, or an error if a duplicate exists.
      */
-    override fun saveClient(clientDto: ClientDto): Mono<Long> {
+    override fun saveClient(clientDto: ClientDto): Mono<CreateClientResponseDto> {
         logger.info { "Saving new client: $clientDto" }
 
         return clientRepository.findByEmail(clientDto.email)
             .flatMap {
                 logger.warn { "Client already exists: ${clientDto.email}" }
-                Mono.error<Long>(DuplicateClientException("Client with email ${clientDto.email} already exists"))
+                Mono.error<CreateClientResponseDto>(DuplicateClientException("Client with email ${clientDto.email} already exists"))
             }
             .switchIfEmpty(
                 Mono.defer {
@@ -85,7 +86,7 @@ class ClientServiceImpl(
                         clientEntity.email,
                         clientEntity.phone,
                         clientEntity.address
-                    )
+                    ).map { clientMapper.entityToCreateResponse(it) }
                 }
             )
             .doOnSuccess { logger.info { "Client saved with ID: $it" } }
