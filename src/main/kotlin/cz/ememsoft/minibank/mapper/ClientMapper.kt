@@ -68,8 +68,15 @@ interface ClientMapper {
     fun dtoToCreateResponse(dto: ClientDto): CreateClientResponseDto
 
     /**
-     * Converts a [ClientEntity] to a [CreateClientResponseDto] for API responses.
+     * Maps a [ClientEntity] to a [CreateClientResponseDto].
      *
+     * This method converts a database entity representing a client into a response DTO
+     * used for API responses. It ensures that only the necessary client data is exposed
+     * in the response.
+     *
+     * @param entity The [ClientEntity] object to be converted.
+     * @return The corresponding [CreateClientResponseDto] containing client details.
      */
     fun entityToCreateResponse(entity: ClientEntity): CreateClientResponseDto
+
 }
