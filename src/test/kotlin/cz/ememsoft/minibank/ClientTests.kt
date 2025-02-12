@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank
 
-import cz.ememsoft.minibank.api.dto.request.CreateClientRequestDto
+import cz.ememsoft.minibank.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.repository.AccountRepository
 import cz.ememsoft.minibank.repository.ClientRepository
 import org.junit.jupiter.api.BeforeEach

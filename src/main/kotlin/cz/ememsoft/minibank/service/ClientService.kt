@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.service
 
-import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
+import cz.ememsoft.minibank.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

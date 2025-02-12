@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.service
 
-import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
+import cz.ememsoft.minibank.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
 import cz.ememsoft.minibank.exception.ClientNotFoundException
@@ -99,7 +99,6 @@ class ClientServiceImpl(
             .doOnSuccess { logger.info { "Client saved with ID: $it" } }
             .doOnError { logger.error(it) { "Error saving client" } }
     }
-
 
     /**
      * Updates an existing client's information.
