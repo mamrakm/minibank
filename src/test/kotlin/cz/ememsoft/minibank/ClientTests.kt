@@ -73,6 +73,28 @@ class ClientTests @Autowired constructor(
 //            .jsonPath("$.address").isEqualTo("123 Street")
             .returnResult()
 
+        val secondRequest = CreateClientRequest(
+            firstName = "John",
+            lastName = "Doe",
+            email = "tonmmy@verceti.com",
+            phone = "123456789",
+            address = "123 Street"
+        )
+        val secondResponse = webTestClient.post()
+            .uri("/clients")
+            .contentType(MediaType.APPLICATION_JSON)
+            .bodyValue(secondRequest)
+            .exchange()
+            .expectStatus().isCreated
+            .expectBody()
+//            .jsonPath("$.id").isNotEmpty
+//            .jsonPath("$.firstName").isEqualTo("John")
+//            .jsonPath("$.lastName").isEqualTo("Doe")
+//            .jsonPath("$.email").isEqualTo("john.doe@example.com")
+//            .jsonPath("$.phone").isEqualTo("123456789")
+//            .jsonPath("$.address").isEqualTo("123 Street")
+            .returnResult()
+
 
         println("XXXXXXXXXXXXXXXXX Response Body: ${response.responseBody?.decodeToString()}")
     }

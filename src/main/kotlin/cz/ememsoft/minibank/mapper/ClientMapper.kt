@@ -5,6 +5,7 @@ import cz.ememsoft.minibank.api.dto.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
 import org.mapstruct.Mapper
+import org.mapstruct.Mapping
 import org.mapstruct.MappingConstants
 
 /**
@@ -41,6 +42,7 @@ interface ClientMapper {
      * @param dto The internal DTO object containing client details.
      * @return A [ClientEntity] instance ready for database persistence.
      */
+    @Mapping(target = "id", ignore = true)
     fun dtoToEntity(dto: ClientDto): ClientEntity
 
     /**

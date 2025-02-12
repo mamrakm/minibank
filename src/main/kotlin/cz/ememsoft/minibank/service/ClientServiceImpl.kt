@@ -68,6 +68,7 @@ class ClientServiceImpl(
      */
     override fun saveClient(clientDto: ClientDto): Mono<Long> {
         logger.info { "Saving new client: $clientDto" }
+
         return clientRepository.findByEmail(clientDto.email)
             .flatMap {
                 logger.warn { "Client already exists: ${clientDto.email}" }
@@ -77,12 +78,20 @@ class ClientServiceImpl(
                 Mono.defer {
                     val clientEntity = clientMapper.dtoToEntity(clientDto)
                     logger.debug { "Persisting new client entity: $clientEntity" }
-                    clientRepository.save(clientEntity).map { it.id }
+
+                    clientRepository.saveAndReturnId(
+                        clientEntity.firstName,
+                        clientEntity.lastName,
+                        clientEntity.email,
+                        clientEntity.phone,
+                        clientEntity.address
+                    )
                 }
             )
             .doOnSuccess { logger.info { "Client saved with ID: $it" } }
             .doOnError { logger.error(it) { "Error saving client" } }
     }
+
 
     /**
      * Updates an existing client's information.

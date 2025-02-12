@@ -73,7 +73,7 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<Long> {
+    fun saveClient(@RequestBody createClientRequest: CreateClientRequest): Mono<Long?> {
         logger.info { "Creating new client: $createClientRequest" }
         val clientDto = clientMapper.requestToDto(createClientRequest)
         return clientService.saveClient(clientDto)

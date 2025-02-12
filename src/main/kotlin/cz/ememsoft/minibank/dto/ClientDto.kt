@@ -33,6 +33,6 @@ data class ClientDto(
      * "CustomerDto(firstName='value', lastName='value', email='value', phone='value', address='value')".
      */
     override fun toString(): String {
-        return "CustomerDto(firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
+        return "ClientDto(firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
     }
 }
