@@ -6,6 +6,7 @@ import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.service.ClientService
 import io.github.oshai.kotlinlogging.KotlinLogging
+import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -89,13 +90,12 @@ class ClientController(
      * @return The updated [ClientDto].
      */
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PutMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun updateClient(
-        @PathVariable id: Long,
-        @RequestBody createClientRequestDto: CreateClientRequestDto,
+        @RequestBody updatedClientDto: ClientDto,
     ): Mono<ClientDto> {
+        val id = updatedClientDto.id
         logger.info { "Updating client with ID: $id" }
-        val updatedClientDto = clientMapper.requestToDto(createClientRequestDto)
         return clientService.updateClient(updatedClientDto)
             .doOnSuccess { logger.info { "Successfully updated client with ID: $id" } }
             .doOnError { logger.error(it) { "Error updating client with ID: $id" } }

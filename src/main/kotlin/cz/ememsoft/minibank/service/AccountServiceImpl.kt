@@ -47,8 +47,9 @@ class AccountServiceImpl(private val accountRepository: AccountRepository, priva
      */
     override fun getAccountById(id: Long): Mono<AccountDto> {
         logger.info("Fetching account with ID: $id")
-        return accountRepository.findById(id).map { accountMapper.entityToDto(it) }
+        return accountRepository.findById(id)
             .switchIfEmpty(Mono.error(AccountNotFoundException("Account with ID $id not found")))
+            .map { accountMapper.entityToDto(it) }
             .doOnSuccess { logger.info("Account found by id: $id") }
             .doOnError { logger.error("Error fetching account with ID: $id", it) }
     }

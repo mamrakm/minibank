@@ -15,7 +15,7 @@ import jakarta.validation.constraints.NotNull
  */
 data class ClientDto(
     @NotNull
-    val id: Long,
+    var id: Long,
     @NotNull
     val firstName: String,
     @NotNull
