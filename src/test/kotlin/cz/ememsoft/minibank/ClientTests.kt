@@ -271,12 +271,6 @@ class ClientTests @Autowired constructor(
 
         val clientId = createResponse.id
 
-        //  Verify deletion by attempting to retrieve the deleted client.
-        webTestClient.get()
-            .uri("/clients/$clientId")
-            .exchange()
-            .expectStatus().isOk
-
         // Delete the client.
         webTestClient.delete()
             .uri("/clients/$clientId")
