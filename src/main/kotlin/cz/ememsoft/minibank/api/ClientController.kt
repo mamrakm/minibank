@@ -1,3 +1,4 @@
+
 package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.client.request.CreateClientRequestDto
@@ -71,11 +72,11 @@ class ClientController(
      * Creates a new client.
      *
      * @param createClientRequestDto The request body containing client data.
-     * @return The ID of the created client.
+     * @return The created [CreateClientResponseDto] containing client details.
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun saveClient(@RequestBody createClientRequestDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
+    fun createClient(@RequestBody createClientRequestDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
         logger.info { "Creating new client: $createClientRequestDto" }
         return clientService.createClient(createClientRequestDto)
             .doOnSuccess { logger.info { "Successfully created client with ID: $it" } }
