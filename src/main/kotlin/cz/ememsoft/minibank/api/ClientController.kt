@@ -1,4 +1,3 @@
-
 package cz.ememsoft.minibank.api
 
 import cz.ememsoft.minibank.client.request.CreateClientRequestDto
@@ -7,7 +6,6 @@ import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.service.ClientService
 import io.github.oshai.kotlinlogging.KotlinLogging
-import org.springframework.data.jpa.domain.AbstractPersistable_.id
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -30,7 +28,7 @@ private val logger = KotlinLogging.logger {}
  * Provides endpoints for CRUD operations and search functionality related to clients.
  *
  * @property clientService The service layer for client-related operations.
- * @property clientRequestMapper The mapper for converting request DTOs to internal DTOs.
+ * @property clientMapper The mapper for converting request DTOs to internal DTOs.
  */
 @RestController
 @RequestMapping("/clients")
@@ -42,8 +40,8 @@ class ClientController(
     /**
      * Retrieves a client by their ID.
      *
-     * @param id The ID of the client to retrieve.
-     * @return The corresponding [ClientDto].
+     * @param id The unique identifier of the client.
+     * @return A [Mono] emitting the corresponding [ClientDto] if found.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -57,7 +55,7 @@ class ClientController(
     /**
      * Retrieves all clients in the system.
      *
-     * @return A list of all clients as [ClientDto].
+     * @return A [Flux] emitting all clients as [ClientDto].
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -69,10 +67,10 @@ class ClientController(
     }
 
     /**
-     * Creates a new client.
+     * Creates a new client in the system.
      *
      * @param createClientRequestDto The request body containing client data.
-     * @return The created [CreateClientResponseDto] containing client details.
+     * @return A [Mono] emitting the created [CreateClientResponseDto] containing client details.
      */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -86,15 +84,12 @@ class ClientController(
     /**
      * Updates an existing client's information.
      *
-     * @param id The ID of the client to update.
-     * @param createClientRequestDto The request body containing updated client data.
-     * @return The updated [ClientDto].
+     * @param updatedClientDto The request body containing the updated client data.
+     * @return A [Mono] emitting the updated [ClientDto].
      */
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateClient(
-        @RequestBody updatedClientDto: ClientDto,
-    ): Mono<ClientDto> {
+    fun updateClient(@RequestBody updatedClientDto: ClientDto): Mono<ClientDto> {
         val id = updatedClientDto.id
         logger.info { "Updating client with ID: $id" }
         return clientService.updateClient(updatedClientDto)
@@ -105,7 +100,8 @@ class ClientController(
     /**
      * Deletes a client by their ID.
      *
-     * @param id The ID of the client to delete.
+     * @param id The unique identifier of the client to be deleted.
+     * @return A [Mono] signaling completion of the deletion process.
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
@@ -120,7 +116,7 @@ class ClientController(
      * Searches for clients by their first name.
      *
      * @param firstName The first name of the client(s) to search for.
-     * @return A list of clients matching the first name as [ClientDto].
+     * @return A [Flux] emitting clients matching the provided first name.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-name/{firstName}", produces = [MediaType.APPLICATION_JSON_VALUE])
@@ -132,10 +128,10 @@ class ClientController(
     }
 
     /**
-     * Searches for a client by their email.
+     * Searches for a client by their email address.
      *
      * @param email The email address of the client to search for.
-     * @return The corresponding [ClientDto] or null if not found.
+     * @return A [Mono] emitting the corresponding [ClientDto] if found, or empty if not found.
      */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-email/{email}", produces = [MediaType.APPLICATION_JSON_VALUE])
