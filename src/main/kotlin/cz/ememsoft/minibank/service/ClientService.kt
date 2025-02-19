@@ -37,7 +37,7 @@ interface ClientService {
      * @param clientDto The DTO containing client information to save.
      * @return A [Mono] emitting the ID of the saved client, or an error if a duplicate exists.
      */
-    fun saveClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto>
+    fun createClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto>
 
     /**
      * Updates an existing client's information.

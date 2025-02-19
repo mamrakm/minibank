@@ -75,7 +75,7 @@ class ClientServiceImpl(
      * @param clientDto The DTO containing client information to save.
      * @return A [Mono] emitting the saved [CreateClientResponseDto], or an error if a duplicate exists.
      */
-    override fun saveClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
+    override fun createClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
         logger.info { "Saving new client: $clientDto" }
 
         return clientRepository.findByEmail(clientDto.email)

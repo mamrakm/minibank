@@ -77,7 +77,7 @@ class ClientController(
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun saveClient(@RequestBody createClientRequestDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
         logger.info { "Creating new client: $createClientRequestDto" }
-        return clientService.saveClient(createClientRequestDto)
+        return clientService.createClient(createClientRequestDto)
             .doOnSuccess { logger.info { "Successfully created client with ID: $it" } }
             .doOnError { logger.error(it) { "Error creating client" } }
     }
