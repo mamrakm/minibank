@@ -129,24 +129,11 @@ class ClientServiceImpl(
             .doOnError { logger.error(it) { "Error updating client with ID: $id" } }
     }
 
-    /**
-     * Deletes a client by their ID.
-     *
-     * @param id The ID of the client to delete.
-     * @return A [Mono] signaling completion of the deletion process, or an error if the client is not found.
-     */
     override fun deleteClient(id: Long): Mono<Void> {
         logger.info { "Deleting client with ID: $id" }
-        return clientRepository.existsById(id)
-            .flatMap {
-                if (it) {
-                    logger.debug { "Client exists, proceeding with deletion" }
-                    clientRepository.deleteById(id)
-                } else {
-                    logger.warn { "Client with ID $id not found for deletion" }
-                    Mono.error(ClientNotFoundException("Client with ID $id not found"))
-                }
-            }
+        return clientRepository.findById(id)
+            .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
+            .flatMap { clientRepository.deleteById(it.id).then(Mono.empty<Void>()) } // Ensure deletion completes
             .doOnSuccess { logger.info { "Client with ID $id deleted successfully" } }
             .doOnError { logger.error(it) { "Error deleting client with ID: $id" } }
     }

@@ -285,10 +285,10 @@ class ClientTests @Autowired constructor(
 
         print("Client ID: $clientId")
         // Verify deletion by attempting to retrieve the deleted client.
-//        webTestClient.get()
-//            .uri("/clients/$clientId")
-//            .exchange()
-//            .expectStatus().isNotFound
+        webTestClient.get()
+            .uri("/clients/$clientId")
+            .exchange()
+            .expectStatus().isNotFound
     }
 
     /**

@@ -109,9 +109,9 @@ class ClientController(
      */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    fun deleteClient(@PathVariable id: Long) {
+    fun deleteClient(@PathVariable id: Long): Mono<Void> {
         logger.info { "Deleting client with ID: $id" }
-        clientService.deleteClient(id)
+        return clientService.deleteClient(id)
             .doOnSuccess { logger.info { "Successfully deleted client with ID: $id" } }
             .doOnError { logger.error(it) { "Error deleting client with ID: $id" } }
     }
