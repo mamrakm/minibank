@@ -106,6 +106,36 @@ class GlobalExceptionHandler {
     }
 
     /**
+     * Handles [InsufficientFundsException].
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(InsufficientFundsException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleInsufficientFundsException(exception: InsufficientFundsException): Map<String, String> {
+        return mapOf(
+            "error" to "Insufficient Funds",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [CurrencyMismatchException].
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(CurrencyMismatchException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleCurrencyMismatchException(exception: CurrencyMismatchException): Map<String, String> {
+        return mapOf(
+            "error" to "Currency Mismatch",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
      * Handles generic exceptions.
      *
      * Returns a response with HTTP status `500 Internal Server Error` and an error

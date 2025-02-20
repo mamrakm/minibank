@@ -85,7 +85,8 @@ class AccountServiceImpl(private val accountRepository: AccountRepository, priva
                     name = accountEntity.name,
                     balance = accountEntity.balance,
                     clientId = existingAccount.clientId,
-                    accountType = accountEntity.accountType
+                    accountType = accountEntity.accountType,
+                    currency = accountEntity.currency
                 )
                 accountRepository.save(updatedAccount).map { accountMapper.entityToDto(it) }
             }
