@@ -1,4 +1,4 @@
-package cz.ememsoft.minibank.account.response
+package cz.ememsoft.minibank.api.account.response
 
 import java.math.BigDecimal
 

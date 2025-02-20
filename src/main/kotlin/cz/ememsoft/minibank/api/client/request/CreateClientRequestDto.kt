@@ -1,4 +1,4 @@
-package cz.ememsoft.minibank.client.request
+package cz.ememsoft.minibank.api.client.request
 
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank

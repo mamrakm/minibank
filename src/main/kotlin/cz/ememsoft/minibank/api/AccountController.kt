@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.api
 
-import cz.ememsoft.minibank.account.request.CreateAccountRequestDto
+import cz.ememsoft.minibank.api.account.request.CreateAccountRequestDto
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.mapper.AccountMapper
 import cz.ememsoft.minibank.service.AccountService

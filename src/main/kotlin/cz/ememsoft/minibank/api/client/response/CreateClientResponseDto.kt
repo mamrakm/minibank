@@ -1,4 +1,4 @@
-package cz.ememsoft.minibank.client.response
+package cz.ememsoft.minibank.api.client.response
 
 import jakarta.validation.constraints.NotNull
 

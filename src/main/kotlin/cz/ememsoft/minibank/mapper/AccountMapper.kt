@@ -1,6 +1,6 @@
 package cz.ememsoft.minibank.mapper
 
-import cz.ememsoft.minibank.account.request.CreateAccountRequestDto
+import cz.ememsoft.minibank.api.account.request.CreateAccountRequestDto
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import org.mapstruct.Mapper

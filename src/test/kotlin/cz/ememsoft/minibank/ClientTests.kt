@@ -1,7 +1,7 @@
 package cz.ememsoft.minibank
 
-import cz.ememsoft.minibank.client.request.CreateClientRequestDto
-import cz.ememsoft.minibank.client.response.CreateClientResponseDto
+import cz.ememsoft.minibank.api.client.request.CreateClientRequestDto
+import cz.ememsoft.minibank.api.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.repository.AccountRepository
 import cz.ememsoft.minibank.repository.ClientRepository
