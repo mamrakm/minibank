@@ -11,12 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
-import org.springframework.test.context.DynamicPropertyRegistry
-import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.reactive.server.WebTestClient
-import org.testcontainers.containers.PostgreSQLContainer
-import org.testcontainers.junit.jupiter.Container
-import org.testcontainers.junit.jupiter.Testcontainers
 
 /**
  * Integration tests for client-related REST operations.
@@ -26,36 +21,17 @@ import org.testcontainers.junit.jupiter.Testcontainers
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureWebTestClient
-@Testcontainers
 class ClientTests @Autowired constructor(
     private val webTestClient: WebTestClient,
     private val accountRepository: AccountRepository,
     private val clientRepository: ClientRepository,
-) {
-    companion object {
-        @Container
-        val postgreSQLContainer = PostgreSQLContainer("postgres:latest").apply {
-            withDatabaseName("testdb")
-            withUsername("testuser")
-            withPassword("testpass")
-            withReuse(true)
-            withInitScript("init-db.sql")
-        }
-
-        @JvmStatic
-        @DynamicPropertySource
-        fun configureProperties(registry: DynamicPropertyRegistry) {
-            registry.add("spring.r2dbc.url") {
-                "r2dbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/testdb"
-            }
-            registry.add("spring.r2dbc.username") { "testuser" }
-            registry.add("spring.r2dbc.password") { "testpass" }
-        }
-    }
+) : TestBase() {
 
     @BeforeEach
     fun setup() {
-        // Clean the client repository before each test.
+        println("Checking existing tables...")
+        clientRepository.findAll().collectList().block()?.forEach { println(it) }
+        println("Deleting all clients now...")
         clientRepository.deleteAll().block()
     }
 
