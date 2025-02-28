@@ -24,6 +24,6 @@ logging:
   level:
     root: INFO
     cz.ememsoft.minibank: DEBUG
-    org.springframework: DEBUG
-    reactor: ERROR
-    org.springframework.r2dbc: DEBUG
+    org.springframework: ERROR
+    reactor: WARN
+    org.springframework.r2dbc: WARN
