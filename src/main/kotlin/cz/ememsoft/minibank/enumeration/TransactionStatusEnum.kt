@@ -10,7 +10,7 @@ import java.io.Serializable
  * - COMPLETED: The transaction has been successfully completed
  * - FAILED: The transaction failed to complete
  */
-enum class TransactionStatus : Serializable {
+enum class TransactionStatusEnum : Serializable {
     PENDING,
     COMPLETED,
     FAILED

@@ -65,7 +65,7 @@ data class TransactionEntity(
 
     /** Status of the transaction */
     @Column("status")
-    val status: TransactionStatus,
+    val status: TransactionStatusEnum,
 
     /** Reference or description for the transaction */
     @Column("reference")

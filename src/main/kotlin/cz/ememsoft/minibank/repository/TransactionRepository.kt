@@ -59,21 +59,17 @@ interface TransactionRepository : R2dbcRepository<TransactionEntity, Long> {
      * @param reference The reference or description of the transaction.
      * @return A [Mono] emitting the saved [TransactionEntity] with all populated fields, including the generated ID.
      */
-    /**
-     * Inserts a new transaction into the database using SQL.
-     *
-     * This method aligns with the schema defined in the SQL changelog.
-     */
     @Query(
         "INSERT INTO bank.transaction " +
-                "(source_account_id, target_account_id, amount, timestamp, status, reference) " +
-                "VALUES (:sourceAccountId, :targetAccountId, :amount, :timestamp, :status, :reference) " +
-                "RETURNING id, source_account_id, target_account_id, amount, timestamp, status, reference"
+                "(source_account_id, target_account_id, amount, currency, timestamp, status, reference) " +
+                "VALUES (:sourceAccountId, :targetAccountId, :amount, :currency, :timestamp, :status, :reference) " +
+                "RETURNING id, source_account_id, target_account_id, amount, currency, timestamp, status, reference"
     )
     fun saveAndReturnId(
         sourceAccountId: Long,
         targetAccountId: Long,
         amount: BigDecimal,
+        currency: String,
         timestamp: LocalDateTime,
         status: String,
         reference: String
