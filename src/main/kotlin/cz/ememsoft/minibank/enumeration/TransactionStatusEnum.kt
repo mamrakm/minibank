@@ -1,16 +1,17 @@
-package cz.ememsoft.minibank.enumeration
+package cz.ememsoft.minibank.entity
+
+import java.io.Serializable
 
 /**
- * Enum representing the status of a financial transaction.
+ * Enum representing the possible states of a transaction.
  *
- * @property SUCCESS Indicates that the transaction was processed successfully.
- * @property PENDING Indicates that the transaction is currently pending.
- * @property FAILED Indicates that the transaction has failed.
- * @property CANCELLED Indicates that the transaction was cancelled.
+ * Transactions can be in one of three states:
+ * - PENDING: The transaction has been initiated but not yet completed
+ * - COMPLETED: The transaction has been successfully completed
+ * - FAILED: The transaction failed to complete
  */
-enum class TransactionStatusEnum {
-    SUCCESS,
+enum class TransactionStatus : Serializable {
     PENDING,
-    FAILED,
-    CANCELLED
+    COMPLETED,
+    FAILED
 }

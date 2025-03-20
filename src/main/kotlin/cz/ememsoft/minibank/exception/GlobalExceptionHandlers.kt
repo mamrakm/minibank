@@ -88,25 +88,46 @@ class GlobalExceptionHandler {
     }
 
     /**
-     * Handles [IllegalArgumentException].
+     * Handles [AccountNotFoundException].
      *
-     * Returns a response with HTTP status `400 Bad Request` and an error message
-     * indicating that an invalid argument was provided.
+     * Returns a response with HTTP status `404 Not Found` and an error message
+     * indicating that the account could not be found.
      *
      * @param exception The exception instance.
      * @return A map containing the error type and the exception message.
      */
-    @ExceptionHandler(IllegalArgumentException::class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    fun handleIllegalArgumentException(exception: IllegalArgumentException): Map<String, String> {
+    @ExceptionHandler(AccountNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleAccountNotFoundException(exception: AccountNotFoundException): Map<String, String> {
         return mapOf(
-            "error" to "Invalid Argument",
+            "error" to "Account Not Found",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [TransactionNotFoundException].
+     *
+     * Returns a response with HTTP status `404 Not Found` and an error message
+     * indicating that the transaction could not be found.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(TransactionNotFoundException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleTransactionNotFoundException(exception: TransactionNotFoundException): Map<String, String> {
+        return mapOf(
+            "error" to "Transaction Not Found",
             "message" to exception.message.orEmpty()
         )
     }
 
     /**
      * Handles [InsufficientFundsException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that the source account has insufficient funds.
      *
      * @param exception The exception instance.
      * @return A map containing the error type and the exception message.
@@ -121,7 +142,28 @@ class GlobalExceptionHandler {
     }
 
     /**
+     * Handles [SameAccountTransferException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that transfer to the same account is not allowed.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(SameAccountTransferException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleSameAccountTransferException(exception: SameAccountTransferException): Map<String, String> {
+        return mapOf(
+            "error" to "Invalid Transfer",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
      * Handles [CurrencyMismatchException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that the currencies of the accounts do not match.
      *
      * @param exception The exception instance.
      * @return A map containing the error type and the exception message.
@@ -131,6 +173,60 @@ class GlobalExceptionHandler {
     fun handleCurrencyMismatchException(exception: CurrencyMismatchException): Map<String, String> {
         return mapOf(
             "error" to "Currency Mismatch",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [InvalidTransactionAmountException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that the transaction amount is invalid.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(InvalidTransactionAmountException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleInvalidTransactionAmountException(exception: InvalidTransactionAmountException): Map<String, String> {
+        return mapOf(
+            "error" to "Invalid Transaction Amount",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [TransactionFailedException].
+     *
+     * Returns a response with HTTP status `500 Internal Server Error` and an error message
+     * indicating that the transaction failed.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(TransactionFailedException::class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    fun handleTransactionFailedException(exception: TransactionFailedException): Map<String, String> {
+        return mapOf(
+            "error" to "Transaction Failed",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [IllegalArgumentException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that an invalid argument was provided.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(IllegalArgumentException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleIllegalArgumentException(exception: IllegalArgumentException): Map<String, String> {
+        return mapOf(
+            "error" to "Invalid Argument",
             "message" to exception.message.orEmpty()
         )
     }

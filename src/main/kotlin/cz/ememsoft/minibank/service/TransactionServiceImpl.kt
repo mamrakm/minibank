@@ -1,142 +1,219 @@
 package cz.ememsoft.minibank.service
 
-import cz.ememsoft.minibank.entity.AccountEntity
-import cz.ememsoft.minibank.enumeration.TransactionStatusEnum
-import cz.ememsoft.minibank.exception.AccountNotFoundException
-import cz.ememsoft.minibank.exception.CurrencyMismatchException
-import cz.ememsoft.minibank.exception.InsufficientFundsException
+import cz.ememsoft.minibank.api.transaction.response.TransferResponse
+import cz.ememsoft.minibank.exception.InvalidTransactionAmountException
+import cz.ememsoft.minibank.exception.SameAccountTransferException
+import cz.ememsoft.minibank.exception.TransactionFailedException
+import cz.ememsoft.minibank.exception.TransactionNotFoundException
 import cz.ememsoft.minibank.mapper.TransactionMapper
 import cz.ememsoft.minibank.repository.AccountRepository
-import cz.ememsoft.minibank.transaction.entity.TransactionEntity
-import cz.ememsoft.minibank.transaction.repository.TransactionRepository
-import cz.ememsoft.minibank.transaction.request.CreateTransactionRequestDto
-import cz.ememsoft.minibank.transaction.response.CreateTransactionResponseDto
+import cz.ememsoft.minibank.repository.TransactionRepository
+import cz.ememsoft.minibank.transaction.request.TransferRequest
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.kotlin.core.publisher.switchIfEmpty
+import java.math.BigDecimal
+import java.time.LocalDateTime
 
 private val logger = KotlinLogging.logger {}
 
 /**
- * Service implementation for processing financial transactions.
- *
- * This implementation ensures that a transaction record is created with an initial
- * status of PENDING. After validating the involved accounts and updating their balances,
- * the transaction record is updated to SUCCESS. If an error occurs during processing,
- * the transaction record is updated to FAILED.
- *
- * @property accountRepository Repository for accessing account data.
- * @property transactionRepository Repository for managing transaction records.
- * @property transactionMapper Mapper for converting transaction entities to response DTOs.
+ * Implementation of the [TransactionService] interface that orchestrates
+ * transaction operations using the [TransactionProcessor].
  */
 @Service
-@Transactional
 class TransactionServiceImpl(
-    private val accountRepository: AccountRepository,
     private val transactionRepository: TransactionRepository,
-    private val transactionMapper: TransactionMapper
+    private val accountRepository: AccountRepository,
+    private val transactionMapper: TransactionMapper,
+    private val transactionProcessor: TransactionProcessor,
 ) : TransactionService {
 
     /**
-     * Processes a new transaction between accounts.
+     * Transfers money between two accounts in a transactional manner.
      *
-     * The processing flow is as follows:
-     * 1. Create an initial transaction record with status PENDING.
-     * 2. Fetch and validate the sender and recipient accounts.
-     * 3. Update account balances.
-     * 4. Update the transaction record status to SUCCESS.
-     * 5. In case of any error, update the transaction record status to FAILED.
+     * This implementation follows a workflow pattern:
+     * 1. Validate the request
+     * 2. Retrieve the accounts
+     * 3. Validate the accounts
+     * 4. Create a pending transaction
+     * 5. Process the transfer
+     * 6. Mark the transaction as completed or failed
      *
-     * @param request The transaction request data.
-     * @return A [Mono] emitting the transaction response.
-     * @throws AccountNotFoundException if either account is not found.
-     * @throws InsufficientFundsException if the sender has insufficient funds.
-     * @throws CurrencyMismatchException if there is a currency mismatch between accounts.
+     * @param transferRequest The details of the transfer operation
+     * @return A [Mono] emitting the [TransferResponse] containing the transaction details
      */
-    override fun createTransaction(request: CreateTransactionRequestDto): Mono<CreateTransactionResponseDto> {
-        logger.info { "Initiating transaction: $request" }
-        // Step 1: Create a pending transaction record.
-        return transactionRepository.save(
-            TransactionEntity(
-                fromAccountId = request.fromAccountId,
-                toAccountId = request.toAccountId,
-                amount = request.amount,
-                currency = request.currency,
-                status = TransactionStatusEnum.PENDING
-            )
-        ).flatMap { pendingTransaction ->
-            // Step 2: Fetch and validate sender and recipient accounts.
-            fetchAndValidateAccounts(request)
-                .flatMap { (sender, recipient) ->
-                    // Step 3: Update account balances.
-                    updateAccountsBalances(request, sender, recipient)
-                }
-                .then(Mono.defer { transactionRepository.save(pendingTransaction.copy(status = TransactionStatusEnum.SUCCESS)) })
-                .onErrorResume { ex ->
-                    // Step 5: On error, update the pending transaction record to FAILED and propagate the error.
-                    transactionRepository.save(pendingTransaction.copy(status = TransactionStatusEnum.FAILED))
-                        .then(Mono.error(ex))
-                }
-        }
-            .map { transactionEntity ->
-                transactionMapper.entityToResponseDto(transactionEntity)
-            }
-            .doOnSuccess { logger.info { "Transaction completed successfully: $it" } }
-            .doOnError { ex -> logger.error(ex) { "Transaction failed: ${ex.message}" } }
-    }
+    @Transactional
+    override fun transferMoney(transferRequest: TransferRequest): Mono<TransferResponse> {
+        logger.info { "Initiating money transfer: $transferRequest" }
 
-    /**
-     * Fetches and validates the sender and recipient accounts.
-     *
-     * Validates that:
-     * - The sender account exists and has sufficient funds.
-     * - The recipient account exists.
-     * - Both accounts use the currency specified in the request.
-     *
-     * @param request The transaction request data.
-     * @return A [Mono] emitting a [Pair] of sender and recipient accounts if validations pass.
-     */
-    private fun fetchAndValidateAccounts(request: CreateTransactionRequestDto): Mono<Pair<AccountEntity, AccountEntity>> {
-        return accountRepository.findById(request.fromAccountId)
-            .switchIfEmpty(Mono.error(AccountNotFoundException("Sender account not found.")))
-            .flatMap { sender ->
-                if (sender.balance < request.amount) {
-                    Mono.error(InsufficientFundsException("Insufficient funds in sender account."))
-                } else {
-                    accountRepository.findById(request.toAccountId)
-                        .switchIfEmpty(Mono.error(AccountNotFoundException("Recipient account not found.")))
-                        .flatMap { recipient ->
-                            if (sender.currency != request.currency || recipient.currency != request.currency) {
-                                Mono.error(CurrencyMismatchException("Currency mismatch between accounts."))
-                            } else {
-                                Mono.just(Pair(sender, recipient))
+        // Initial validations
+        return validateInitialRequest(transferRequest)
+            // Fetch accounts
+            .then(fetchAccounts(transferRequest))
+            // Process the transfer
+            .flatMap { (sourceAccountId, targetAccountId) ->
+                // Validate transfer conditions (sufficient funds)
+                transactionProcessor.validateTransfer(transferRequest, sourceAccount, targetAccount)
+                    // Create pending transaction
+                    .then(
+                        transactionProcessor.createPendingTransaction(
+                            sourceAccountId = sourceAccount.id,
+                            targetAccountId = targetAccount.id,
+                            amount = transferRequest.amount,
+                            currency = transferRequest.currency,
+                            reference = transferRequest.reference,
+                            timestamp = LocalDateTime.now()
+                        )
+                    )
+                    // Update account balances
+                    .flatMap { transaction ->
+                        transactionProcessor.updateAccountBalances(
+                            sourceAccount = sourceAccount,
+                            targetAccount = targetAccount,
+                            amount = transferRequest.amount
+                        )
+                            // Mark transaction as completed
+                            .then(transactionProcessor.completeTransaction(transaction))
+                            // Handle any errors during processing
+                            .onErrorResume { error ->
+                                logger.error(error) { "Error during transfer processing" }
+                                transactionProcessor.failTransaction(transaction, error.message ?: "Unknown error")
+                                    .flatMap { Mono.error<TransferResponse>(TransactionFailedException("Transaction failed: ${error.message}")) }
                             }
-                        }
-                }
+                    }
+                    // Map to response DTO
+                    .map { transactionMapper.entityToResponseDto(it) }
             }
+            .doOnSuccess { logger.info { "Successfully completed money transfer with ID: ${it.id}" } }
+            .doOnError { logger.error(it) { "Failed to complete money transfer" } }
     }
 
     /**
-     * Updates the account balances for both sender and recipient.
+     * Validates the initial transfer request.
      *
-     * Creates updated immutable copies of the sender and recipient accounts with new balances,
-     * then saves these accounts.
-     *
-     * @param request The transaction request data.
-     * @param sender The validated sender account.
-     * @param recipient The validated recipient account.
-     * @return A [Mono] signaling completion of the balance update operations.
+     * @param transferRequest The transfer request to validate
+     * @return A [Mono] that completes successfully if validation passes
      */
-    private fun updateAccountsBalances(
-        request: CreateTransactionRequestDto,
-        sender: AccountEntity,
-        recipient: AccountEntity
-    ): Mono<Void> {
-        val updatedSender = sender.copy(balance = sender.balance.subtract(request.amount))
-        val updatedRecipient = recipient.copy(balance = recipient.balance.add(request.amount))
-        return accountRepository.save(updatedSender)
-            .then(accountRepository.save(updatedRecipient))
-            .then()
+    private fun validateInitialRequest(transferRequest: TransferRequest): Mono<Unit> = Mono.defer {
+        // Validate positive amount
+        if (transferRequest.amount <= BigDecimal.ZERO) {
+            logger.warn { "Invalid transaction amount: ${transferRequest.amount}" }
+            return@defer Mono.error<Unit>(InvalidTransactionAmountException("Transaction amount must be positive"))
+        }
+
+        // Validate different accounts
+        if (transferRequest.sourceAccountId == transferRequest.targetAccountId) {
+            logger.warn { "Attempted transfer to same account: ${transferRequest.sourceAccountId}" }
+            return@defer Mono.error<Unit>(SameAccountTransferException("Cannot transfer money to the same account"))
+        }
+
+        Mono.just(Unit)
+    }
+
+    /**
+     * Fetches source and target accounts for a transfer.
+     *
+     * @param transferRequest The transfer request containing account IDs
+     * @return A [Mono] emitting a pair of source and target account entities
+     */
+    private fun fetchAccounts(transferRequest: TransferRequest) = Mono.zip(
+        accountRepository.findById(transferRequest.sourceAccountId)
+            .switchIfEmpty {
+                logger.warn { "Source account not found: ${transferRequest.sourceAccountId}" }
+                Mono.error(AccountNotFoundException("Source account with ID ${transferRequest.sourceAccountId} not found"))
+            },
+        accountRepository.findById(transferRequest.targetAccountId)
+            .switchIfEmpty {
+                logger.warn { "Target account not found: ${transferRequest.targetAccountId}" }
+                Mono.error(AccountNotFoundException("Target account with ID ${transferRequest.targetAccountId} not found"))
+            }
+    )
+
+    /**
+     * Retrieves a transaction by its ID.
+     *
+     * @param id The ID of the transaction to retrieve
+     * @return A [Mono] emitting the [TransferResponse] if found
+     */
+    override fun getTransactionById(id: Long): Mono<TransferResponse> {
+        logger.info { "Fetching transaction with ID: $id" }
+        return transactionRepository.findById(id)
+            .switchIfEmpty {
+                logger.warn { "Transaction not found: $id" }
+                Mono.error(TransactionNotFoundException("Transaction with ID $id not found"))
+            }
+            .map { transactionMapper.entityToResponseDto(it) }
+            .doOnSuccess { logger.debug { "Successfully retrieved transaction with ID: $id" } }
+            .doOnError { logger.error(it) { "Error retrieving transaction with ID: $id" } }
+    }
+
+    /**
+     * Retrieves all transactions associated with an account.
+     *
+     * @param accountId The ID of the account
+     * @return A [Flux] emitting all [TransferResponse] objects associated with the account
+     */
+    override fun getTransactionsByAccountId(accountId: Long): Flux<TransferResponse> {
+        logger.info { "Fetching transactions for account ID: $accountId" }
+        return validateAccountExists(accountId)
+            .thenMany(
+                transactionRepository.findByAccountId(accountId)
+                    .map { transactionMapper.entityToResponseDto(it) }
+            )
+            .doOnComplete { logger.debug { "Successfully retrieved transactions for account ID: $accountId" } }
+            .doOnError { logger.error(it) { "Error retrieving transactions for account ID: $accountId" } }
+    }
+
+    /**
+     * Retrieves outgoing transactions from an account.
+     *
+     * @param accountId The ID of the account
+     * @return A [Flux] emitting all outgoing [TransferResponse] objects from the account
+     */
+    override fun getOutgoingTransactions(accountId: Long): Flux<TransferResponse> {
+        logger.info { "Fetching outgoing transactions for account ID: $accountId" }
+        return validateAccountExists(accountId)
+            .thenMany(
+                transactionRepository.findBySourceAccountId(accountId)
+                    .map { transactionMapper.entityToResponseDto(it) }
+            )
+            .doOnComplete { logger.debug { "Successfully retrieved outgoing transactions for account ID: $accountId" } }
+            .doOnError { logger.error(it) { "Error retrieving outgoing transactions for account ID: $accountId" } }
+    }
+
+    /**
+     * Retrieves incoming transactions to an account.
+     *
+     * @param accountId The ID of the account
+     * @return A [Flux] emitting all incoming [TransferResponse] objects to the account
+     */
+    override fun getIncomingTransactions(accountId: Long): Flux<TransferResponse> {
+        logger.info { "Fetching incoming transactions for account ID: $accountId" }
+        return validateAccountExists(accountId)
+            .thenMany(
+                transactionRepository.findByTargetAccountId(accountId)
+                    .map { transactionMapper.entityToResponseDto(it) }
+            )
+            .doOnComplete { logger.debug { "Successfully retrieved incoming transactions for account ID: $accountId" } }
+            .doOnError { logger.error(it) { "Error retrieving incoming transactions for account ID: $accountId" } }
+    }
+
+    /**
+     * Validates that an account exists.
+     *
+     * @param accountId The ID of the account to check
+     * @return A [Mono] that completes if the account exists, or emits an error if not
+     */
+    private fun validateAccountExists(accountId: Long): Mono<Unit> {
+        return accountRepository.findById(accountId)
+            .switchIfEmpty {
+                logger.warn { "Account not found: $accountId" }
+                Mono.error(AccountNotFoundException("Account with ID $accountId not found"))
+            }
+            .then(Mono.just(Unit))
     }
 }
