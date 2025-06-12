@@ -51,8 +51,8 @@ test_request() {
     local expected_status=$4
     local description=$5
 
-    echo -e "\n${YELLOW}Testing:${NC} $description"
-    echo -e "${BLUE}$method $url${NC}"
+    echo -e "\n${YELLOW}Testing:${NC} $description" >&2
+    echo -e "${BLUE}$method $url${NC}" >&2
 
     if [ -n "$data" ]; then
         response=$(curl -s -w "\n%{http_code}" -X "$method" \
@@ -74,12 +74,12 @@ test_request() {
     body=$(echo "$response" | head -n -1)
     status=$(echo "$response" | tail -n 1)
 
-    echo "Response: $body"
-    echo "Status: $status"
+    echo "Response: $body" >&2
+    echo "Status: $status" >&2
 
     if [ "$status" = "$expected_status" ]; then
         print_success "$description - Status $status"
-        echo "$body"  # Return response body for parsing
+        echo "$body"  # Return response body to stdout for capture
         return 0
     else
         print_error "$description - Expected $expected_status, got $status"
