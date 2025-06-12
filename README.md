@@ -1,292 +1,419 @@
 # Minibank v0.5.0
 
-A reactive banking system built with Spring Boot 3.4.1, Kotlin, and R2DBC.
+A reactive banking system built with Spring Boot 3.4.1, Kotlin, and R2DBC for high-performance, non-blocking financial operations.
 
-## System Architecture
+## Architecture Overview
 
 ```mermaid
-graph TD
-   Client[Client Browser/App]
-   API[REST API Layer]
-   Services[Service Layer]
-   Repositories[Repository Layer]
-   DB[(PostgreSQL Database)]
-   Keycloak[Keycloak Auth Server]
-   Scheduler[Quartz Scheduler]
-
-   Client -->|HTTP/REST| API
-   Client -->|Authentication| Keycloak
-   Keycloak -->|JWT Token| API
-   API -->|Business Logic| Services
-   Services -->|Data Access| Repositories
-   Repositories -->|R2DBC| DB
-   Scheduler -->|Execute Jobs| Services
-
-   subgraph "Core Components"
-      API
-      Services
-      Repositories
-   end
+graph TB
+    Client[Client Applications]
+    
+    subgraph "Spring Boot 3.4.1 Application"
+        Controllers[REST Controllers<br/>Spring WebFlux]
+        Services[Service Layer<br/>Business Logic]
+        Processors[Transaction Processors<br/>Money Operations]
+        Repositories[R2DBC Repositories<br/>Reactive Data Access]
+        Mappers[MapStruct Mappers<br/>Entity ↔ DTO]
+        Utils[MoneyUtils<br/>Financial Safety]
+    end
+    
+    DB[(PostgreSQL 17<br/>bank schema)]
+    Liquibase[Liquibase<br/>Schema Migration]
+    
+    Client -->|HTTP/JSON| Controllers
+    Controllers --> Services
+    Services --> Processors
+    Services --> Repositories
+    Services --> Mappers
+    Processors --> Utils
+    Repositories -->|R2DBC| DB
+    Liquibase -->|JDBC| DB
 ```
 
 ## Domain Model
 
 ```mermaid
-classDiagram
-    Client "1" -- "*" Account : owns
-    Account "1" -- "*" Transaction : participates
-    Account "1" -- "*" AccountStatement : has
-    Account "1" -- "*" ScheduledTransfer : involves
-    
-    class Client {
-        +Long id
-        +String firstName
-        +String lastName
-        +String email
-        +String phone
-        +String address
+erDiagram
+    CLIENT {
+        bigint id PK
+        varchar first_name "NOT NULL"
+        varchar last_name "NOT NULL" 
+        varchar email "UNIQUE NOT NULL"
+        varchar phone_number "nullable"
+        varchar address "nullable"
+        date date_of_birth "nullable"
+        uuid personal_number "UNIQUE NOT NULL"
     }
     
-    class Account {
-        +Long id
-        +String name
-        +Long clientId
-        +BigDecimal balance
-        +AccountTypeEnum accountType
-        +CurrencyEnum currency
+    ACCOUNT {
+        bigint id PK
+        varchar account_name "NOT NULL"
+        bigint client_id FK "NOT NULL"
+        decimal balance "19,4 DEFAULT 0.0000"
+        integer account_type "ordinal NOT NULL"
+        integer currency "ordinal NOT NULL"
     }
     
-    class Transaction {
-        +Long id
-        +Long sourceAccountId
-        +Long targetAccountId
-        +BigDecimal amount
-        +String currency
-        +LocalDateTime timestamp
-        +TransactionStatus status
-        +String reference
+    TRANSACTION {
+        bigint id PK
+        bigint source_account_id FK "NOT NULL"
+        bigint target_account_id FK "NOT NULL"
+        decimal amount "19,4 > 0"
+        integer currency "ordinal NOT NULL"
+        timestamp timestamp "NOT NULL"
+        integer status "ordinal NOT NULL"
+        varchar reference "nullable"
     }
     
-    class AccountStatement {
-        +Long id
-        +Long accountId
-        +LocalDate startDate
-        +LocalDate endDate
-        +LocalDateTime generatedOn
-        +BigDecimal openingBalance
-        +BigDecimal closingBalance
-    }
-    
-    class ScheduledTransfer {
-        +Long id
-        +Long sourceAccountId
-        +Long targetAccountId
-        +BigDecimal amount
-        +String currency
-        +LocalDateTime executionDate
-        +TransferFrequency frequency
-        +LocalDateTime endDate
-        +Boolean isActive
-    }
+    CLIENT ||--o{ ACCOUNT : "owns (CASCADE DELETE)"
+    ACCOUNT ||--o{ TRANSACTION : "source account"
+    ACCOUNT ||--o{ TRANSACTION : "target account"
 ```
-
-## Features
-
-- **Client Management**: Create, update, and manage client information
-- **Account Management**: Create and manage different types of bank accounts
-- **Transaction Processing**: Transfer money between accounts with real-time balance updates
-- **Account Statements**: Generate account statements for specified periods
-- **Scheduled Transfers**: Set up one-time or recurring transfers between accounts
-- **Security**: OAuth2/OIDC authentication and authorization with fine-grained access control
-
-## Request Flow
-
-```mermaid
-sequenceDiagram
-   actor Client
-   participant API as API Controller
-   participant Service as Service Layer
-   participant Repo as Repository
-   participant DB as Database
-
-   Client->>API: HTTP Request
-   API->>Service: Invoke service method
-   Service->>Repo: Data operation
-   Repo->>DB: R2DBC query
-   DB-->>Repo: Reactive data stream
-   Repo-->>Service: Flux/Mono of entities
-   Service-->>API: DTO transformation
-   API-->>Client: HTTP Response (JSON)
-```
-
-For more detailed diagrams, see the PlantUML files in the `/docs` directory:
-- [System Architecture](docs/architecture.puml)
-- [Domain Model](docs/domain.puml)
-- [Money Transfer Sequence](docs/transfer-sequence.puml)
 
 ## Technology Stack
 
-- **Kotlin 2.1.10**: Modern, concise JVM language with functional programming features
-- **Spring Boot 3.4.1**: Framework for building reactive microservices
-- **Spring WebFlux**: Reactive web framework
-- **R2DBC**: Reactive database connectivity
-- **PostgreSQL**: Relational database
-- **Liquibase**: Database schema versioning and migration
-- **Quartz**: Advanced scheduling capabilities
-- **Spring Security**: Authentication and authorization
-- **OAuth2/OIDC**: Modern authentication and authorization protocols
-- **Keycloak**: Identity and access management
-- **Docker**: Containerization for easy deployment
-- **Testcontainers**: Integration testing with real database instances
-- **MapStruct**: Type-safe bean mapping
-- **JUnit 5**: Testing framework
+**Core Framework:**
+- Spring Boot 3.4.1
+- Kotlin 2.1.21
+- Spring WebFlux (Reactive Web)
+- R2DBC (Reactive Database)
 
-## Prerequisites
+**Database:**
+- PostgreSQL 17
+- Liquibase (Schema Management)
+- Enum Ordinal Storage
 
-- JDK 23 or higher
-- Docker and docker-compose
-- Gradle 8.11.1 or higher (or use the included Gradle wrapper)
+**Development:**
+- MapStruct 1.6.3 (Bean Mapping)
+- Docker & Docker Compose
+- Testcontainers (Integration Testing)
+- JUnit 5
 
 ## Getting Started
 
-### Setup
+### Prerequisites
 
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/yourusername/minibank.git
-   cd minibank
-   ```
+- JDK 21 or higher
+- Docker & Docker Compose
+- curl (for testing)
 
-2. Start the database and Keycloak:
-   ```bash
-   docker-compose up -d postgres keycloak
-   ```
+### Quick Start
 
-3. Build and run the application:
-   ```bash
-   ./gradlew clean bootRun
-   ```
+1. **Start Infrastructure:**
+```bash
+docker compose up -d postgres
+```
 
-   Alternatively, build and run with Docker:
-   ```bash
-   ./gradlew clean bootBuildImage
-   docker-compose up -d
-   ```
+2. **Initialize Database Schema:**
+```bash
+./mvnw liquibase:update
+```
 
-4. Access the application:
-   - API: http://localhost:8082
-   - Keycloak Admin: http://localhost:8080 (admin/admin)
+3. **Build and Start Application:**
+```bash
+./mvnw clean bootBuildImage
+docker compose up -d app
+```
 
-### Default Users
+4. **Verify Application:**
+```bash
+curl http://localhost:8082/actuator/health
+```
 
-The application comes with two predefined users:
+5. **Run API Tests:**
+```bash
+./test_minibank_api.sh
+```
 
-1. **Admin User**
-   - Username: `admin`
-   - Password: `admin`
-   - Roles: `ADMIN`
-   - Scopes: Full access to all endpoints
+6. **Shutdown:**
+```bash
+docker compose down -v  # -v removes volumes/data
+```
 
-2. **Regular User**
-   - Username: `user`
-   - Password: `user`
-   - Roles: `USER`
-   - Scopes: Read-only access to most endpoints
+### Development Mode
 
-## API Endpoints
+```bash
+# Start only database
+docker compose up -d postgres
 
-### Client Management
-- `GET /clients` - Get all clients
+# Run schema migrations
+./mvnw liquibase:update
+
+# Start application in development
+./mvnw spring-boot:run
+
+# Application available at http://localhost:8082
+```
+
+## API Reference
+
+### Base URL
+```
+http://localhost:8082
+```
+
+### OpenAPI Documentation
+- **OpenAPI Spec**: [openapi.yaml](src/main/resources/openapi.yaml)
+- **Swagger UI**: http://localhost:8082/swagger-ui.html (when running)
+
+### Core Endpoints
+
+**Clients:**
+- `GET /clients` - List all clients
+- `POST /clients` - Create client
 - `GET /clients/{id}` - Get client by ID
-- `POST /clients` - Create a new client
-- `PUT /clients` - Update a client
-- `DELETE /clients/{id}` - Delete a client
-- `GET /clients/search-by-name/{firstName}` - Search clients by first name
-- `GET /clients/search-by-email/{email}` - Search client by email
+- `PUT /clients/{id}` - Update client
+- `DELETE /clients/{id}` - Delete client
+- `GET /clients/search-by-name/{firstName}` - Search by first name
+- `GET /clients/search-by-email/{email}` - Search by email
 
-### Account Management
-- `GET /accounts` - Get all accounts
+**Accounts:**
+- `GET /accounts` - List all accounts
+- `POST /accounts` - Create account
 - `GET /accounts/{id}` - Get account by ID
-- `POST /accounts` - Create a new account
-- `PUT /accounts/{id}` - Update an account
-- `DELETE /accounts/{id}` - Delete an account
-- `GET /accounts/client/{clientId}` - Get accounts for client
+- `PUT /accounts/{id}` - Update account
+- `DELETE /accounts/{id}` - Delete account
+- `GET /accounts/client/{clientId}` - Get client's accounts
 
-### Transaction Management
-- `POST /transactions/transfer` - Transfer money between accounts
+**Transactions:**
+- `POST /transactions/transfer` - Transfer money
 - `GET /transactions/{id}` - Get transaction by ID
-- `GET /transactions/account/{accountId}` - Get transactions for account
-- `GET /transactions/account/{accountId}/outgoing` - Get outgoing transactions
-- `GET /transactions/account/{accountId}/incoming` - Get incoming transactions
+- `GET /transactions/account/{accountId}` - Get account transactions
+- `GET /transactions/account/{accountId}/outgoing` - Outgoing transactions
+- `GET /transactions/account/{accountId}/incoming` - Incoming transactions
 
-### Account Statements
-- `POST /statements/{accountId}/generate` - Generate statement for period
-- `GET /statements/account/{accountId}` - Get all statements for account
-- `GET /statements/{id}` - Get statement by ID
-- `GET /statements/account/{accountId}/latest` - Get most recent statement
-- `GET /statements/{id}/export/pdf` - Export statement as PDF
-- `GET /statements/{id}/export/csv` - Export statement as CSV
+### Example Usage
 
-### Scheduled Transfers
-- `POST /scheduled-transfers` - Create scheduled transfer
-- `GET /scheduled-transfers/{id}` - Get transfer by ID
-- `GET /scheduled-transfers/account/{accountId}` - Get transfers for account
-- `GET /scheduled-transfers/my-transfers` - Get current user's transfers
-- `PUT /scheduled-transfers` - Update scheduled transfer
-- `DELETE /scheduled-transfers/{id}` - Cancel scheduled transfer
-
-## Development
-
-### Project Structure
-
-```
-project/
-├── build.gradle.kts            # Build configuration with dependencies
-├── docker-compose.yml          # Docker compose for running the application
-├── config/
-│   └── keycloak/
-│       └── minibank-realm.json # Keycloak realm configuration
-├── src/
-│   ├── main/
-│   │   ├── kotlin/            # Kotlin source code
-│   │   └── resources/         # Application resources and configurations
-│   └── test/
-│       ├── kotlin/            # Test code
-│       └── resources/         # Test resources
-```
-
-### Running Tests
-
-Run unit tests:
+**Create Client:**
 ```bash
-./gradlew test
+curl -X POST http://localhost:8082/clients \
+  -H "Content-Type: application/json" \
+  -d '{
+    "firstName": "John",
+    "lastName": "Doe", 
+    "email": "john.doe@example.com",
+    "phoneNumber": "+1234567890",
+    "address": "123 Main St",
+    "dateOfBirth": "1990-01-15"
+  }'
 ```
 
-Run integration tests:
+**Create Account:**
 ```bash
-./gradlew integrationTest
+curl -X POST http://localhost:8082/accounts \
+  -H "Content-Type: application/json" \
+  -d '{
+    "accountType": "CHECKING",
+    "balance": "1000.0000",
+    "currency": "USD",
+    "clientId": 1
+  }'
 ```
 
-### Configuration
+**Transfer Money:**
+```bash
+curl -X POST http://localhost:8082/transactions/transfer \
+  -H "Content-Type: application/json" \
+  -d '{
+    "sourceAccountId": 1,
+    "targetAccountId": 2,
+    "amount": "250.0000",
+    "currency": "USD",
+    "reference": "Monthly payment"
+  }'
+```
 
-Configuration properties are in `src/main/resources/application.yml` and environment-specific configurations are in `application-{env}.yml` files.
+## Data Types & Enums
 
-## Security
+**Account Types:**
+`CHECKING`, `CURRENT`, `SAVINGS`, `INVESTMENT`, `BUSINESS`, `STUDENT`, `JOINT`, `LOAN`, `CLASSIC`
 
-The application uses OAuth2/OIDC for authentication and authorization:
+**Currencies:**
+`USD`, `EUR`, `GBP`
 
-- **Authentication**: Users authenticate via Keycloak
-- **Authorization**: Access control is based on roles and scopes
-- **JWT**: Secure token-based authentication
+**Transaction Status:**
+`PENDING`, `COMPLETED`, `FAILED`
+
+## Money Safety Features
+
+- **4-Decimal Precision**: All amounts stored with `DECIMAL(19,4)`
+- **Banker's Rounding**: `HALF_EVEN` rounding mode
+- **Validation**: Min amount `0.0001`, max `999,999,999,999,999.9999`
+- **MoneyUtils**: Centralized financial calculations
+- **Currency Matching**: Enforced across transaction accounts
+
+## Transaction Flow
+
+```mermaid
+sequenceDiagram
+    participant Client
+    participant API as TransactionController
+    participant Service as TransactionService
+    participant Processor as TransactionProcessor
+    participant AccountRepo as AccountRepository
+    participant TransactionRepo as TransactionRepository
+    participant DB as PostgreSQL
+
+    Client->>API: POST /transactions/transfer
+    API->>Service: processTransaction()
+    Service->>AccountRepo: findById(sourceAccount)
+    AccountRepo->>DB: SELECT source account
+    Service->>AccountRepo: findById(targetAccount)
+    AccountRepo->>DB: SELECT target account
+    Service->>Processor: validateTransaction()
+    Processor-->>Service: validation result
+    Service->>Processor: createPendingTransaction()
+    Processor->>TransactionRepo: save(PENDING)
+    TransactionRepo->>DB: INSERT transaction
+    Service->>Processor: updateAccountBalances()
+    Processor->>AccountRepo: save(debitedSource)
+    Processor->>AccountRepo: save(creditedTarget)
+    Service->>Processor: completeTransaction()
+    Processor->>TransactionRepo: update(COMPLETED)
+    Service-->>API: TransactionResponse
+    API-->>Client: 201 Created
+```
+
+## Testing
+
+**Unit Tests:**
+```bash
+./mvnw test
+```
+
+**Integration Tests:**
+```bash
+./mvnw test -Dtest=*IntegrationTest
+```
+
+**API Testing:**
+```bash
+./test_minibank_api.sh
+```
+
+**Test Coverage:**
+- Controller layer unit tests
+- Service layer integration tests
+- Repository tests with Testcontainers
+- End-to-end API testing
+
+## Project Structure
+
+```
+minibank/
+├── src/main/kotlin/cz/ememsoft/minibank/
+│   ├── api/                    # REST Controllers
+│   ├── service/                # Business Logic
+│   ├── repository/             # Data Access
+│   ├── entity/                 # JPA Entities
+│   ├── dto/                    # Data Transfer Objects
+│   ├── mapper/                 # MapStruct Mappers
+│   ├── enumeration/            # Enums
+│   ├── exception/              # Custom Exceptions
+│   ├── util/                   # Utilities (MoneyUtils)
+│   ├── validation/             # Validation Strategies
+│   └── config/                 # Configuration
+├── src/main/resources/
+│   ├── db/changelog/           # Liquibase Migrations
+│   └── application*.yml        # Configuration Files
+├── src/test/                   # Test Classes
+├── docs/                       # PlantUML Diagrams
+├── docker-compose.yml          # Docker Services
+└── test_minibank_api.sh        # API Test Script
+```
+
+## Configuration
+
+**Database Connection:**
+```yaml
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/minibank-database?currentSchema=bank
+    username: postgres
+    password: postgres
+```
+
+**Liquibase:**
+```yaml
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: bank
+```
+
+## Monitoring
+
+**Health Check:**
+```bash
+curl http://localhost:8082/actuator/health
+```
+
+**Metrics:**
+```bash
+curl http://localhost:8082/actuator/metrics
+```
+
+## Error Handling
+
+The API provides consistent error responses:
+
+```json
+{
+  "error": "Insufficient Funds",
+  "message": "Insufficient funds in account 1. Available: 100.00 USD, Required: 150.00 USD"
+}
+```
+
+**Common Error Types:**
+- `400` - Validation errors, insufficient funds, currency mismatch
+- `404` - Resource not found
+- `409` - Duplicate client email
+- `500` - Internal server error
+
+## Performance Features
+
+- **Non-blocking I/O**: R2DBC reactive database access
+- **Connection Pooling**: Configurable R2DBC connection pool
+- **Enum Ordinals**: Integer storage for account types/currencies
+- **Efficient Indexing**: Optimized database indexes
+- **Async Processing**: Non-blocking transaction processing
+
+## Security Notes
+
+- Input validation on all endpoints
+- Email uniqueness enforcement
+- Transaction amount limits
+- Account balance constraints
+- Foreign key integrity
+
+## Troubleshooting
+
+**Database Connection Issues:**
+```bash
+# Check database status
+docker compose logs postgres
+
+# Verify schema
+docker compose exec postgres psql -U postgres -d minibank-database -c "\dt bank.*"
+```
+
+**Application Issues:**
+```bash
+# Check application logs
+docker compose logs app
+
+# Verify health
+curl http://localhost:8082/actuator/health
+```
 
 ## License
 
-This project is licensed under the Apache License 2.0 - see the LICENSE file for details.
+Apache License 2.0 - see LICENSE file for details.
 
 ## Contributing
 
 1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+2. Create feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open Pull Request
