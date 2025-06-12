@@ -33,6 +33,6 @@ jobs:
       - name: Run a multi-line script
         run: |
           echo "Action: build project image"
-          ./gradlew clean bootJar
+          ./mvnw clean package -DskipTests
           echo "Action: run tests"
           # ./gradlew tests
