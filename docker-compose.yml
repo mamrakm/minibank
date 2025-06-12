@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:latest
+    image: postgres:17
     restart: always
     environment:
       POSTGRES_USER: postgres
@@ -23,8 +23,8 @@ services:
     ports:
       - "8082:8082"
     environment:
-      # Fixed: Use R2DBC properties instead of JDBC
-      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/minibank-database?schema=bank
+      # R2DBC Configuration
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/minibank-database?currentSchema=bank
       SPRING_R2DBC_USERNAME: postgres
       SPRING_R2DBC_PASSWORD: postgres
       SPRING_R2DBC_POOL_INITIAL_SIZE: 5
@@ -32,41 +32,48 @@ services:
       SPRING_R2DBC_POOL_MAX_IDLE_TIME: 30m
       SPRING_R2DBC_POOL_VALIDATION_QUERY: "SELECT 1"
 
-      # Liquibase still needs JDBC for schema migrations
-      SPRING_LIQUIBASE_URL: jdbc:postgresql://postgres:5432/minibank-database?schema=bank
+      # Liquibase Configuration
+      SPRING_LIQUIBASE_URL: jdbc:postgresql://postgres:5432/minibank-database
       SPRING_LIQUIBASE_USER: postgres
       SPRING_LIQUIBASE_PASSWORD: postgres
       SPRING_LIQUIBASE_DEFAULT_SCHEMA: bank
       SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
 
-      # Application properties
+      # Application Configuration
       SPRING_PROFILES_ACTIVE: prod
       SERVER_PORT: 8082
+      SPRING_APPLICATION_NAME: minibank
 
-      # Jackson configuration
+      # Jackson Configuration
       SPRING_JACKSON_DESERIALIZATION_FAIL_ON_UNKNOWN_PROPERTIES: false
 
-      # Logging levels
+      # Logging Configuration
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_CZ_EMEMSOFT_MINIBANK: INFO
       LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_R2DBC: DEBUG
       LOGGING_LEVEL_IO_R2DBC_POSTGRESQL: DEBUG
 
-      # Task execution
+      # Task Execution Configuration
       SPRING_TASK_EXECUTION_POOL_CORE_SIZE: 5
       SPRING_TASK_EXECUTION_POOL_MAX_SIZE: 10
       SPRING_TASK_EXECUTION_POOL_QUEUE_CAPACITY: 25
       SPRING_TASK_EXECUTION_THREAD_NAME_PREFIX: "AsyncExecutor-"
+
+      # Management/Actuator Configuration
+      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
+      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+
     depends_on:
       postgres:
         condition: service_healthy
-    networks:
-      - minibank-network
+
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   postgres_data:
     driver: local
-
-networks:
-  minibank-network:
-    driver: bridge
