@@ -1,59 +1,53 @@
--- Ensure the "bank" schema exists
+-- Simple database initialization script for bank schema
+-- Creates only tables with proper columns
+
+-- Create bank schema
 CREATE SCHEMA IF NOT EXISTS bank;
 
--- ===========================================
--- Create "client" table with an auto-incrementing ID
--- ===========================================
-CREATE SEQUENCE IF NOT EXISTS bank.client_id_seq START WITH 1 INCREMENT BY 1;
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE IF NOT EXISTS bank.client
+-- Client table
+CREATE TABLE bank.client
 (
-    id         BIGINT PRIMARY KEY DEFAULT nextval('bank.client_id_seq'),
-    first_name VARCHAR(255)        NOT NULL,
-    last_name  VARCHAR(255)        NOT NULL,
-    email      VARCHAR(255) UNIQUE NOT NULL,
-    phone      VARCHAR(255),
-    address    VARCHAR(255)
+    id              BIGSERIAL PRIMARY KEY,
+    first_name      VARCHAR(255)                   NOT NULL,
+    last_name       VARCHAR(255)                   NOT NULL,
+    email           VARCHAR(255)                   NOT NULL UNIQUE,
+    phone_number    VARCHAR(255),
+    address         VARCHAR(255),
+    date_of_birth   DATE,
+    personal_number UUID DEFAULT gen_random_uuid() NOT NULL UNIQUE
 );
 
--- ===========================================
--- Create "account" table with an auto-incrementing ID
--- ===========================================
-CREATE SEQUENCE IF NOT EXISTS bank.account_id_seq START WITH 1 INCREMENT BY 1;
-
-CREATE TABLE IF NOT EXISTS bank.account
+-- Account table
+CREATE TABLE bank.account
 (
-    id           BIGINT PRIMARY KEY DEFAULT nextval('bank.account_id_seq'),
-    account_name VARCHAR(255) NOT NULL,
-    client_id    BIGINT       NOT NULL,
-    balance      DECIMAL      NOT NULL,
-    account_type SMALLINT     NOT NULL,
-    CONSTRAINT fk_account_client FOREIGN KEY (client_id) REFERENCES bank.client (id) ON DELETE CASCADE
+    id           BIGSERIAL PRIMARY KEY,
+    account_name VARCHAR(255)                  NOT NULL,
+    client_id    BIGINT                        NOT NULL,
+    balance      DECIMAL(19, 4) DEFAULT 0.0000 NOT NULL,
+    account_type INTEGER                       NOT NULL,
+    currency     INTEGER                       NOT NULL,
+    CONSTRAINT fk_account_client
+        FOREIGN KEY (client_id) REFERENCES bank.client (id) ON DELETE CASCADE
 );
 
--- ===========================================
--- Create "transaction" table with an auto-incrementing ID
--- ===========================================
-CREATE SEQUENCE IF NOT EXISTS bank.transaction_id_seq START WITH 1 INCREMENT BY 1;
-
-CREATE TABLE IF NOT EXISTS bank.transaction
+-- Transaction table - Fixed currency column to be INTEGER for ordinal storage
+CREATE TABLE bank.transaction
 (
-    id                BIGINT PRIMARY KEY DEFAULT nextval('bank.transaction_id_seq'),
-    source_account_id BIGINT          NOT NULL,
-    target_account_id BIGINT          NOT NULL,
-    amount            DECIMAL(19, 2)   NOT NULL,
-    timestamp         TIMESTAMP        NOT NULL,
-    status            VARCHAR(20)      NOT NULL,
+    id                BIGSERIAL PRIMARY KEY,
+    source_account_id BIGINT         NOT NULL,
+    target_account_id BIGINT         NOT NULL,
+    amount            DECIMAL(19, 4) NOT NULL CHECK (amount > 0),
+    currency          INTEGER        NOT NULL, -- Changed from VARCHAR(3) to INTEGER for ordinal
+    timestamp         TIMESTAMP      NOT NULL,
+    status            INTEGER        NOT NULL,
     reference         VARCHAR(255),
-    CONSTRAINT fk_transaction_source_account FOREIGN KEY (source_account_id) REFERENCES bank.account (id),
-    CONSTRAINT fk_transaction_target_account FOREIGN KEY (target_account_id) REFERENCES bank.account (id)
+    CONSTRAINT fk_transaction_source
+        FOREIGN KEY (source_account_id) REFERENCES bank.account (id),
+    CONSTRAINT fk_transaction_target
+        FOREIGN KEY (target_account_id) REFERENCES bank.account (id),
+    CONSTRAINT chk_different_accounts
+        CHECK (source_account_id != target_account_id)
 );
-
--- ===========================================
--- Ensure indexes for faster lookup
--- ===========================================
-CREATE INDEX IF NOT EXISTS idx_client_email ON bank.client (email);
-CREATE INDEX IF NOT EXISTS idx_account_client_id ON bank.account (client_id);
-CREATE INDEX IF NOT EXISTS idx_transaction_source_account ON bank.transaction (source_account_id);
-CREATE INDEX IF NOT EXISTS idx_transaction_target_account ON bank.transaction (target_account_id);
-CREATE INDEX IF NOT EXISTS idx_transaction_timestamp ON bank.transaction (timestamp);

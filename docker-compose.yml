@@ -10,26 +10,63 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql  # Map the SQL script with schema creation
+      - ./db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   app:
-    image: minibank:0.0.1-SNAPSHOT
+    image: minibank:0.5.0
     restart: always
     ports:
       - "8082:8082"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/minibank-database
-      #      SPRING_DATASOURCE_USERNAME: postgres
-      #      SPRING_DATASOURCE_PASSWORD: postgres
-      #      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
-      #      SPRING_JPA_HIBERNATE_DDL_AUTO: none
-      #      SPRING_SERVER_PORT: 8082
-      SPRING_ACTIVE_PROFILE: dev
-      #      SPRING_LIQUIBASE_ENABLE_LAZY_INIT: false
+      # Fixed: Use R2DBC properties instead of JDBC
+      SPRING_R2DBC_URL: r2dbc:postgresql://postgres:5432/minibank-database?schema=bank
+      SPRING_R2DBC_USERNAME: postgres
+      SPRING_R2DBC_PASSWORD: postgres
+      SPRING_R2DBC_POOL_INITIAL_SIZE: 5
+      SPRING_R2DBC_POOL_MAX_SIZE: 10
+      SPRING_R2DBC_POOL_MAX_IDLE_TIME: 30m
+      SPRING_R2DBC_POOL_VALIDATION_QUERY: "SELECT 1"
+
+      # Liquibase still needs JDBC for schema migrations
+      SPRING_LIQUIBASE_URL: jdbc:postgresql://postgres:5432/minibank-database?schema=bank
+      SPRING_LIQUIBASE_USER: postgres
+      SPRING_LIQUIBASE_PASSWORD: postgres
+      SPRING_LIQUIBASE_DEFAULT_SCHEMA: bank
+      SPRING_LIQUIBASE_CHANGE_LOG: classpath:db/changelog/db.changelog-master.yaml
+
+      # Application properties
+      SPRING_PROFILES_ACTIVE: prod
+      SERVER_PORT: 8082
+
+      # Jackson configuration
+      SPRING_JACKSON_DESERIALIZATION_FAIL_ON_UNKNOWN_PROPERTIES: false
+
+      # Logging levels
+      LOGGING_LEVEL_ROOT: INFO
+      LOGGING_LEVEL_CZ_EMEMSOFT_MINIBANK: INFO
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_R2DBC: DEBUG
+      LOGGING_LEVEL_IO_R2DBC_POSTGRESQL: DEBUG
+
+      # Task execution
+      SPRING_TASK_EXECUTION_POOL_CORE_SIZE: 5
+      SPRING_TASK_EXECUTION_POOL_MAX_SIZE: 10
+      SPRING_TASK_EXECUTION_POOL_QUEUE_CAPACITY: 25
+      SPRING_TASK_EXECUTION_THREAD_NAME_PREFIX: "AsyncExecutor-"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - minibank-network
 
 volumes:
   postgres_data:
     driver: local
 
 networks:
-  default:
+  minibank-network:
+    driver: bridge
