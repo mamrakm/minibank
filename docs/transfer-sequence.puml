@@ -1,0 +1,56 @@
+@startuml "Money Transaction Sequence"
+
+title Money Transaction Flow
+
+participant "Client" as client
+participant "TransactionController" as controller
+participant "TransactionService" as service
+participant "AccountService" as accountService
+participant "TransactionRepository" as transRepo
+participant "AccountRepository" as accountRepo
+database "Database" as db
+
+client -> controller : POST /api/transactions\n(sourceAccountId, targetAccountId,\namount, currency, reference)
+
+controller -> service : createTransaction(TransactionRequest)
+
+service -> accountService : validateAccounts(sourceId, targetId)
+accountService -> accountRepo : findById(sourceId)
+accountRepo -> db : SELECT
+db --> accountRepo : source account
+accountRepo --> accountService : Optional<Account>
+
+accountService -> accountRepo : findById(targetId)
+accountRepo -> db : SELECT
+db --> accountRepo : target account
+accountRepo --> accountService : Optional<Account>
+
+accountService --> service : ValidationResult
+
+service -> accountService : checkSufficientFunds(sourceAccount, amount)
+accountService --> service : boolean
+
+service -> transRepo : save(newTransaction(PENDING))
+transRepo -> db : INSERT
+db --> transRepo : transaction
+transRepo --> service : Transaction
+
+service -> accountService : updateBalance(sourceAccount, -amount)
+accountService -> accountRepo : save(sourceAccount)
+accountRepo -> db : UPDATE
+db --> accountRepo : updated source
+
+service -> accountService : updateBalance(targetAccount, amount)
+accountService -> accountRepo : save(targetAccount)
+accountRepo -> db : UPDATE
+db --> accountRepo : updated target
+
+service -> transRepo : updateStatus(transaction, COMPLETED)
+transRepo -> db : UPDATE
+db --> transRepo : updated transaction
+transRepo --> service : Transaction
+
+service --> controller : TransactionResponse
+controller --> client : 200 OK (TransactionResponse)
+
+@enduml

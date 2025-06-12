@@ -3,61 +3,56 @@ package cz.ememsoft.minibank.mapper
 import cz.ememsoft.minibank.api.account.request.CreateAccountRequestDto
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
+import cz.ememsoft.minibank.enumeration.AccountTypeEnum
+import cz.ememsoft.minibank.enumeration.CurrencyEnum
 import org.mapstruct.Mapper
+import org.mapstruct.Mapping
 import org.mapstruct.MappingConstants
-import org.mapstruct.ReportingPolicy
 
 /**
  * Mapper interface for converting between Account entities and Data Transfer Objects (DTOs).
  *
- * <p>
  * This interface leverages MapStruct to automatically generate the mapping implementations
- * for converting between the following types:
- * <ul>
- *   <li>[AccountEntity] and [AccountDto]</li>
- *   <li>[CreateAccountRequestDto] and [AccountEntity]</li>
- * </ul>
- * </p>
- *
- * <p>
- * The component model is configured for Spring, enabling dependency injection of the generated mapper.
- * Unmapped target properties are ignored to prevent compilation issues.
- * </p>
- *
- * @see AccountEntity
- * @see AccountDto
- * @see CreateAccountRequestDto
+ * for converting between AccountEntity and various DTOs with explicit mappings.
  */
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, imports = [AccountTypeEnum::class, CurrencyEnum::class])
 interface AccountMapper {
 
     /**
-     * Converts an [AccountEntity] to an [AccountDto].
-     *
-     * @param accountEntity the account entity to be converted.
-     * @return the corresponding account DTO.
+     * Converts an AccountEntity to an AccountDto with explicit field mappings.
      */
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "name", target = "name")
+    @Mapping(source = "clientId", target = "clientId")
+    @Mapping(source = "balance", target = "balance")
+    @Mapping(source = "accountType", target = "accountType")
+    @Mapping(source = "currency", target = "currency")
     fun entityToDto(accountEntity: AccountEntity): AccountDto
 
     /**
-     * Converts an [AccountDto] to an [AccountEntity].
-     *
-     * @param accountDto the account DTO to be converted.
-     * @return the corresponding account entity.
+     * Converts an AccountDto to an AccountEntity with explicit field mappings.
      */
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "name", target = "name")
+    @Mapping(source = "clientId", target = "clientId")
+    @Mapping(source = "balance", target = "balance")
+    @Mapping(target = "accountTypeOrdinal", expression = "java(accountDto.getAccountType().ordinal())")
+    @Mapping(target = "currencyOrdinal", expression = "java(accountDto.getCurrency().ordinal())")
+    @Mapping(target = "withBalance", ignore = true)
+    @Mapping(target = "creditBalance", ignore = true)
+    @Mapping(target = "debitBalance", ignore = true)
     fun dtoToEntity(accountDto: AccountDto): AccountEntity
 
     /**
-     * Converts a [CreateAccountRequestDto] to an [AccountEntity].
-     *
-     * <p>
-     * This method transforms a request DTO received from an API into an account entity
-     * suitable for persistence in the database. The mapping handles the conversion of
-     * all relevant fields from the request to the entity.
-     * </p>
-     *
-     * @param createAccountRequestDto the account request DTO containing account details.
-     * @return the account entity populated with data from the request DTO.
+     * Converts a CreateAccountRequestDto to a partial AccountEntity.
+     * The account name is generated based on account type and client ID.
      */
-    fun requestToEntity(createAccountRequestDto: CreateAccountRequestDto): AccountEntity
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "name", expression = "java(createAccountRequestDto.getAccountType().toUpperCase() + \" Account for Client \" + createAccountRequestDto.getClientId())")
+    @Mapping(target = "accountTypeOrdinal", expression = "java(AccountTypeEnum.valueOf(createAccountRequestDto.getNormalizedAccountType()).ordinal())")
+    @Mapping(target = "currencyOrdinal", expression = "java(CurrencyEnum.valueOf(createAccountRequestDto.getNormalizedCurrency()).ordinal())")
+    @Mapping(target = "withBalance", ignore = true)
+    @Mapping(target = "creditBalance", ignore = true)
+    @Mapping(target = "debitBalance", ignore = true)
+    fun createRequestToEntity(createAccountRequestDto: CreateAccountRequestDto): AccountEntity
 }

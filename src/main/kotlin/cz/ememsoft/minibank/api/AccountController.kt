@@ -39,6 +39,9 @@ class AccountController(
     /**
      * Retrieves all accounts.
      *
+     * Improved error handling: Let errors propagate to global exception handler
+     * instead of swallowing them silently.
+     *
      * @return A [Flux] emitting all [AccountDto] objects.
      */
     @GetMapping
@@ -47,7 +50,7 @@ class AccountController(
         logger.info { "Fetching all accounts" }
         return accountService.getAllAccounts()
             .doOnError { logger.error(it) { "Error fetching all accounts" } }
-            .onErrorResume { Flux.empty() }
+        // Removed: .onErrorResume { Flux.empty() } - let errors propagate to global handler
     }
 
     /**
@@ -72,10 +75,10 @@ class AccountController(
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     fun createAccount(@RequestBody accountRequest: CreateAccountRequestDto): Mono<AccountDto> {
-        logger.info { "Creating new account" }
+        logger.info { "Creating new account for client ${accountRequest.clientId}" }
         return accountService.createAccount(accountRequest)
-            .doOnSuccess { logger.info { "Account created: $it" } }
-            .doOnError { logger.error(it) { "Error creating account" } }
+            .doOnSuccess { logger.info { "Account created successfully: ${it.id}" } }
+            .doOnError { logger.error(it) { "Error creating account for client ${accountRequest.clientId}" } }
     }
 
     /**
@@ -102,7 +105,8 @@ class AccountController(
      * @param id The ID of the account to delete.
      * @return A [Mono] indicating completion of the operation.
      */
-    @DeleteMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     fun deleteAccount(@PathVariable id: Long): Mono<Void> {
         logger.info { "Deleting account with ID: $id" }
         return accountService.deleteAccount(id)
@@ -114,13 +118,13 @@ class AccountController(
      * Retrieves all accounts for a specific client ID.
      *
      * @param clientId The ID of the client whose accounts are to be retrieved.
-     * @return A [Mono] emitting all [AccountDto] objects associated with the client.
+     * @return A [Flux] emitting all [AccountDto] objects associated with the client.
      */
     @GetMapping("/client/{clientId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getAccountsByClientId(@PathVariable clientId: Long): Mono<AccountDto> {
+    fun getAccountsByClientId(@PathVariable clientId: Long): Flux<AccountDto> {
         logger.info { "Fetching accounts for client ID: $clientId" }
         return accountService.getAccountsByClientId(clientId)
-            .doOnSuccess { logger.info { "Accounts for client ID: $clientId fetched successfully" } }
+            .doOnComplete { logger.info { "Accounts for client ID: $clientId fetched successfully" } }
             .doOnError { logger.error(it) { "Error fetching accounts for client ID: $clientId" } }
     }
 }

@@ -1,27 +1,25 @@
 package cz.ememsoft.minibank.api.client.response
 
-import jakarta.validation.constraints.NotNull
+import java.time.LocalDate
+import java.util.UUID
 
+/**
+ * Response DTO for client creation operations.
+ *
+ * This DTO is returned after successfully creating a new client,
+ * containing the generated ID and all client information.
+ */
 data class CreateClientResponseDto(
     val id: Long,
-    @NotNull
     val firstName: String,
-    @NotNull
     val lastName: String,
-    @NotNull
     val email: String,
-    @NotNull
-    val phone: String,
-    @NotNull
-    val address: String,
+    val phoneNumber: String?,
+    val address: String?,
+    val dateOfBirth: LocalDate?,
+    val personalNumber: UUID
 ) {
-    /**
-     * Returns a string representation of the ClientDto object.
-     *
-     * @return A string representation of the object in the format:
-     * "ClientDto(firstName='value', lastName='value', email='value', phone='value', address='value')".
-     */
     override fun toString(): String {
-        return "ClientDto(id= '$id', firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
+        return "CreateClientResponseDto(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phoneNumber='$phoneNumber', address='$address', dateOfBirth=$dateOfBirth, personalNumber=$personalNumber)"
     }
 }

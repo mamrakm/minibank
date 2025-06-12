@@ -60,21 +60,6 @@ class ClientServiceImpl(
             .doOnError { logger.error(it) { "Error fetching all clients" } }
     }
 
-    /**
-     * Saves a new client to the database and returns the created client response.
-     *
-     * This method ensures that no duplicate email exists before saving the client.
-     * If a client with the same email is found, an error is returned.
-     * Otherwise, the client is saved, and the generated ID is used to create a response DTO.
-     *
-     * ## Process:
-     * 1. Check if a client with the given email already exists.
-     * 2. If a duplicate exists, return an error.
-     * 3. If no duplicate exists, persist the new client and return a response DTO.
-     *
-     * @param clientDto The DTO containing client information to save.
-     * @return A [Mono] emitting the saved [CreateClientResponseDto], or an error if a duplicate exists.
-     */
     override fun createClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
         logger.info { "Saving new client: $clientDto" }
 
@@ -85,15 +70,16 @@ class ClientServiceImpl(
             }
             .switchIfEmpty(
                 Mono.defer {
-                    val clientEntity = clientMapper.requestToDto(clientDto)
+                    val clientEntity = clientMapper.createRequestToEntity(clientDto)
                     logger.debug { "Persisting new client entity: $clientEntity" }
 
-                    clientRepository.saveAndReturnId(
+                    clientRepository.saveAndReturn(
                         clientEntity.firstName,
                         clientEntity.lastName,
                         clientEntity.email,
-                        clientEntity.phone,
-                        clientEntity.address
+                        clientEntity.phoneNumber,
+                        clientEntity.address,
+                        clientEntity.dateOfBirth
                     ).map { clientMapper.entityToCreateResponse(it) }
                 }
             )
@@ -101,14 +87,7 @@ class ClientServiceImpl(
             .doOnError { logger.error(it) { "Error saving client" } }
     }
 
-    /**
-     * Updates an existing client's information.
-     *
-     * @param updatedClientDto The updated client data.
-     * @return A [Mono] emitting the updated [ClientDto], or an error if the client is not found.
-     */
-    override fun updateClient(updatedClientDto: ClientDto): Mono<ClientDto> {
-        val id = updatedClientDto.id
+    override fun updateClient(id: Long, updatedClientDto: ClientDto): Mono<ClientDto> {
         logger.info { "Updating client with ID: $id" }
         return clientRepository.findById(id)
             .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
@@ -118,8 +97,10 @@ class ClientServiceImpl(
                     firstName = updatedClientDto.firstName,
                     lastName = updatedClientDto.lastName,
                     email = updatedClientDto.email,
-                    phone = updatedClientDto.phone,
-                    address = updatedClientDto.address
+                    phoneNumber = updatedClientDto.phoneNumber,
+                    address = updatedClientDto.address,
+                    dateOfBirth = updatedClientDto.dateOfBirth,
+                    personalNumber = existingClient.personalNumber
                 )
                 logger.debug { "Updating client entity: $updatedEntity" }
                 clientRepository.save(updatedEntity)
@@ -133,22 +114,20 @@ class ClientServiceImpl(
         logger.info { "Deleting client with ID: $id" }
         return clientRepository.findById(id)
             .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
-            .flatMap { clientRepository.deleteById(it.id).then(Mono.empty<Void>()) } // Ensure deletion completes
+            .flatMap { client ->
+                client.id?.let { clientId ->
+                    clientRepository.deleteById(clientId)
+                } ?: Mono.empty()
+            }
             .doOnSuccess { logger.info { "Client with ID $id deleted successfully" } }
             .doOnError { logger.error(it) { "Error deleting client with ID: $id" } }
     }
 
-    /**
-     * Searches for a client by their email.
-     *
-     * @param email The email address to search for.
-     * @return A [Mono] emitting the corresponding [ClientDto], or an empty Mono if not found.
-     */
     override fun findClientByEmail(email: String): Mono<ClientDto> {
         logger.info { "Searching for client with email: $email" }
         return clientRepository.findByEmail(email)
             .map { clientMapper.entityToDto(it) }
-            .doOnSuccess { logger.info { "Client with email $email found" } }
+            .doOnSuccess { it?.let { logger.info { "Client with email $email found" } } }
             .switchIfEmpty(Mono.defer {
                 logger.warn { "Client with email $email not found" }
                 Mono.empty()
@@ -156,12 +135,6 @@ class ClientServiceImpl(
             .doOnError { logger.error(it) { "Error searching for client with email: $email" } }
     }
 
-    /**
-     * Searches for clients by their first name.
-     *
-     * @param firstName The first name of the client(s) to search for.
-     * @return A [Flux] emitting clients matching the first name as [ClientDto].
-     */
     override fun findClientsByFirstName(firstName: String): Flux<ClientDto> {
         logger.info { "Searching for clients with first name: $firstName" }
         return clientRepository.findByFirstNameIgnoreCase(firstName)

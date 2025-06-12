@@ -7,15 +7,17 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
- * Service interface for managing account-related operations.
- * Provides reactive methods for performing CRUD operations on accounts.
+ * Service interface for managing bank accounts.
+ *
+ * This interface provides reactive CRUD operations for accounts,
+ * ensuring non-blocking interactions with the database.
  */
 interface AccountService {
 
     /**
-     * Retrieves all accounts.
+     * Retrieves all accounts in the system.
      *
-     * @return A [Flux] emitting all [AccountEntity] objects.
+     * @return A [Flux] emitting all accounts as [AccountDto].
      */
     fun getAllAccounts(): Flux<AccountDto>
 
@@ -23,24 +25,24 @@ interface AccountService {
      * Retrieves an account by its ID.
      *
      * @param id The ID of the account to retrieve.
-     * @return A [Mono] emitting the [AccountEntity] if found, or empty if not.
+     * @return A [Mono] emitting the corresponding [AccountDto], or an error if the account is not found.
      */
     fun getAccountById(id: Long): Mono<AccountDto>
 
     /**
      * Creates a new account.
      *
-     * @param accountEntity The account details to create.
-     * @return A [Mono] emitting the created [AccountEntity].
+     * @param accountRequest The request object containing the account details.
+     * @return A [Mono] emitting the created [AccountDto].
      */
     fun createAccount(accountRequest: CreateAccountRequestDto): Mono<AccountDto>
 
     /**
-     * Updates an existing account.
+     * Updates an existing account by ID.
      *
      * @param id The ID of the account to update.
-     * @param accountEntity The updated account details.
-     * @return A [Mono] emitting the updated [AccountEntity] if found, or empty if not.
+     * @param accountEntity The updated account entity.
+     * @return A [Mono] emitting the updated [AccountDto], or an error if the account is not found.
      */
     fun updateAccount(id: Long, accountEntity: AccountEntity): Mono<AccountDto>
 
@@ -48,15 +50,15 @@ interface AccountService {
      * Deletes an account by its ID.
      *
      * @param id The ID of the account to delete.
-     * @return A [Mono] indicating the completion of the operation.
+     * @return A [Mono] signaling completion, or an error if the account is not found.
      */
     fun deleteAccount(id: Long): Mono<Void>
 
     /**
-     * Retrieves all accounts for a specific client ID.
+     * Retrieves accounts associated with a specific client ID.
      *
-     * @param clientId The ID of the client whose accounts are to be retrieved.
-     * @return A [Flux] emitting all [AccountEntity] objects associated with the client.
+     * @param clientId The ID of the client whose accounts are being retrieved.
+     * @return A [Flux] emitting all corresponding [AccountDto] objects.
      */
-    fun getAccountsByClientId(clientId: Long): Mono<AccountDto>
+    fun getAccountsByClientId(clientId: Long): Flux<AccountDto>
 }

@@ -1,53 +1,53 @@
 package cz.ememsoft.minibank.service
 
-import cz.ememsoft.minibank.transaction.request.TransferRequestDto
-import cz.ememsoft.minibank.transaction.response.TransferResponseDto
+import cz.ememsoft.minibank.api.transaction.request.TransactionRequestDto
+import cz.ememsoft.minibank.api.transaction.response.TransactionResponseDto
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
 /**
  * Service interface for managing transaction-related operations.
- * Provides reactive methods for performing money transfers and retrieving transaction history.
+ * Provides reactive methods for performing money transactions and retrieving transaction history.
  */
 interface TransactionService {
 
     /**
-     * Transfers money between two accounts.
+     * Processes a money transaction between two accounts.
      *
-     * @param transferRequest The details of the transfer operation.
-     * @return A [Mono] emitting the [TransferResponseDto] containing the transaction details.
+     * @param transactionRequest The details of the transaction operation.
+     * @return A [Mono] emitting the [TransactionResponseDto] containing the transaction details.
      */
-    fun transferMoney(transferRequest: TransferRequestDto): Mono<TransferResponseDto>
+    fun processTransaction(transactionRequest: TransactionRequestDto): Mono<TransactionResponseDto>
 
     /**
      * Retrieves a transaction by its ID.
      *
      * @param id The ID of the transaction to retrieve.
-     * @return A [Mono] emitting the [TransferResponseDto] if found.
+     * @return A [Mono] emitting the [TransactionResponseDto] if found.
      */
-    fun getTransactionById(id: Long): Mono<TransferResponseDto>
+    fun getTransactionById(id: Long): Mono<TransactionResponseDto>
 
     /**
      * Retrieves all transactions associated with an account.
      *
      * @param accountId The ID of the account.
-     * @return A [Flux] emitting all [TransferResponseDto] objects associated with the account.
+     * @return A [Flux] emitting all [TransactionResponseDto] objects associated with the account.
      */
-    fun getTransactionsByAccountId(accountId: Long): Flux<TransferResponseDto>
+    fun getTransactionsByAccountId(accountId: Long): Flux<TransactionResponseDto>
 
     /**
      * Retrieves outgoing transactions from an account.
      *
      * @param accountId The ID of the account.
-     * @return A [Flux] emitting all outgoing [TransferResponseDto] objects from the account.
+     * @return A [Flux] emitting all outgoing [TransactionResponseDto] objects from the account.
      */
-    fun getOutgoingTransactions(accountId: Long): Flux<TransferResponseDto>
+    fun getOutgoingTransactions(accountId: Long): Flux<TransactionResponseDto>
 
     /**
      * Retrieves incoming transactions to an account.
      *
      * @param accountId The ID of the account.
-     * @return A [Flux] emitting all incoming [TransferResponseDto] objects to the account.
+     * @return A [Flux] emitting all incoming [TransactionResponseDto] objects to the account.
      */
-    fun getIncomingTransactions(accountId: Long): Flux<TransferResponseDto>
+    fun getIncomingTransactions(accountId: Long): Flux<TransactionResponseDto>
 }

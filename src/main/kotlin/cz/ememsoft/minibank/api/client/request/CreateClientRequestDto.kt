@@ -3,25 +3,34 @@ package cz.ememsoft.minibank.api.client.request
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
-import jakarta.validation.constraints.Pattern
+import jakarta.validation.constraints.Past
+import java.time.LocalDate
 
+/**
+ * Create client request DTO for client creation.
+ */
 data class CreateClientRequestDto(
-    @NotNull
-    @NotBlank
+    @NotBlank(message = "First name must not be blank")
     val firstName: String,
-    @NotNull
-    @NotBlank
+
+    @NotBlank(message = "Last name must not be blank")
     val lastName: String,
-    @Email(message = "Invalid email")
+
+    @NotBlank(message = "Email must not be blank")
+    @Email(message = "Email must be valid")
     val email: String,
-    @Pattern(
-        regexp = "^\\+?[1-9]\\d{1,14}\$",
-        message = "Invalid phone number"
-    )
-    val phone: String,
+
+    @NotBlank(message = "Phone number must not be blank")
+    val phoneNumber: String,
+
+    @NotBlank(message = "Address must not be blank")
     val address: String,
+
+    @NotNull(message = "Date of birth must not be null")
+    @Past(message = "Date of birth must be in the past")
+    val dateOfBirth: LocalDate
 ) {
     override fun toString(): String {
-        return "ClientSaveRequest(firstName='$firstName', lastName='$lastName', email='$email', phone='$phone', address='$address')"
+        return "CreateClientRequestDto(firstName='$firstName', lastName='$lastName', email='$email', phoneNumber='$phoneNumber', address='$address', dateOfBirth=$dateOfBirth)"
     }
 }

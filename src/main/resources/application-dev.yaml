@@ -1,0 +1,61 @@
+spring:
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/minibank-database?schema=bank
+    username: postgres
+    password: postgres
+    pool:
+      initial-size: 5
+      max-size: 10
+      max-idle-time: 30m
+      validation-query: SELECT 1
+
+  # Fixed: Keep Liquibase enabled for consistency with main application.yml
+  liquibase:
+    enabled: true  # Changed from false to true for consistency
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: bank
+    url: jdbc:postgresql://localhost:5432/minibank-database?schema=bank
+    user: postgres
+    password: postgres
+
+  jackson:
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 5
+        queue-capacity: 15
+        allow-core-thread-timeout: true
+      thread-name-prefix: "DevAsyncExecutor-"
+
+server:
+  port: 8082
+
+logging:
+  level:
+    root: INFO
+    cz.ememsoft.minibank: DEBUG
+    org.springframework.r2dbc: INFO
+    org.springframework.transaction: INFO
+    r2dbc.postgresql: WARN
+    r2dbc.pool: WARN
+    org.testcontainers: WARN
+    reactor.netty: WARN
+    io.r2dbc.postgresql: WARN
+    org.springframework.web: INFO
+    org.springframework.boot.autoconfigure: WARN
+
+# Development-specific actuator configuration
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,configprops
+  endpoint:
+    health:
+      show-details: always
+    env:
+      show-values: when-authorized

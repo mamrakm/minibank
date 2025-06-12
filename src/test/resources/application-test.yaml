@@ -1,8 +1,56 @@
 spring:
-  r2dbc:
-    url: r2dbc:postgresql://localhost:5432/minibank-database
-    username: testuser
-    password: testpass
+  application:
+    name: minibank-test
   liquibase:
-    enabled: true
+    # Liquibase needs JDBC connection for schema migrations
+    url: jdbc:postgresql://localhost:5432/minibank-database?schema=bank
+    user: postgres
+    password: postgres
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: bank
+  r2dbc:
+    url: r2dbc:postgresql://localhost:5432/minibank_test?schema=bank
+    username: test_user
+    password: test_password
+    pool:
+      initial-size: 5
+      max-size: 10
+      max-idle-time: 30m
+      validation-query: SELECT 1
 
+  jackson:
+    deserialization:
+      FAIL_ON_UNKNOWN_PROPERTIES: false
+  task:
+    execution:
+      pool:
+        core-size: 2
+        max-size: 5
+        queue-capacity: 10
+        allow-core-thread-timeout: true
+      thread-name-prefix: "TestAsyncExecutor-"
+
+server:
+  port: 0  # Use a random port for tests to avoid conflicts
+
+logging:
+  level:
+    root: INFO
+    cz.ememsoft.minibank: INFO
+    org.springframework.r2dbc: INFO
+    org.springframework.transaction: INFO
+    r2dbc.postgresql: INFO
+    r2dbc.pool: INFO
+    org.testcontainers: INFO
+    reactor.netty: INFO
+    io.r2dbc.postgresql: INFO
+
+# Test-specific settings for Actuator endpoints
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

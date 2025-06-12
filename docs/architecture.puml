@@ -1,0 +1,34 @@
+@startuml "High-Level Architecture"
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+LAYOUT_WITH_LEGEND()
+
+title High-Level Architecture - MiniBank Application
+
+Person(customer, "Customer", "A bank customer who wants to perform transactions")
+
+System_Boundary(minibank, "MiniBank System") {
+    Container(api_gateway, "API Gateway", "Spring WebFlux", "Handles HTTP requests and routes them to appropriate services")
+
+    Component(account_service, "Account Service", "Spring Service", "Manages bank accounts and balances")
+    Component(transaction_service, "Transaction Service", "Spring Service", "Handles money transfers between accounts")
+    Component(validation_service, "Validation Service", "Spring Service", "Validates transactions and account operations")
+
+    ComponentDb(postgres_db, "PostgreSQL Database", "Stores accounts, transactions, and other banking data")
+}
+
+System_Ext(notification_system, "Notification System", "Sends notifications about transactions")
+System_Ext(audit_system, "Audit System", "Records all system activities")
+
+Rel(customer, api_gateway, "Uses", "HTTP/REST")
+Rel(api_gateway, account_service, "Uses", "Internal API")
+Rel(api_gateway, transaction_service, "Uses", "Internal API")
+Rel(account_service, validation_service, "Uses", "Internal API")
+Rel(transaction_service, validation_service, "Uses", "Internal API")
+Rel_R(account_service, postgres_db, "Reads/Writes", "R2DBC")
+Rel_R(transaction_service, postgres_db, "Reads/Writes", "R2DBC")
+Rel(transaction_service, notification_system, "Notifies", "Events")
+Rel(transaction_service, audit_system, "Logs", "Events")
+
+@enduml

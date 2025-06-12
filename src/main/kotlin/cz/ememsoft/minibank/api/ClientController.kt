@@ -3,11 +3,12 @@ package cz.ememsoft.minibank.api
 import cz.ememsoft.minibank.api.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.api.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
-import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.service.ClientService
 import io.github.oshai.kotlinlogging.KotlinLogging
+import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -23,26 +24,15 @@ import reactor.core.publisher.Mono
 private val logger = KotlinLogging.logger {}
 
 /**
- * REST controller for managing clients in the application.
- *
- * Provides endpoints for CRUD operations and search functionality related to clients.
- *
- * @property clientService The service layer for client-related operations.
- * @property clientMapper The mapper for converting request DTOs to internal DTOs.
+ * REST controller for managing clients with validation enabled.
  */
 @RestController
 @RequestMapping("/clients")
+@Validated
 class ClientController(
-    private val clientService: ClientService,
-    private val clientMapper: ClientMapper,
+    private val clientService: ClientService
 ) {
 
-    /**
-     * Retrieves a client by their ID.
-     *
-     * @param id The unique identifier of the client.
-     * @return A [Mono] emitting the corresponding [ClientDto] if found.
-     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getClient(@PathVariable id: Long): Mono<ClientDto> {
@@ -52,11 +42,6 @@ class ClientController(
             .doOnError { logger.error(it) { "Error fetching client with ID: $id" } }
     }
 
-    /**
-     * Retrieves all clients in the system.
-     *
-     * @return A [Flux] emitting all clients as [ClientDto].
-     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(produces = [MediaType.APPLICATION_JSON_VALUE])
     fun getAllClients(): Flux<ClientDto> {
@@ -66,43 +51,24 @@ class ClientController(
             .doOnError { logger.error(it) { "Error fetching all clients" } }
     }
 
-    /**
-     * Creates a new client in the system.
-     *
-     * @param createClientRequestDto The request body containing client data.
-     * @return A [Mono] emitting the created [CreateClientResponseDto] containing client details.
-     */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun createClient(@RequestBody createClientRequestDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
+    fun createClient(@Valid @RequestBody createClientRequestDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
         logger.info { "Creating new client: $createClientRequestDto" }
         return clientService.createClient(createClientRequestDto)
-            .doOnSuccess { logger.info { "Successfully created client with ID: $it" } }
+            .doOnSuccess { logger.info { "Successfully created client with ID: ${it.id}" } }
             .doOnError { logger.error(it) { "Error creating client" } }
     }
 
-    /**
-     * Updates an existing client's information.
-     *
-     * @param updatedClientDto The request body containing the updated client data.
-     * @return A [Mono] emitting the updated [ClientDto].
-     */
     @ResponseStatus(HttpStatus.OK)
-    @PutMapping(consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun updateClient(@RequestBody updatedClientDto: ClientDto): Mono<ClientDto> {
-        val id = updatedClientDto.id
+    @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun updateClient(@PathVariable id: Long, @Valid @RequestBody updatedClientDto: ClientDto): Mono<ClientDto> {
         logger.info { "Updating client with ID: $id" }
-        return clientService.updateClient(updatedClientDto)
+        return clientService.updateClient(id, updatedClientDto)
             .doOnSuccess { logger.info { "Successfully updated client with ID: $id" } }
             .doOnError { logger.error(it) { "Error updating client with ID: $id" } }
     }
 
-    /**
-     * Deletes a client by their ID.
-     *
-     * @param id The unique identifier of the client to be deleted.
-     * @return A [Mono] signaling completion of the deletion process.
-     */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     fun deleteClient(@PathVariable id: Long): Mono<Void> {
@@ -112,12 +78,6 @@ class ClientController(
             .doOnError { logger.error(it) { "Error deleting client with ID: $id" } }
     }
 
-    /**
-     * Searches for clients by their first name.
-     *
-     * @param firstName The first name of the client(s) to search for.
-     * @return A [Flux] emitting clients matching the provided first name.
-     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-name/{firstName}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun findClientsByFirstName(@PathVariable firstName: String): Flux<ClientDto> {
@@ -127,12 +87,6 @@ class ClientController(
             .doOnError { logger.error(it) { "Error searching for clients with first name: $firstName" } }
     }
 
-    /**
-     * Searches for a client by their email address.
-     *
-     * @param email The email address of the client to search for.
-     * @return A [Mono] emitting the corresponding [ClientDto] if found, or empty if not found.
-     */
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/search-by-email/{email}", produces = [MediaType.APPLICATION_JSON_VALUE])
     fun findClientByEmail(@PathVariable email: String): Mono<ClientDto> {

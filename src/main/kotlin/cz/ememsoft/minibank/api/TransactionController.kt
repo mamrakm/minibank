@@ -1,10 +1,9 @@
 package cz.ememsoft.minibank.api
 
+import cz.ememsoft.minibank.api.transaction.request.TransactionRequestDto
+import cz.ememsoft.minibank.api.transaction.response.TransactionResponseDto
 import cz.ememsoft.minibank.service.TransactionService
-import cz.ememsoft.minibank.transaction.request.TransferRequestDto
-import cz.ememsoft.minibank.transaction.response.TransferResponseDto
 import io.github.oshai.kotlinlogging.KotlinLogging
-import jakarta.validation.Valid
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
 import org.springframework.web.bind.annotation.GetMapping
@@ -19,41 +18,37 @@ import reactor.core.publisher.Mono
 
 private val logger = KotlinLogging.logger {}
 
-/**
- * REST controller for managing transactions in the application.
- *
- * This controller provides endpoints for initiating money transfers between accounts
- * and retrieving transaction history.
- *
- * @property transactionService The service layer for transaction-related operations.
- */
 @RestController
 @RequestMapping("/transactions")
 class TransactionController(private val transactionService: TransactionService) {
 
     /**
-     * Initiates a money transfer between accounts.
+     * Processes a money transaction between two accounts.
      *
-     * @param transferRequest The details of the transfer operation.
-     * @return A [Mono] emitting the [TransferResponseDto] containing the transaction details.
+     * @param transactionRequest The details of the transaction operation.
+     * @return A [Mono] emitting the [TransactionResponseDto] containing the transaction details.
      */
-    @PostMapping("/transfer", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PostMapping(
+        path = ["/transfer"],
+        consumes = [MediaType.APPLICATION_JSON_VALUE],
+        produces = [MediaType.APPLICATION_JSON_VALUE]
+    )
     @ResponseStatus(HttpStatus.CREATED)
-    fun transferMoney(@Valid @RequestBody transferRequest: TransferRequestDto): Mono<TransferResponseDto> {
-        logger.info { "Received transfer request: $transferRequest" }
-        return transactionService.transferMoney(transferRequest)
-            .doOnSuccess { logger.info { "Successfully processed transfer with ID: ${it.id}" } }
-            .doOnError { logger.error(it) { "Error processing transfer request" } }
+    fun processTransaction(@RequestBody transactionRequest: TransactionRequestDto): Mono<TransactionResponseDto> {
+        logger.info { "Processing transaction request: $transactionRequest" }
+        return transactionService.processTransaction(transactionRequest)
+            .doOnSuccess { logger.info { "Transaction completed successfully: ${it.id}" } }
+            .doOnError { logger.error(it) { "Transaction failed: $transactionRequest" } }
     }
 
     /**
      * Retrieves a transaction by its ID.
      *
      * @param id The ID of the transaction to retrieve.
-     * @return A [Mono] emitting the [TransferResponseDto] if found.
+     * @return A [Mono] emitting the [TransactionResponseDto] if found.
      */
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getTransaction(@PathVariable id: Long): Mono<TransferResponseDto> {
+    fun getTransaction(@PathVariable id: Long): Mono<TransactionResponseDto> {
         logger.info { "Fetching transaction with ID: $id" }
         return transactionService.getTransactionById(id)
             .doOnSuccess { logger.info { "Successfully retrieved transaction with ID: $id" } }
@@ -64,10 +59,10 @@ class TransactionController(private val transactionService: TransactionService) 
      * Retrieves all transactions associated with an account.
      *
      * @param accountId The ID of the account.
-     * @return A [Flux] emitting all [TransferResponseDto] objects associated with the account.
+     * @return A [Flux] emitting all [TransactionResponseDto] objects associated with the account.
      */
     @GetMapping("/account/{accountId}", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getTransactionsByAccount(@PathVariable accountId: Long): Flux<TransferResponseDto> {
+    fun getTransactionsByAccount(@PathVariable accountId: Long): Flux<TransactionResponseDto> {
         logger.info { "Fetching transactions for account ID: $accountId" }
         return transactionService.getTransactionsByAccountId(accountId)
             .doOnComplete { logger.info { "Successfully retrieved transactions for account ID: $accountId" } }
@@ -76,12 +71,13 @@ class TransactionController(private val transactionService: TransactionService) 
 
     /**
      * Retrieves outgoing transactions from an account.
+     * Fixed endpoint path to match documentation: /account/{accountId}/outgoing
      *
      * @param accountId The ID of the account.
-     * @return A [Flux] emitting all outgoing [TransferResponseDto] objects from the account.
+     * @return A [Flux] emitting all outgoing [TransactionResponseDto] objects from the account.
      */
     @GetMapping("/account/{accountId}/outgoing", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getOutgoingTransactions(@PathVariable accountId: Long): Flux<TransferResponseDto> {
+    fun getOutgoingTransactions(@PathVariable accountId: Long): Flux<TransactionResponseDto> {
         logger.info { "Fetching outgoing transactions for account ID: $accountId" }
         return transactionService.getOutgoingTransactions(accountId)
             .doOnComplete { logger.info { "Successfully retrieved outgoing transactions for account ID: $accountId" } }
@@ -90,12 +86,13 @@ class TransactionController(private val transactionService: TransactionService) 
 
     /**
      * Retrieves incoming transactions to an account.
+     * Fixed endpoint path to match documentation: /account/{accountId}/incoming
      *
      * @param accountId The ID of the account.
-     * @return A [Flux] emitting all incoming [TransferResponseDto] objects to the account.
+     * @return A [Flux] emitting all incoming [TransactionResponseDto] objects to the account.
      */
     @GetMapping("/account/{accountId}/incoming", produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun getIncomingTransactions(@PathVariable accountId: Long): Flux<TransferResponseDto> {
+    fun getIncomingTransactions(@PathVariable accountId: Long): Flux<TransactionResponseDto> {
         logger.info { "Fetching incoming transactions for account ID: $accountId" }
         return transactionService.getIncomingTransactions(accountId)
             .doOnComplete { logger.info { "Successfully retrieved incoming transactions for account ID: $accountId" } }

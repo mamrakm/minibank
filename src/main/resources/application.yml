@@ -6,6 +6,10 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.yaml
     default-schema: bank
+    # Configure Liquibase to work with R2DBC setup
+    url: jdbc:postgresql://localhost:5432/minibank-database?schema=bank
+    user: postgres
+    password: postgres
   task:
     execution:
       pool:

@@ -1,8 +1,8 @@
 package cz.ememsoft.minibank.service
 
+import cz.ememsoft.minibank.api.transaction.request.TransactionRequestDto
 import cz.ememsoft.minibank.entity.AccountEntity
 import cz.ememsoft.minibank.entity.TransactionEntity
-import cz.ememsoft.minibank.transaction.request.TransferRequestDto
 import reactor.core.publisher.Mono
 import java.time.LocalDateTime
 
@@ -22,8 +22,8 @@ interface TransactionProcessor {
      * @param targetAccount The target account entity
      * @return A [Mono] that completes successfully if validation passes or emits an error if validation fails
      */
-    fun validateTransfer(
-        transferRequest: TransferRequestDto,
+    fun validateTransaction(
+        transferRequest: TransactionRequestDto,
         sourceAccount: AccountEntity,
         targetAccount: AccountEntity
     ): Mono<Unit>

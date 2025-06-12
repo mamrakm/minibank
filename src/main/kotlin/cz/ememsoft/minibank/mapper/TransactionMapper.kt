@@ -1,49 +1,41 @@
 package cz.ememsoft.minibank.mapper
 
+import cz.ememsoft.minibank.api.transaction.request.TransactionRequestDto
+import cz.ememsoft.minibank.api.transaction.response.TransactionResponseDto
 import cz.ememsoft.minibank.entity.TransactionEntity
-import cz.ememsoft.minibank.transaction.request.TransferRequestDto
-import cz.ememsoft.minibank.transaction.response.TransferResponseDto
+import cz.ememsoft.minibank.enumeration.CurrencyEnum
+import cz.ememsoft.minibank.enumeration.TransactionStatusEnum
 import org.mapstruct.Mapper
 import org.mapstruct.Mapping
 import org.mapstruct.MappingConstants
+import org.mapstruct.ReportingPolicy
 
-/**
- * Mapper interface for converting between Transaction entities and Data Transfer Objects (DTOs).
- *
- * <p>
- * This interface leverages MapStruct to automatically generate the mapping implementations
- * for converting between the following types:
- * <ul>
- *   <li>[TransactionEntity] and [TransferResponseDto]</li>
- *   <li>[TransferRequestDto] and [TransactionEntity]</li>
- * </ul>
- * </p>
- *
- * <p>
- * The component model is configured for Spring, enabling dependency injection of the generated mapper.
- * </p>
- */
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(
+    componentModel = MappingConstants.ComponentModel.SPRING,
+    unmappedTargetPolicy = ReportingPolicy.IGNORE,
+    imports = [CurrencyEnum::class, TransactionStatusEnum::class]
+)
 interface TransactionMapper {
 
-    /**
-     * Converts a [TransactionEntity] to a [TransferResponseDto].
-     *
-     * @param transactionEntity The transaction entity to be converted.
-     * @return The corresponding transfer response DTO.
-     */
-    fun entityToResponseDto(transactionEntity: TransactionEntity): TransferResponseDto
+    @Mapping(source = "id", target = "id")
+    @Mapping(source = "sourceAccountId", target = "sourceAccountId")
+    @Mapping(source = "targetAccountId", target = "targetAccountId")
+    @Mapping(source = "amount", target = "amount")
+    @Mapping(source = "currency", target = "currency")
+    @Mapping(source = "timestamp", target = "timestamp")
+    @Mapping(source = "status", target = "status")
+    @Mapping(source = "reference", target = "reference")
+    fun entityToResponseDto(transactionEntity: TransactionEntity): TransactionResponseDto
 
-    /**
-     * Converts a [TransferRequestDto] to a partial [TransactionEntity].
-     *
-     * This mapping ignores the ID and timestamp fields, which will be set during the transaction processing.
-     *
-     * @param transferRequestDto The transfer request DTO to be converted.
-     * @return A partially populated transaction entity.
-     */
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "timestamp", ignore = true)
+    @Mapping(target = "currency", ignore = true)
     @Mapping(target = "status", ignore = true)
-    fun requestToEntity(transferRequestDto: TransferRequestDto): TransactionEntity
+    @Mapping(target = "currencyOrdinal", expression = "java(CurrencyEnum.valueOf(transactionRequestDto.getCurrency().toUpperCase().trim()).ordinal())")
+    @Mapping(target = "statusOrdinal", expression = "java(TransactionStatusEnum.PENDING.ordinal())")
+    @Mapping(source = "sourceAccountId", target = "sourceAccountId")
+    @Mapping(source = "targetAccountId", target = "targetAccountId")
+    @Mapping(source = "amount", target = "amount")
+    @Mapping(source = "reference", target = "reference")
+    fun requestToEntity(transactionRequestDto: TransactionRequestDto): TransactionEntity
 }

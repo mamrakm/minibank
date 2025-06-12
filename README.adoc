@@ -161,7 +161,7 @@ For more detailed diagrams, see the PlantUML files in the `/docs` directory:
 * *Spring Boot 3.4.1*: Framework for building reactive microservices
 * *Spring WebFlux*: Reactive web framework
 * *R2DBC*: Reactive database connectivity
-* *PostgreSQL*: Relational database
+* *PostgresSQL*: Relational database
 * *Liquibase*: Database schema versioning and migration
 * *Quartz*: Advanced scheduling capabilities
 * *Spring Security*: Authentication and authorization
@@ -235,30 +235,34 @@ The application comes with two predefined users:
 == API Endpoints
 
 === Client Management
-* `GET /clients` - Get all clients
-* `GET /clients/{id}` - Get client by ID
-* `POST /clients` - Create a new client
-* `PUT /clients` - Update a client
+
+* `GET /clients` — Get all clients
+* `GET /clients/{id}` — Get client by ID
+* `POST /clients` — Create a new client
+* `PUT /clients` — Update a client
 * `DELETE /clients/{id}` - Delete a client
 * `GET /clients/search-by-name/{firstName}` - Search clients by first name
 * `GET /clients/search-by-email/{email}` - Search client by email
 
 === Account Management
-* `GET /accounts` - Get all accounts
-* `GET /accounts/{id}` - Get account by ID
-* `POST /accounts` - Create a new account
-* `PUT /accounts/{id}` - Update an account
-* `DELETE /accounts/{id}` - Delete an account
-* `GET /accounts/client/{clientId}` - Get accounts for client
+
+* `GET /accounts` — Get all accounts
+* `GET /accounts/{id}` — Get an account by ID
+* `POST /accounts` — Create a new account
+* `PUT /accounts/{id}` — Update an account
+* `DELETE /accounts/{id}` — Delete an account
+* `GET /accounts/client/{clientId}` — Get accounts for client
 
 === Transaction Management
+
 * `POST /transactions/transfer` - Transfer money between accounts
 * `GET /transactions/{id}` - Get transaction by ID
 * `GET /transactions/account/{accountId}` - Get transactions for account
-* `GET /transactions/account/{accountId}/outgoing` - Get outgoing transactions
+* `GET /transactions/account/+{accountId}+/outgoing` - Get outgoing transactions
 * `GET /transactions/account/{accountId}/incoming` - Get incoming transactions
 
 === Account Statements
+
 * `POST /statements/{accountId}/generate` - Generate statement for period
 * `GET /statements/account/{accountId}` - Get all statements for account
 * `GET /statements/{id}` - Get statement by ID
@@ -267,12 +271,13 @@ The application comes with two predefined users:
 * `GET /statements/{id}/export/csv` - Export statement as CSV
 
 === Scheduled Transfers
-* `POST /scheduled-transfers` - Create scheduled transfer
-* `GET /scheduled-transfers/{id}` - Get transfer by ID
-* `GET /scheduled-transfers/account/{accountId}` - Get transfers for account
+
+* `POST /scheduled-transfers` — Create a scheduled transfer
+* `GET /scheduled-transfers/{id}` — Get transfer by ID
+* `GET /scheduled-transfers/account/+{accountId}+` — Get transfers for an account
 * `GET /scheduled-transfers/my-transfers` - Get current user's transfers
-* `PUT /scheduled-transfers` - Update scheduled transfer
-* `DELETE /scheduled-transfers/{id}` - Cancel scheduled transfer
+* `PUT /scheduled-transfers` — Update scheduled transfer
+* `DELETE /scheduled-transfers/{id}` — Cancel scheduled transfer
 
 == Development
 
@@ -298,12 +303,14 @@ project/
 === Running Tests
 
 Run unit tests:
+
 [source,bash]
 ----
 ./gradlew test
 ----
 
 Run integration tests:
+
 [source,bash]
 ----
 ./gradlew integrationTest

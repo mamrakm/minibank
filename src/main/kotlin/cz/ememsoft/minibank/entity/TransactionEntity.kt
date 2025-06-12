@@ -1,73 +1,125 @@
 package cz.ememsoft.minibank.entity
 
+import cz.ememsoft.minibank.enumeration.CurrencyEnum
+import cz.ememsoft.minibank.enumeration.TransactionStatusEnum
+import cz.ememsoft.minibank.util.MoneyUtils
 import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
-/**
- * Represents a transaction entity within the system.
- *
- * This entity is mapped to the `transaction` table in the `bank` schema.
- * Each transaction records a movement of funds between two accounts.
- *
- * <p><strong>Database Mapping:</strong></p>
- * <ul>
- *   <li>Table: `bank.transaction`</li>
- *   <li>Primary Key: `id`</li>
- *   <li>Foreign Keys:
- *     <ul>
- *       <li>`source_account_id` references the source account in the `account` table</li>
- *       <li>`target_account_id` references the target account in the `account` table</li>
- *     </ul>
- *   </li>
- * </ul>
- *
- * <p><strong>Fields:</strong></p>
- * <ul>
- *   <li>{@code id} - The unique identifier for the transaction.</li>
- *   <li>{@code sourceAccountId} - The identifier of the account from which the funds are transferred.</li>
- *   <li>{@code targetAccountId} - The identifier of the account to which the funds are transferred.</li>
- *   <li>{@code amount} - The amount of money transferred.</li>
- *   <li>{@code currency} - The currency of the transaction.</li>
- *   <li>{@code timestamp} - The date and time when the transaction occurred.</li>
- *   <li>{@code status} - The status of the transaction (e.g., completed, failed).</li>
- *   <li>{@code reference} - A reference or description for the transaction.</li>
- * </ul>
- */
 @Table(name = "transaction", schema = "bank")
 data class TransactionEntity(
-    /** Unique identifier for the transaction */
     @Id
     @Column("id")
     val id: Long,
-
-    /** Identifier of the source account */
     @Column("source_account_id")
     val sourceAccountId: Long,
-
-    /** Identifier of the target account */
     @Column("target_account_id")
     val targetAccountId: Long,
-
-    /** Amount transferred */
     @Column("amount")
     val amount: BigDecimal,
-
-    /** Currency of the transaction */
     @Column("currency")
-    val currency: String,
-
-    /** Timestamp of when the transaction occurred */
+    private val currencyOrdinal: Int,
     @Column("timestamp")
     val timestamp: LocalDateTime,
-
-    /** Status of the transaction */
     @Column("status")
-    val status: TransactionStatusEnum,
-
-    /** Reference or description for the transaction */
+    private val statusOrdinal: Int,
     @Column("reference")
     val reference: String
-)
+) {
+    init {
+        validateOrdinals()
+    }
+
+    val currency: CurrencyEnum
+        get() = CurrencyEnum.entries.getOrNull(currencyOrdinal)
+            ?: throw IllegalStateException("Invalid currency ordinal: $currencyOrdinal")
+
+    val status: TransactionStatusEnum
+        get() = TransactionStatusEnum.entries.getOrNull(statusOrdinal)
+            ?: throw IllegalStateException("Invalid status ordinal: $statusOrdinal")
+
+    // Internal accessor for repository operations
+    internal fun getCurrencyOrdinal(): Int = currencyOrdinal
+    internal fun getStatusOrdinal(): Int = statusOrdinal
+
+    private fun validateOrdinals() {
+        require(currencyOrdinal in CurrencyEnum.entries.toTypedArray().indices) {
+            "Invalid currency ordinal: $currencyOrdinal. Valid range: 0-${CurrencyEnum.entries.size - 1}"
+        }
+        require(statusOrdinal in TransactionStatusEnum.entries.toTypedArray().indices) {
+            "Invalid status ordinal: $statusOrdinal. Valid range: 0-${TransactionStatusEnum.entries.size - 1}"
+        }
+    }
+
+    companion object {
+        fun create(
+            id: Long,
+            sourceAccountId: Long,
+            targetAccountId: Long,
+            amount: BigDecimal,
+            currency: CurrencyEnum,
+            timestamp: LocalDateTime,
+            status: TransactionStatusEnum,
+            reference: String
+        ): TransactionEntity {
+            require(sourceAccountId != targetAccountId) {
+                "Source and target accounts must be different"
+            }
+
+            return TransactionEntity(
+                id = id,
+                sourceAccountId = sourceAccountId,
+                targetAccountId = targetAccountId,
+                amount = MoneyUtils.validateAmount(amount),
+                currencyOrdinal = currency.ordinal,
+                timestamp = timestamp,
+                statusOrdinal = status.ordinal,
+                reference = reference
+            )
+        }
+
+        fun create(
+            id: Long,
+            sourceAccountId: Long,
+            targetAccountId: Long,
+            amount: BigDecimal,
+            currency: String,
+            timestamp: LocalDateTime,
+            status: TransactionStatusEnum,
+            reference: String
+        ): TransactionEntity {
+            val validatedCurrency = MoneyUtils.validateCurrency(currency)
+            val currencyEnum = CurrencyEnum.entries.find { it.name == validatedCurrency }
+                ?: throw IllegalArgumentException("Unsupported currency: $currency. " +
+                        "Supported currencies: ${CurrencyEnum.entries.joinToString { it.name }}")
+
+            return create(id, sourceAccountId, targetAccountId, amount, currencyEnum, timestamp, status, reference)
+        }
+    }
+
+    fun withStatus(newStatus: TransactionStatusEnum): TransactionEntity {
+        return copy(statusOrdinal = newStatus.ordinal)
+    }
+
+    fun withReference(newReference: String): TransactionEntity {
+        return copy(reference = newReference)
+    }
+
+    fun getFormattedAmount(): String {
+        return MoneyUtils.formatAmount(amount, currency.name)
+    }
+
+    fun involvesAccount(accountId: Long): Boolean {
+        return sourceAccountId == accountId || targetAccountId == accountId
+    }
+
+    fun getCurrencyString(): String = currency.name
+
+    override fun toString(): String {
+        return "TransactionEntity(id=$id, sourceAccountId=$sourceAccountId, targetAccountId=$targetAccountId, " +
+                "amount=$amount, currency=${currency.name}, timestamp=$timestamp, status=${status.name}, reference='$reference')"
+    }
+}

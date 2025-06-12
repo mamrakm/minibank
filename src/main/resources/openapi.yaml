@@ -1,0 +1,1027 @@
+openapi: 3.0.3
+info:
+  title: Minibank API
+  description: |
+    A reactive banking system API built with Spring Boot 3.4.1, Kotlin, and R2DBC.
+    
+    ## Features
+    - Client management with full CRUD operations
+    - Bank account management with multiple account types
+    - Secure money transfers between accounts
+    - Transaction history and reporting
+    - Real-time balance updates
+    - Multi-currency support (USD, EUR, GBP)
+    - Money-safe operations with 4-decimal precision
+    
+    ## Security
+    - OAuth2/OIDC authentication
+    - Role-based access control
+    - JWT token-based authorization
+    
+    ## Money Safety
+    All monetary operations use BigDecimal with 4-decimal precision and banker's rounding (HALF_EVEN).
+    Transaction limits: 0.0001 to 999,999,999,999,999.9999 per currency.
+  version: 0.5.0
+  contact:
+    name: EMeMSoft spol. s r.o.
+    email: support@ememsoft.cz
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0
+
+servers:
+  - url: http://localhost:8082
+    description: Development server
+  - url: https://api.minibank.ememsoft.cz
+    description: Production server
+
+tags:
+  - name: clients
+    description: Client management operations
+  - name: accounts
+    description: Bank account management
+  - name: transactions
+    description: Money transfer and transaction operations
+
+paths:
+  /clients:
+    get:
+      tags:
+        - clients
+      summary: Get all clients
+      description: Retrieves a list of all clients in the system
+      operationId: getAllClients
+      responses:
+        '200':
+          description: List of clients retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:clients]
+
+    post:
+      tags:
+        - clients
+      summary: Create a new client
+      description: Creates a new client with the provided information
+      operationId: createClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateClientRequest'
+      responses:
+        '201':
+          description: Client created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateClientResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '409':
+          description: Client with this email already exists
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                error: "Duplicate Client"
+                message: "Client with email john.doe@example.com already exists"
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [write:clients]
+
+    put:
+      tags:
+        - clients
+      summary: Update an existing client
+      description: Updates client information
+      operationId: updateClient
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ClientDto'
+      responses:
+        '200':
+          description: Client updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [write:clients]
+
+  /clients/{id}:
+    get:
+      tags:
+        - clients
+      summary: Get client by ID
+      description: Retrieves a specific client by their unique identifier
+      operationId: getClientById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Client ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Client found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:clients]
+
+    delete:
+      tags:
+        - clients
+      summary: Delete a client
+      description: Deletes a client and all associated accounts (if no transactions exist)
+      operationId: deleteClient
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Client ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '204':
+          description: Client deleted successfully
+        '400':
+          description: Cannot delete client with existing transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [delete:clients]
+
+  /clients/search-by-name/{firstName}:
+    get:
+      tags:
+        - clients
+      summary: Search clients by first name
+      description: Finds all clients matching the given first name (case-insensitive)
+      operationId: findClientsByFirstName
+      parameters:
+        - name: firstName
+          in: path
+          required: true
+          description: First name to search for
+          schema:
+            type: string
+            example: "John"
+      responses:
+        '200':
+          description: Clients found
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ClientDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:clients]
+
+  /clients/search-by-email/{email}:
+    get:
+      tags:
+        - clients
+      summary: Search client by email
+      description: Finds a client by their email address
+      operationId: findClientByEmail
+      parameters:
+        - name: email
+          in: path
+          required: true
+          description: Email address to search for
+          schema:
+            type: string
+            format: email
+            example: "john.doe@example.com"
+      responses:
+        '200':
+          description: Client found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClientDto'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:clients]
+
+  /accounts:
+    get:
+      tags:
+        - accounts
+      summary: Get all accounts
+      description: Retrieves a list of all bank accounts in the system
+      operationId: getAllAccounts
+      responses:
+        '200':
+          description: List of accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountDto'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:accounts]
+
+    post:
+      tags:
+        - accounts
+      summary: Create a new account
+      description: Creates a new bank account for an existing client
+      operationId: createAccount
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccountRequest'
+      responses:
+        '201':
+          description: Account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          description: Client not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [write:accounts]
+
+  /accounts/{id}:
+    get:
+      tags:
+        - accounts
+      summary: Get account by ID
+      description: Retrieves a specific account by its unique identifier
+      operationId: getAccountById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Account ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Account found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:accounts]
+
+    put:
+      tags:
+        - accounts
+      summary: Update an account
+      description: Updates account information (balance updates should use transactions)
+      operationId: updateAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Account ID
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountDto'
+      responses:
+        '200':
+          description: Account updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [write:accounts]
+
+    delete:
+      tags:
+        - accounts
+      summary: Delete an account
+      description: Deletes an account (only if no transactions exist)
+      operationId: deleteAccount
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Account ID
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '204':
+          description: Account deleted successfully
+        '400':
+          description: Cannot delete account with existing transactions
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [delete:accounts]
+
+  /accounts/client/{clientId}:
+    get:
+      tags:
+        - accounts
+      summary: Get accounts by client ID
+      description: Retrieves all accounts belonging to a specific client
+      operationId: getAccountsByClientId
+      parameters:
+        - name: clientId
+          in: path
+          required: true
+          description: Client ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Client accounts found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountDto'
+        '404':
+          $ref: '#/components/responses/ClientNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:accounts]
+
+  /transactions/transfer:
+    post:
+      tags:
+        - transactions
+      summary: Transfer money between accounts
+      description: |
+        Performs a money transfer between two accounts with the following validations:
+        - Both accounts must exist and have matching currencies
+        - Source account must have sufficient funds
+        - Amount must be between 0.0001 and 999,999,999,999,999.9999
+        - Accounts must be different
+      operationId: transferMoney
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TransferRequest'
+      responses:
+        '201':
+          description: Transfer completed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+        '400':
+          description: Invalid transfer request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/InsufficientFundsError'
+                  - $ref: '#/components/schemas/CurrencyMismatchError'
+                  - $ref: '#/components/schemas/InvalidAmountError'
+                  - $ref: '#/components/schemas/SameAccountError'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [write:transactions]
+
+  /transactions/{id}:
+    get:
+      tags:
+        - transactions
+      summary: Get transaction by ID
+      description: Retrieves a specific transaction by its unique identifier
+      operationId: getTransactionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Transaction ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Transaction found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransferResponse'
+        '404':
+          $ref: '#/components/responses/TransactionNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:transactions]
+
+  /transactions/account/{accountId}:
+    get:
+      tags:
+        - transactions
+      summary: Get all transactions for an account
+      description: Retrieves all transactions (incoming and outgoing) for a specific account
+      operationId: getTransactionsByAccount
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Account ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Account transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransferResponse'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:transactions]
+
+  /transactions/account/{accountId}/outgoing:
+    get:
+      tags:
+        - transactions
+      summary: Get outgoing transactions for an account
+      description: Retrieves all outgoing transactions from a specific account
+      operationId: getOutgoingTransactions
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Account ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Outgoing transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransferResponse'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:transactions]
+
+  /transactions/account/{accountId}/incoming:
+    get:
+      tags:
+        - transactions
+      summary: Get incoming transactions for an account
+      description: Retrieves all incoming transactions to a specific account
+      operationId: getIncomingTransactions
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Account ID
+          schema:
+            type: integer
+            format: int64
+            example: 1
+      responses:
+        '200':
+          description: Incoming transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TransferResponse'
+        '404':
+          $ref: '#/components/responses/AccountNotFound'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+      security:
+        - BearerAuth: [read:transactions]
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token obtained from Keycloak authentication
+
+  schemas:
+    ClientDto:
+      type: object
+      required:
+        - id
+        - firstName
+        - lastName
+        - email
+        - phone
+        - address
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique client identifier
+          example: 1
+        firstName:
+          type: string
+          description: Client's first name
+          example: "John"
+          maxLength: 255
+        lastName:
+          type: string
+          description: Client's last name
+          example: "Doe"
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          description: Client's email address (must be unique)
+          example: "john.doe@example.com"
+          maxLength: 255
+        phone:
+          type: string
+          description: Client's phone number in E.164 format
+          example: "+1234567890"
+          pattern: '^\+?[1-9]\d{1,14}$'
+          maxLength: 255
+        address:
+          type: string
+          description: Client's address
+          example: "123 Main Street, City, Country"
+          maxLength: 255
+
+    CreateClientRequest:
+      type: object
+      required:
+        - firstName
+        - lastName
+        - email
+        - phone
+        - address
+      properties:
+        firstName:
+          type: string
+          description: Client's first name
+          example: "John"
+          maxLength: 255
+        lastName:
+          type: string
+          description: Client's last name
+          example: "Doe"
+          maxLength: 255
+        email:
+          type: string
+          format: email
+          description: Client's email address (must be unique)
+          example: "john.doe@example.com"
+          maxLength: 255
+        phone:
+          type: string
+          description: Client's phone number in E.164 format
+          example: "+1234567890"
+          pattern: '^\+?[1-9]\d{1,14}$'
+          maxLength: 255
+        address:
+          type: string
+          description: Client's address
+          example: "123 Main Street, City, Country"
+          maxLength: 255
+
+    CreateClientResponse:
+      allOf:
+        - $ref: '#/components/schemas/ClientDto'
+      description: Response after successfully creating a client
+
+    AccountDto:
+      type: object
+      required:
+        - id
+        - name
+        - clientId
+        - balance
+        - accountType
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique account identifier
+          example: 1
+        name:
+          type: string
+          description: Account name
+          example: "Main Checking Account"
+          maxLength: 255
+        clientId:
+          type: integer
+          format: int64
+          description: ID of the account owner
+          example: 1
+        balance:
+          type: string
+          format: decimal
+          description: Current account balance with 4 decimal precision
+          example: "1250.5000"
+          pattern: '^\d{1,15}\.\d{4}$'
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+
+    CreateAccountRequest:
+      type: object
+      required:
+        - accountType
+        - balance
+        - currency
+        - clientId
+      properties:
+        accountType:
+          $ref: '#/components/schemas/AccountType'
+        balance:
+          type: string
+          format: decimal
+          description: Initial account balance (must be >= 0)
+          example: "1000.0000"
+          pattern: '^\d{1,15}\.\d{1,4}$'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        clientId:
+          type: integer
+          format: int64
+          description: ID of the account owner
+          example: 1
+
+    TransferRequest:
+      type: object
+      required:
+        - sourceAccountId
+        - targetAccountId
+        - amount
+        - currency
+      properties:
+        sourceAccountId:
+          type: integer
+          format: int64
+          description: ID of the account to transfer from
+          example: 1
+        targetAccountId:
+          type: integer
+          format: int64
+          description: ID of the account to transfer to
+          example: 2
+        amount:
+          type: string
+          format: decimal
+          description: Amount to transfer (0.0001 to 999,999,999,999,999.9999)
+          example: "150.0000"
+          pattern: '^\d{1,15}\.\d{1,4}$'
+        currency:
+          $ref: '#/components/schemas/Currency'
+        reference:
+          type: string
+          description: Optional transfer reference or description
+          example: "Monthly payment"
+          maxLength: 255
+
+    TransferResponse:
+      type: object
+      required:
+        - id
+        - sourceAccountId
+        - targetAccountId
+        - amount
+        - currency
+        - timestamp
+        - status
+        - reference
+      properties:
+        id:
+          type: integer
+          format: int64
+          description: Unique transaction identifier
+          example: 1
+        sourceAccountId:
+          type: integer
+          format: int64
+          description: ID of the source account
+          example: 1
+        targetAccountId:
+          type: integer
+          format: int64
+          description: ID of the target account
+          example: 2
+        amount:
+          type: string
+          format: decimal
+          description: Transfer amount with 4 decimal precision
+          example: "150.0000"
+        currency:
+          $ref: '#/components/schemas/Currency'
+        timestamp:
+          type: string
+          format: date-time
+          description: When the transaction occurred
+          example: "2025-01-15T10:30:00Z"
+        status:
+          $ref: '#/components/schemas/TransactionStatus'
+        reference:
+          type: string
+          description: Transfer reference or description
+          example: "Monthly payment"
+
+    AccountType:
+      type: string
+      enum:
+        - CLASSIC
+        - SAVINGS
+        - INVESTMENT
+      description: Type of bank account
+      example: "CLASSIC"
+
+    Currency:
+      type: string
+      enum:
+        - USD
+        - EUR
+        - GBP
+      description: ISO 4217 currency code
+      example: "USD"
+
+    TransactionStatus:
+      type: string
+      enum:
+        - PENDING
+        - COMPLETED
+        - FAILED
+      description: Current status of the transaction
+      example: "COMPLETED"
+
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+          description: Error type identifier
+          example: "Client Not Found"
+        message:
+          type: string
+          description: Human-readable error description
+          example: "Client with ID 123 not found"
+
+    InsufficientFundsError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      example:
+        error: "Insufficient Funds"
+        message: "Insufficient funds in account 1. Available: 100.00, Required: 150.00"
+
+    CurrencyMismatchError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      example:
+        error: "Currency Mismatch"
+        message: "Currency mismatch: source account has USD, but transfer requests EUR"
+
+    InvalidAmountError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      example:
+        error: "Invalid Transaction Amount"
+        message: "Transaction amount must be positive"
+
+    SameAccountError:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+      example:
+        error: "Invalid Transfer"
+        message: "Cannot transfer money to the same account"
+
+  responses:
+    BadRequest:
+      description: Invalid request data
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Invalid Client Data"
+            message: "Email field is required"
+
+    ClientNotFound:
+      description: Client not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Client Not Found"
+            message: "Client with ID 123 not found"
+
+    AccountNotFound:
+      description: Account not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Account Not Found"
+            message: "Account with ID 456 not found"
+
+    TransactionNotFound:
+      description: Transaction not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Transaction Not Found"
+            message: "Transaction with ID 789 not found"
+
+    InternalServerError:
+      description: Internal server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Internal Server Error"
+            message: "An unexpected error occurred"
+
+  examples:
+    CreateClientExample:
+      summary: Create a new client
+      value:
+        firstName: "Alice"
+        lastName: "Johnson"
+        email: "alice.johnson@example.com"
+        phone: "+1234567890"
+        address: "123 Main Street, Springfield, USA"
+
+    CreateAccountExample:
+      summary: Create a new savings account
+      value:
+        accountType: "SAVINGS"
+        balance: "1000.0000"
+        currency: "USD"
+        clientId: 1
+
+    TransferExample:
+      summary: Transfer money between accounts
+      value:
+        sourceAccountId: 1
+        targetAccountId: 2
+        amount: "250.0000"
+        currency: "USD"
+        reference: "Monthly rent payment"
+
+    ClientResponseExample:
+      summary: Client information
+      value:
+        id: 1
+        firstName: "Alice"
+        lastName: "Johnson"
+        email: "alice.johnson@example.com"
+        phone: "+1234567890"
+        address: "123 Main Street, Springfield, USA"
+
+    AccountResponseExample:
+      summary: Account information
+      value:
+        id: 1
+        name: "Account for Client 1"
+        clientId: 1
+        balance: "1250.5000"
+        accountType: "SAVINGS"
+
+    TransferResponseExample:
+      summary: Completed transfer
+      value:
+        id: 1
+        sourceAccountId: 1
+        targetAccountId: 2
+        amount: "250.0000"
+        currency: "USD"
+        timestamp: "2025-01-15T10:30:00Z"
+        status: "COMPLETED"
+        reference: "Monthly rent payment"
+
+security:
+  - BearerAuth: []
+
+# Additional API Documentation
+x-tagGroups:
+  - name: Core Banking Operations
+    tags:
+      - clients
+      - accounts
+      - transactions
+
+x-logo:
+  url: "https://ememsoft.cz/images/minibank-logo.png"
+  altText: "Minibank API"
+
+x-readme:
+  samples-languages:
+    - curl
+    - javascript
+    - python
+    - java
+    - kotlin

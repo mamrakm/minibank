@@ -1,4 +1,4 @@
-package cz.ememsoft.minibank.entity
+package cz.ememsoft.minibank.enumeration
 
 import java.io.Serializable
 

@@ -1,11 +1,11 @@
-package cz.ememsoft.minibank.transaction.response
+package cz.ememsoft.minibank.api.transaction.response
 
-import cz.ememsoft.minibank.entity.TransactionStatusEnum
+import cz.ememsoft.minibank.enumeration.TransactionStatusEnum
 import java.math.BigDecimal
 import java.time.LocalDateTime
 
 /**
- * Data Transfer Object for the response after a money transfer operation.
+ * Data Transfer Object for the response after a money transaction operation.
  *
  * This DTO provides information about the completed transaction.
  *
@@ -18,7 +18,7 @@ import java.time.LocalDateTime
  * @property status The status of the transaction (e.g., completed, failed).
  * @property reference A description or reference for the transaction.
  */
-data class TransferResponseDto(
+data class TransactionResponseDto(
     val id: Long,
     val sourceAccountId: Long,
     val targetAccountId: Long,
@@ -29,7 +29,7 @@ data class TransferResponseDto(
     val reference: String
 ) {
     override fun toString(): String {
-        return "TransferResponse(id=$id, sourceAccountId=$sourceAccountId, targetAccountId=$targetAccountId, " +
+        return "TransactionResponse(id=$id, sourceAccountId=$sourceAccountId, targetAccountId=$targetAccountId, " +
                 "amount=$amount, currency='$currency', timestamp=$timestamp, status=$status, reference='$reference')"
     }
 }

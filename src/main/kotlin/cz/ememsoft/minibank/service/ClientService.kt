@@ -46,7 +46,7 @@ interface ClientService {
      * @param updatedClientDto The updated client data.
      * @return A [Mono] emitting the updated [ClientDto], or an error if the client is not found.
      */
-    fun updateClient(updatedClientDto: ClientDto): Mono<ClientDto>
+    fun updateClient(id: Long, updatedClientDto: ClientDto): Mono<ClientDto>
 
     /**
      * Deletes a client by their ID.

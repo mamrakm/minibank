@@ -1,0 +1,40 @@
+@startuml "MiniBank Domain Model"
+
+skinparam packageStyle rectangle
+skinparam linetype ortho
+
+title MiniBank Domain Model
+
+enum TransactionStatus {
+    PENDING
+    COMPLETED
+    FAILED
+}
+
+class Account {
+    -id: Long
+    -balance: BigDecimal
+    -currency: String
+    -customerId: Long
+    -status: String
+}
+
+class Transaction {
+    -id: Long
+    -amount: BigDecimal
+    -currency: String
+    -timestamp: DateTime
+    -status: TransactionStatus
+    -reference: String
+}
+
+class Customer {
+    -id: Long
+    -name: String
+}
+
+Account "1" --> "*" Transaction : sourceAccount
+Account "1" --> "*" Transaction : targetAccount
+Customer "1" --> "*" Account : owns
+
+@enduml
