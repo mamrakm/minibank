@@ -3,6 +3,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!-- Spring Boot Parent for dependency management -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -10,12 +11,14 @@
         <relativePath/>
     </parent>
 
+    <!-- Project Information -->
     <groupId>cz.ememsoft</groupId>
     <artifactId>minibank</artifactId>
     <version>0.5.0</version>
     <name>minibank</name>
     <description>A reactive banking system with Spring Boot and Kotlin.</description>
 
+    <!-- Build Properties -->
     <properties>
         <java.version>21</java.version>
         <kotlin.version>2.1.21</kotlin.version>
@@ -24,9 +27,10 @@
         <mockito-kotlin.version>5.4.0</mockito-kotlin.version>
         <maven-compiler-plugin.version>3.14.0</maven-compiler-plugin.version>
     </properties>
-    <!-- Add repositories section -->
+
+    <!-- Maven Repositories -->
     <repositories>
-        <!-- Maven Central (usually included by default) -->
+        <!-- Maven Central Repository -->
         <repository>
             <id>central</id>
             <name>Maven Central Repository</name>
@@ -37,7 +41,7 @@
             </snapshots>
         </repository>
 
-        <!-- Spring.io repositories -->
+        <!-- Spring Release Repository -->
         <repository>
             <id>spring-releases</id>
             <name>Spring Releases</name>
@@ -47,6 +51,7 @@
             </snapshots>
         </repository>
 
+        <!-- Spring Milestone Repository -->
         <repository>
             <id>spring-milestones</id>
             <name>Spring Milestones</name>
@@ -56,6 +61,7 @@
             </snapshots>
         </repository>
 
+        <!-- Spring Snapshot Repository -->
         <repository>
             <id>spring-snapshots</id>
             <name>Spring Snapshots</name>
@@ -69,7 +75,7 @@
         </repository>
     </repositories>
 
-    <!-- Plugin repositories (if needed) -->
+    <!-- Plugin Repositories -->
     <pluginRepositories>
         <pluginRepository>
             <id>spring-releases</id>
@@ -91,7 +97,9 @@
     </pluginRepositories>
 
     <dependencies>
-        <!-- Spring Boot Core -->
+        <!-- =================================================================== -->
+        <!-- SPRING BOOT CORE DEPENDENCIES                                       -->
+        <!-- =================================================================== -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
@@ -109,7 +117,25 @@
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
 
-        <!-- Kotlin Support -->
+        <!-- =================================================================== -->
+        <!-- SPRING SECURITY DEPENDENCIES                                        -->
+        <!-- =================================================================== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-oauth2-resource-server</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-oauth2-jose</artifactId>
+        </dependency>
+
+        <!-- =================================================================== -->
+        <!-- KOTLIN LANGUAGE SUPPORT                                             -->
+        <!-- =================================================================== -->
         <dependency>
             <groupId>com.fasterxml.jackson.module</groupId>
             <artifactId>jackson-module-kotlin</artifactId>
@@ -119,7 +145,9 @@
             <artifactId>kotlin-reflect</artifactId>
         </dependency>
 
-        <!-- Reactive Programming -->
+        <!-- =================================================================== -->
+        <!-- REACTIVE PROGRAMMING SUPPORT                                        -->
+        <!-- =================================================================== -->
         <dependency>
             <groupId>io.projectreactor.kotlin</groupId>
             <artifactId>reactor-kotlin-extensions</artifactId>
@@ -129,98 +157,132 @@
             <artifactId>kotlinx-coroutines-reactor</artifactId>
         </dependency>
 
-        <!-- Database -->
+        <!-- =================================================================== -->
+        <!-- DATABASE DEPENDENCIES                                               -->
+        <!-- =================================================================== -->
+        <!-- Liquibase for database schema versioning -->
+        <dependency>
+            <groupId>org.liquibase</groupId>
+            <artifactId>liquibase-core</artifactId>
+        </dependency>
+        <!-- PostgreSQL JDBC driver for Liquibase -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- PostgreSQL R2DBC driver for reactive database access -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>r2dbc-postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
 
-        <!-- Code Generation & Mapping -->
+        <!-- =================================================================== -->
+        <!-- CODE GENERATION & MAPPING                                           -->
+        <!-- =================================================================== -->
+        <!-- MapStruct for type-safe bean mapping -->
         <dependency>
             <groupId>org.mapstruct</groupId>
             <artifactId>mapstruct</artifactId>
             <version>${mapstruct.version}</version>
         </dependency>
 
-        <!-- Documentation -->
+        <!-- =================================================================== -->
+        <!-- API DOCUMENTATION                                                   -->
+        <!-- =================================================================== -->
+        <!-- SpringDoc OpenAPI for automatic API documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>2.8.5</version>
         </dependency>
 
-        <!-- Logging -->
+        <!-- =================================================================== -->
+        <!-- LOGGING                                                             -->
+        <!-- =================================================================== -->
+        <!-- Kotlin-specific logging framework -->
         <dependency>
             <groupId>io.github.oshai</groupId>
             <artifactId>kotlin-logging-jvm</artifactId>
             <version>${kotlin-logging.version}</version>
         </dependency>
 
-        <!-- Development Tools -->
+        <!-- =================================================================== -->
+        <!-- DEVELOPMENT TOOLS                                                   -->
+        <!-- =================================================================== -->
+        <!-- Spring Boot DevTools for hot reload during development -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
             <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
+        <!-- Spring Boot Docker Compose integration -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-docker-compose</artifactId>
             <optional>true</optional>
         </dependency>
 
-        <!-- Testing Framework -->
+        <!-- =================================================================== -->
+        <!-- TESTING FRAMEWORK                                                   -->
+        <!-- =================================================================== -->
+        <!-- Spring Boot Test Starter with JUnit 5 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Spring Boot Testcontainers integration -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-testcontainers</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- JUnit Platform Suite API for test organization -->
         <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-suite-api</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Reactive Testing -->
+        <!-- =================================================================== -->
+        <!-- REACTIVE TESTING                                                    -->
+        <!-- =================================================================== -->
+        <!-- Reactor Test for reactive stream testing -->
         <dependency>
             <groupId>io.projectreactor</groupId>
             <artifactId>reactor-test</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Test Containers -->
+        <!-- =================================================================== -->
+        <!-- TESTCONTAINERS                                                      -->
+        <!-- =================================================================== -->
+        <!-- Testcontainers JUnit 5 integration -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>junit-jupiter</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Testcontainers PostgreSQL module -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>postgresql</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Testcontainers R2DBC support -->
         <dependency>
             <groupId>org.testcontainers</groupId>
             <artifactId>r2dbc</artifactId>
             <scope>test</scope>
         </dependency>
 
-        <!-- Mocking -->
+        <!-- =================================================================== -->
+        <!-- MOCKING LIBRARIES                                                   -->
+        <!-- =================================================================== -->
+        <!-- Mockito Kotlin for Kotlin-friendly mocking -->
         <dependency>
             <groupId>org.mockito.kotlin</groupId>
             <artifactId>mockito-kotlin</artifactId>
@@ -228,12 +290,19 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <!-- =================================================================== -->
+    <!-- BUILD CONFIGURATION                                                 -->
+    <!-- =================================================================== -->
     <build>
         <plugins>
+            <!-- Spring Boot Maven Plugin for executable JAR creation -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+
+            <!-- Kotlin Maven Plugin for Kotlin compilation -->
             <plugin>
                 <groupId>org.jetbrains.kotlin</groupId>
                 <artifactId>kotlin-maven-plugin</artifactId>
@@ -255,7 +324,7 @@
                     </dependency>
                 </dependencies>
                 <executions>
-                    <!-- Execute kapt first to generate MapStruct implementations -->
+                    <!-- KAPT execution for annotation processing (MapStruct) -->
                     <execution>
                         <id>kapt</id>
                         <goals>
@@ -275,6 +344,7 @@
                             </annotationProcessorPaths>
                         </configuration>
                     </execution>
+                    <!-- Test KAPT execution -->
                     <execution>
                         <id>test-kapt</id>
                         <goals>
@@ -286,7 +356,7 @@
                             </sourceDirs>
                         </configuration>
                     </execution>
-                    <!-- Make compile run after kapt -->
+                    <!-- Main compilation phase -->
                     <execution>
                         <id>compile</id>
                         <phase>compile</phase>
@@ -300,6 +370,7 @@
                             </sourceDirs>
                         </configuration>
                     </execution>
+                    <!-- Test compilation phase -->
                     <execution>
                         <id>test-compile</id>
                         <goals>
@@ -315,11 +386,13 @@
                 </executions>
             </plugin>
 
+            <!-- Maven Compiler Plugin configuration -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>${maven-compiler-plugin.version}</version>
                 <executions>
+                    <!-- Disable default compilation (handled by Kotlin plugin) -->
                     <execution>
                         <id>default-compile</id>
                         <phase>none</phase>
@@ -328,6 +401,7 @@
                         <id>default-testCompile</id>
                         <phase>none</phase>
                     </execution>
+                    <!-- Java compilation for mixed projects -->
                     <execution>
                         <id>java-compile</id>
                         <phase>compile</phase>
@@ -340,17 +414,18 @@
                     <proc>none</proc>
                 </configuration>
             </plugin>
+
+            <!-- Liquibase Maven Plugin for database migrations -->
             <plugin>
                 <groupId>org.liquibase</groupId>
                 <artifactId>liquibase-maven-plugin</artifactId>
                 <configuration>
                     <changeLogFile>src/main/resources/db/changelog/db.changelog-master.yaml</changeLogFile>
-                    <!--                    <url>${spring.liquibase.url}</url>-->
-                    <!--                    <username>${spring.liquibase.user}</username>-->
-                    <!--                    <password>${spring.liquibase.password}</password>-->
                     <defaultSchemaName>bank</defaultSchemaName>
                 </configuration>
             </plugin>
+
+            <!-- Maven Surefire Plugin for running tests -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>

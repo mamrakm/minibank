@@ -45,3 +45,4 @@ out/
 .kotlin
 /qodana.yaml
 /docker-logs.txt
+/CLAUDE.md
