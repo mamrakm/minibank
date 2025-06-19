@@ -60,8 +60,8 @@ services:
       SPRING_TASK_EXECUTION_THREAD_NAME_PREFIX: "AsyncExecutor-"
 
       # Management/Actuator Configuration
-      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
-      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
+#      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
+#      MANAGEMENT_ENDPOINT_HEALTH_SHOW_DETAILS: always
 
     depends_on:
       postgres:
