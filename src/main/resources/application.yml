@@ -10,6 +10,12 @@ spring:
     url: jdbc:postgresql://localhost:5432/minibank-database?schema=bank
     user: postgres
     password: postgres
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/minibank
+          jwk-set-uri: http://localhost:8080/realms/minibank/protocol/openid-connect/certs
   task:
     execution:
       pool:

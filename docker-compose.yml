@@ -1,16 +1,48 @@
 services:
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: minibank-keycloak
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak-database
+      KC_DB_USERNAME: postgres
+      KC_DB_PASSWORD: postgres
+      KC_DB_SCHEMA: keycloak
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+      KC_HOSTNAME: keycloak
+      KC_HOSTNAME_PORT: 8080
+    ports:
+      - "8090:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./config/keycloak:/opt/keycloak/data/import
+    command: start-dev --import-realm
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://keycloak:8080/health/ready || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+
   postgres:
     image: postgres:17
     restart: always
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: minibank-database
+      POSTGRES_DB: postgres
+      POSTGRES_MULTIPLE_DATABASES: minibank-database,keycloak-database
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
-      - ./db/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - ./db/init-multiple-dbs.sh:/docker-entrypoint-initdb.d/01-init-multiple-dbs.sh
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
@@ -50,14 +82,18 @@ services:
       # Logging Configuration
       LOGGING_LEVEL_ROOT: INFO
       LOGGING_LEVEL_CZ_EMEMSOFT_MINIBANK: INFO
-      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_R2DBC: DEBUG
-      LOGGING_LEVEL_IO_R2DBC_POSTGRESQL: DEBUG
+      LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_R2DBC: INFO
+      LOGGING_LEVEL_IO_R2DBC_POSTGRESQL: INFO
 
       # Task Execution Configuration
       SPRING_TASK_EXECUTION_POOL_CORE_SIZE: 5
       SPRING_TASK_EXECUTION_POOL_MAX_SIZE: 10
       SPRING_TASK_EXECUTION_POOL_QUEUE_CAPACITY: 25
       SPRING_TASK_EXECUTION_THREAD_NAME_PREFIX: "AsyncExecutor-"
+
+      # OAuth2 Configuration (using keycloak service name for internal communication)
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/minibank
+      SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/minibank/protocol/openid-connect/certs
 
       # Management/Actuator Configuration
 #      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
@@ -66,6 +102,8 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
+      keycloak:
+        condition: service_started
 
     healthcheck:
       test: ["CMD-SHELL", "curl -f http://localhost:8082/actuator/health || exit 1"]

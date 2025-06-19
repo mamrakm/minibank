@@ -21,7 +21,7 @@ abstract class TestBase {
             withDatabaseName("testdb")
             withUsername("testuser")
             withPassword("testpass")
-            withInitScript("init-db.sql") // Initialize schema from the classpath
+            // Liquibase will handle schema initialization automatically
             withReuse(true)
         }
 

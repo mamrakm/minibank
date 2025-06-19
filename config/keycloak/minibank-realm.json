@@ -1,0 +1,161 @@
+{
+  "realm": "minibank",
+  "enabled": true,
+  "displayName": "Minibank Realm",
+  "displayNameHtml": "<div class=\"kc-logo-text\"><span>Minibank</span></div>",
+  "accessTokenLifespan": 3600,
+  "accessCodeLifespan": 60,
+  "sslRequired": "external",
+  "registrationAllowed": false,
+  "resetPasswordAllowed": true,
+  "editUsernameAllowed": false,
+  "bruteForceProtected": true,
+  "maxFailureWaitSeconds": 900,
+  "minimumQuickLoginWaitSeconds": 60,
+  "waitIncrementSeconds": 60,
+  "quickLoginCheckMilliSeconds": 1000,
+  "maxDeltaTimeSeconds": 43200,
+  "failureFactor": 30,
+  "defaultRoles": ["default-roles-minibank", "offline_access", "uma_authorization"],
+  "roles": {
+    "realm": [
+      {
+        "name": "CUSTOMER",
+        "description": "Basic customer role with account access",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "minibank"
+      },
+      {
+        "name": "PREMIUM_CUSTOMER",
+        "description": "Premium customer with higher transaction limits",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "minibank"
+      },
+      {
+        "name": "BANK_EMPLOYEE",
+        "description": "Bank employee role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "minibank"
+      },
+      {
+        "name": "BANK_MANAGER",
+        "description": "Bank manager role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "minibank"
+      },
+      {
+        "name": "ADMIN",
+        "description": "System administrator role",
+        "composite": false,
+        "clientRole": false,
+        "containerId": "minibank"
+      }
+    ]
+  },
+  "users": [
+    {
+      "username": "user",
+      "enabled": true,
+      "firstName": "Default",
+      "lastName": "User",
+      "email": "user@minibank.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "user",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["CUSTOMER"],
+      "groups": [],
+      "attributes": {}
+    },
+    {
+      "username": "admin",
+      "enabled": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "email": "admin@minibank.com",
+      "emailVerified": true,
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ADMIN", "BANK_MANAGER"],
+      "groups": [],
+      "attributes": {}
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "minibank-api",
+      "name": "Minibank API Client",
+      "description": "OAuth2 client for Minibank API access",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "secret": "minibank-secret",
+      "redirectUris": ["*"],
+      "webOrigins": ["*"],
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": true,
+      "publicClient": false,
+      "frontchannelLogout": true,
+      "protocol": "openid-connect",
+      "attributes": {
+        "access.token.lifespan": "3600",
+        "client.secret.creation.time": "1640995200"
+      },
+      "defaultClientScopes": [
+        "web-origins",
+        "profile",
+        "roles",
+        "email"
+      ],
+      "optionalClientScopes": [
+        "address",
+        "phone",
+        "offline_access",
+        "microprofile-jwt"
+      ],
+      "protocolMappers": [
+        {
+          "name": "realm roles",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-realm-role-mapper",
+          "consentRequired": false,
+          "config": {
+            "user.attribute": "roles",
+            "access.token.claim": "true",
+            "claim.name": "realm_access.roles",
+            "jsonType.label": "String",
+            "multivalued": "true"
+          }
+        },
+        {
+          "name": "username",
+          "protocol": "openid-connect",
+          "protocolMapper": "oidc-usermodel-property-mapper",
+          "consentRequired": false,
+          "config": {
+            "userinfo.token.claim": "true",
+            "user.attribute": "username",
+            "id.token.claim": "true",
+            "access.token.claim": "true",
+            "claim.name": "preferred_username",
+            "jsonType.label": "String"
+          }
+        }
+      ]
+    }
+  ]
+}

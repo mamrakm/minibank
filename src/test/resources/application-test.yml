@@ -1,0 +1,15 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+    default-schema: bank
+    # Enable Liquibase for test environment
+    enabled: true
+  r2dbc:
+    pool:
+      initial-size: 1
+      max-size: 2
+      max-idle-time: 30m
+logging:
+  level:
+    liquibase: INFO
+    org.springframework.r2dbc: DEBUG
