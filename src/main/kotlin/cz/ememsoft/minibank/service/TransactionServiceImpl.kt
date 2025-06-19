@@ -69,77 +69,6 @@ class TransactionServiceImpl(
         }
     }
 
-    /**
-     * Helper method to process a validated transaction.
-     */
-    private fun processValidatedTransaction(
-        request: TransactionRequestDto,
-        sourceAccount: AccountEntity,
-        targetAccount: AccountEntity,
-    ): Mono<TransactionResponseDto> {
-        // 1. Validate the transaction
-        return transactionProcessor.validateTransaction(request, sourceAccount, targetAccount)
-            .then(createPendingTransaction(request))
-            .flatMap { pendingTransaction: TransactionEntity ->
-                completeTransaction(pendingTransaction, sourceAccount, targetAccount, request.amount)
-                    .onErrorResume { error ->
-                        // If completing the transaction fails, mark it as failed and re-throw
-                        logger.error(error) { "Transaction ${pendingTransaction.id} failed during completion" }
-                        transactionProcessor.failTransaction(
-                            pendingTransaction,
-                            error.message ?: "Transaction completion failed"
-                        ).then(Mono.error(error))
-                    }
-            }
-            .map<TransactionResponseDto> { completedTransaction ->
-                transactionMapper.entityToResponseDto(completedTransaction)
-            }
-            .doOnSuccess { responseDto: TransactionResponseDto ->
-                logger.info { "Money transaction completed successfully: ${responseDto.id}" }
-            }
-            .doOnError { error: Throwable ->
-                logger.error(error) { "Money transaction failed: $request" }
-            }
-    }
-
-    /**
-     * Helper method to create a pending transaction.
-     */
-    private fun createPendingTransaction(request: TransactionRequestDto): Mono<TransactionEntity> {
-        return transactionProcessor.createPendingTransaction(
-            sourceAccountId = request.sourceAccountId,
-            targetAccountId = request.targetAccountId,
-            amount = request.amount,
-            currency = request.normalizedCurrency,
-            reference = request.reference,
-            timestamp = LocalDateTime.now()
-        )
-    }
-
-    /**
-     * Helper method to complete a transaction.
-     */
-    private fun completeTransaction(
-        pendingTransaction: TransactionEntity,
-        sourceAccount: AccountEntity,
-        targetAccount: AccountEntity,
-        amount: java.math.BigDecimal,
-    ): Mono<TransactionEntity> {
-        // Update account balances
-        return transactionProcessor.updateAccountBalances(sourceAccount, targetAccount, amount)
-            .then(
-                // Mark the transaction as completed
-                transactionProcessor.completeTransaction(pendingTransaction)
-            )
-            .onErrorResume { error ->
-                // If the balance update fails, mark the transaction as failed
-                logger.error(error) { "Failed to update account balances for transaction ${pendingTransaction.id}" }
-                transactionProcessor.failTransaction(
-                    pendingTransaction,
-                    error.message ?: "Balance update failed"
-                ).then(Mono.error(error))
-            }
-    }
 
     /**
      * Retrieves a transaction by its ID.
@@ -153,7 +82,7 @@ class TransactionServiceImpl(
 
         // Map to response DTO
         return transactionMono
-            .map<TransactionResponseDto> { entity ->
+            .map { entity ->
                 transactionMapper.entityToResponseDto(entity)
             }
             .doOnSuccess { responseDto: TransactionResponseDto ->
@@ -219,6 +148,83 @@ class TransactionServiceImpl(
             }
             .doOnComplete { logger.debug { "Retrieved incoming transactions for account: $accountId" } }
             .doOnError { error -> logger.error(error) { "Error retrieving incoming transactions for account ID: $accountId" } }
+    }
+
+
+    // ========================================================================================
+    // PRIVATE HELPER METHODS
+    // ========================================================================================
+
+    /**
+     * Helper method to process a validated transaction.
+     */
+    private fun processValidatedTransaction(
+        request: TransactionRequestDto,
+        sourceAccount: AccountEntity,
+        targetAccount: AccountEntity,
+    ): Mono<TransactionResponseDto> {
+        // 1. Validate the transaction
+        return transactionProcessor.validateTransaction(request, sourceAccount, targetAccount)
+            .then(createPendingTransaction(request))
+            .flatMap { pendingTransaction: TransactionEntity ->
+                completeTransaction(pendingTransaction, sourceAccount, targetAccount, request.amount)
+                    .onErrorResume { error ->
+                        // If completing the transaction fails, mark it as failed and re-throw
+                        logger.error(error) { "Transaction ${pendingTransaction.id} failed during completion" }
+                        transactionProcessor.failTransaction(
+                            pendingTransaction,
+                            error.message ?: "Transaction completion failed"
+                        ).then(Mono.error(error))
+                    }
+            }
+            .map { completedTransaction ->
+                transactionMapper.entityToResponseDto(completedTransaction)
+            }
+            .doOnSuccess { responseDto: TransactionResponseDto ->
+                logger.info { "Money transaction completed successfully: ${responseDto.id}" }
+            }
+            .doOnError { error: Throwable ->
+                logger.error(error) { "Money transaction failed: $request" }
+            }
+    }
+
+    /**
+     * Helper method to create a pending transaction.
+     */
+    private fun createPendingTransaction(request: TransactionRequestDto): Mono<TransactionEntity> {
+        return transactionProcessor.createPendingTransaction(
+            sourceAccountId = request.sourceAccountId,
+            targetAccountId = request.targetAccountId,
+            amount = request.amount,
+            currency = request.normalizedCurrency,
+            reference = request.reference,
+            timestamp = LocalDateTime.now()
+        )
+    }
+
+    /**
+     * Helper method to complete a transaction.
+     */
+    private fun completeTransaction(
+        pendingTransaction: TransactionEntity,
+        sourceAccount: AccountEntity,
+        targetAccount: AccountEntity,
+        amount: java.math.BigDecimal,
+    ): Mono<TransactionEntity> {
+        // Update account balances
+        return transactionProcessor.updateAccountBalances(sourceAccount, targetAccount, amount)
+            .then(
+                // Mark the transaction as completed
+                transactionProcessor.completeTransaction(pendingTransaction)
+            )
+            .onErrorResume { error ->
+                // If the balance update fails, mark the transaction as failed
+                logger.error(error) { "Failed to update account balances for transaction ${pendingTransaction.id}" }
+                transactionProcessor.failTransaction(
+                    pendingTransaction,
+                    error.message ?: "Balance update failed"
+                ).then(Mono.error(error))
+            }
     }
 
     /**

@@ -24,7 +24,8 @@ import java.time.LocalDate
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
-class ClientServiceImplTest {
+class
+ClientServiceImplTest {
 
     @Mock
     private lateinit var clientRepository: ClientRepository

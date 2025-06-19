@@ -42,4 +42,11 @@ interface ClientRepository : R2dbcRepository<ClientEntity, Long> {
         address: String?,
         dateOfBirth: LocalDate?
     ): Mono<ClientEntity>
+
+    @Query("SELECT * FROM bank.client WHERE id = :id AND personal_number = :personalNumber AND last_name = :lastName")
+    fun findByIdAndPersonalNumberAndLastName(
+        id: Long,
+        personalNumber: String,
+        lastName: String
+    ): Mono<ClientEntity>
 }
