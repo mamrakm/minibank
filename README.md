@@ -1,6 +1,6 @@
 # Minibank v0.5.0
 
-A reactive banking system built with Spring Boot 3.4.1, Kotlin, and R2DBC for high-performance, non-blocking financial operations.
+A reactive banking system built with Spring Boot 3.5.0, Kotlin, and R2DBC for high-performance, non-blocking financial operations.
 
 ## Architecture Overview
 
@@ -8,7 +8,7 @@ A reactive banking system built with Spring Boot 3.4.1, Kotlin, and R2DBC for hi
 graph TB
     Client[Client Applications]
     
-    subgraph "Spring Boot 3.4.1 Application"
+    subgraph "Spring Boot 3.5.0 Application"
         Controllers[REST Controllers<br/>Spring WebFlux]
         Services[Service Layer<br/>Business Logic]
         Processors[Transaction Processors<br/>Money Operations]
@@ -73,7 +73,7 @@ erDiagram
 ## Technology Stack
 
 **Core Framework:**
-- Spring Boot 3.4.1
+- Spring Boot 3.5.0
 - Kotlin 2.1.21
 - Spring WebFlux (Reactive Web)
 - R2DBC (Reactive Database)
@@ -114,6 +114,8 @@ docker compose up -d postgres
 ./mvnw clean bootBuildImage
 docker compose up -d app
 ```
+
+**Note**: The database will be automatically initialized with the schema via Liquibase when the application starts.
 
 4. **Verify Application:**
 ```bash
