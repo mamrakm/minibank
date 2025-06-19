@@ -61,7 +61,7 @@ class JwtAuthenticationConverter : Converter<Jwt, Mono<AbstractAuthenticationTok
     /**
      * Extracts the username from the JWT token.
      * 
-     * Uses the preferred_username claim from Keycloak.
+     * Uses the preferred username claim from Keycloak.
      */
     private fun extractUsername(jwt: Jwt): String {
         return jwt.getClaim<String>(USERNAME_CLAIM) ?: jwt.subject

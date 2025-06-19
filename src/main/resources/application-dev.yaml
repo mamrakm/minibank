@@ -8,7 +8,6 @@ spring:
       max-size: 10
       max-idle-time: 30m
       validation-query: SELECT 1
-
   # Fixed: Keep Liquibase enabled for consistency with main application.yml
   liquibase:
     enabled: true  # Changed from false to true for consistency
@@ -66,3 +65,11 @@ management:
       show-details: always
     env:
       show-values: when-authorized
+
+springdoc:
+  api-docs:
+    enabled: true
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+  enable-kotlin: true
