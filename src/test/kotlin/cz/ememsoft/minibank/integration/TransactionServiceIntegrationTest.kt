@@ -49,14 +49,14 @@ class TransactionServiceIntegrationTest : TestBase() {
     }
 
     private fun cleanupDatabase() {
-        // Delete in correct order due to foreign key constraints
+        // Delete it in the correct order due to foreign key constraints
         transactionRepository.deleteAll().block()
         accountRepository.deleteAll().block()
         clientRepository.deleteAll().block()
     }
 
     private fun setupTestData() {
-        // Create source client using raw SQL to avoid entity mapping issues
+        // Create a source client using raw SQL to avoid entity mapping issues
         val sourcePersonalNumber = UUID.randomUUID()
         sourceClientId = databaseClient.sql(
             """
@@ -76,7 +76,7 @@ class TransactionServiceIntegrationTest : TestBase() {
             .one()
             .block() ?: error("Failed to retrieve source client ID or ID was null after insert")
 
-        // Create target client using raw SQL
+        // Create a target client using raw SQL
         val targetPersonalNumber = UUID.randomUUID()
         targetClientId = databaseClient.sql(
             """
@@ -96,7 +96,7 @@ class TransactionServiceIntegrationTest : TestBase() {
             .one()
             .block() ?: error("Failed to retrieve target client ID or ID was null after insert")
 
-        // Create source account using raw SQL with ordinal values
+        // Create a source account using raw SQL with ordinal values
         sourceAccountId = databaseClient.sql(
             """
             INSERT INTO bank.account (account_name, client_id, balance, account_type, currency)
@@ -113,7 +113,7 @@ class TransactionServiceIntegrationTest : TestBase() {
             .one()
             .block() ?: error("Failed to retrieve source account ID or ID was null after insert")
 
-        // Create target account using raw SQL with ordinal values
+        // Create a target account using raw SQL with ordinal values
         targetAccountId = databaseClient.sql(
             """
             INSERT INTO bank.account (account_name, client_id, balance, account_type, currency)
@@ -273,7 +273,7 @@ class TransactionServiceIntegrationTest : TestBase() {
         transactionService.processTransaction(outgoingTransaction).block()
         transactionService.processTransaction(incomingTransaction).block()
 
-        // Act & Assert - check all transactions for source account
+        // Act & Assert - check all transactions for a source account
         StepVerifier.create(transactionService.getTransactionsByAccountId(sourceAccountId))
             .expectNextCount(2) // Should have 2 transactions (1 outgoing, 1 incoming)
             .verifyComplete()
