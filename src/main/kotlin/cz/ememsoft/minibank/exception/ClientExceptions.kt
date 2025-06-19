@@ -49,3 +49,18 @@ class InvalidClientDataException(message: String) : ClientException(message)
  * @param message The detail message about the exception.
  */
 class ClientDeletionException(message: String) : ClientException(message)
+
+/**
+ * Exception thrown when attempting to operate on a suspended client.
+ */
+class ClientSuspendedException(message: String) : ClientException(message)
+
+/**
+ * Exception thrown when attempting to operate on an inactive client.
+ */
+class ClientInactiveException(message: String) : ClientException(message)
+
+/**
+ * Exception thrown when client lacks permission for administrative operations.
+ */
+class ClientUnauthorizedException(message: String) : ClientException(message)

@@ -1,12 +1,36 @@
-/*
- * This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
- * This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
- * You should have received a copy of the GNU General Public License along with this program. If not, see <https://www.gnu.org/licenses/>.
- *
- * Author: EMeMSoft spol. s r.o.
- * 1/23/25, 11:25 PM
- */
-
 package cz.ememsoft.minibank.exception
 
-class AccountNotFoundException(message: String) : RuntimeException(message)
+/**
+ * Base exception for all account-related errors in the application.
+ */
+sealed class AccountException(message: String) : RuntimeException(message)
+
+/**
+ * Exception thrown when an account is not found.
+ */
+class AccountNotFoundException(message: String) : AccountException(message)
+
+/**
+ * Exception thrown when attempting to operate on a frozen account.
+ */
+class AccountFrozenException(message: String) : AccountException(message)
+
+/**
+ * Exception thrown when attempting to operate on a closed account.
+ */
+class AccountClosedException(message: String) : AccountException(message)
+
+/**
+ * Exception thrown when attempting to create an account with invalid data.
+ */
+class InvalidAccountDataException(message: String) : AccountException(message)
+
+/**
+ * Exception thrown when an account operation violates balance constraints.
+ */
+class InsufficientBalanceException(message: String) : AccountException(message)
+
+/**
+ * Exception thrown when attempting to access an account not owned by the client.
+ */
+class UnauthorizedAccountAccessException(message: String) : AccountException(message)

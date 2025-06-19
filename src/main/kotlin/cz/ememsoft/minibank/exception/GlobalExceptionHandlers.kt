@@ -106,6 +106,150 @@ class GlobalExceptionHandler {
     }
 
     /**
+     * Handles [AccountFrozenException].
+     *
+     * Returns a response with HTTP status `423 Locked` and an error message
+     * indicating that the account is frozen.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(AccountFrozenException::class)
+    @ResponseStatus(HttpStatus.LOCKED)
+    fun handleAccountFrozenException(exception: AccountFrozenException): Map<String, String> {
+        return mapOf(
+            "error" to "Account Frozen",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [AccountClosedException].
+     *
+     * Returns a response with HTTP status `410 Gone` and an error message
+     * indicating that the account is closed.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(AccountClosedException::class)
+    @ResponseStatus(HttpStatus.GONE)
+    fun handleAccountClosedException(exception: AccountClosedException): Map<String, String> {
+        return mapOf(
+            "error" to "Account Closed",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [InvalidAccountDataException].
+     *
+     * Returns a response with HTTP status `400 Bad Request` and an error message
+     * indicating that the account data is invalid.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(InvalidAccountDataException::class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    fun handleInvalidAccountDataException(exception: InvalidAccountDataException): Map<String, String> {
+        return mapOf(
+            "error" to "Invalid Account Data",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [InsufficientBalanceException].
+     *
+     * Returns a response with HTTP status `402 Payment Required` and an error message
+     * indicating insufficient balance for the operation.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(InsufficientBalanceException::class)
+    @ResponseStatus(HttpStatus.PAYMENT_REQUIRED)
+    fun handleInsufficientBalanceException(exception: InsufficientBalanceException): Map<String, String> {
+        return mapOf(
+            "error" to "Insufficient Balance",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [UnauthorizedAccountAccessException].
+     *
+     * Returns a response with HTTP status `403 Forbidden` and an error message
+     * indicating unauthorized access to the account.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(UnauthorizedAccountAccessException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleUnauthorizedAccountAccessException(exception: UnauthorizedAccountAccessException): Map<String, String> {
+        return mapOf(
+            "error" to "Unauthorized Account Access",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [ClientSuspendedException].
+     *
+     * Returns a response with HTTP status `423 Locked` and an error message
+     * indicating that the client is suspended.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(ClientSuspendedException::class)
+    @ResponseStatus(HttpStatus.LOCKED)
+    fun handleClientSuspendedException(exception: ClientSuspendedException): Map<String, String> {
+        return mapOf(
+            "error" to "Client Suspended",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [ClientInactiveException].
+     *
+     * Returns a response with HTTP status `410 Gone` and an error message
+     * indicating that the client is inactive.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(ClientInactiveException::class)
+    @ResponseStatus(HttpStatus.GONE)
+    fun handleClientInactiveException(exception: ClientInactiveException): Map<String, String> {
+        return mapOf(
+            "error" to "Client Inactive",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
+     * Handles [ClientUnauthorizedException].
+     *
+     * Returns a response with HTTP status `403 Forbidden` and an error message
+     * indicating that the client is unauthorized for administrative operations.
+     *
+     * @param exception The exception instance.
+     * @return A map containing the error type and the exception message.
+     */
+    @ExceptionHandler(ClientUnauthorizedException::class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    fun handleClientUnauthorizedException(exception: ClientUnauthorizedException): Map<String, String> {
+        return mapOf(
+            "error" to "Client Unauthorized",
+            "message" to exception.message.orEmpty()
+        )
+    }
+
+    /**
      * Handles [TransactionNotFoundException].
      *
      * Returns a response with HTTP status `404 Not Found` and an error message
