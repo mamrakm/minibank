@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.entity
 
+import cz.ememsoft.minibank.enumeration.AccountStatusEnum
 import cz.ememsoft.minibank.enumeration.AccountTypeEnum
 import cz.ememsoft.minibank.enumeration.CurrencyEnum
 import cz.ememsoft.minibank.util.MoneyUtils
@@ -26,7 +27,9 @@ data class AccountEntity(
     @Column("account_type")
     private val accountTypeOrdinal: Int,
     @Column("currency")
-    private val currencyOrdinal: Int
+    private val currencyOrdinal: Int,
+    @Column("status")
+    private val statusOrdinal: Int = AccountStatusEnum.ACTIVE.ordinal
 ) {
     @get:Transient
     val accountType: AccountTypeEnum
@@ -35,6 +38,10 @@ data class AccountEntity(
     @get:Transient
     val currency: CurrencyEnum
         get() = CurrencyEnum.entries[currencyOrdinal]
+
+    @get:Transient
+    val status: AccountStatusEnum
+        get() = AccountStatusEnum.entries[statusOrdinal]
 
     companion object {
         /**
@@ -46,7 +53,8 @@ data class AccountEntity(
             clientId: Long,
             balance: BigDecimal,
             accountType: AccountTypeEnum,
-            currency: CurrencyEnum
+            currency: CurrencyEnum,
+            status: AccountStatusEnum = AccountStatusEnum.ACTIVE
         ): AccountEntity {
             return AccountEntity(
                 id = id,
@@ -54,7 +62,8 @@ data class AccountEntity(
                 clientId = clientId,
                 balance = MoneyUtils.validateAmount(balance, allowZero = true),
                 accountTypeOrdinal = accountType.ordinal,
-                currencyOrdinal = currency.ordinal
+                currencyOrdinal = currency.ordinal,
+                statusOrdinal = status.ordinal
             )
         }
     }

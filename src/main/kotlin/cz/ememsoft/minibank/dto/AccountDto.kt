@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.dto
 
+import cz.ememsoft.minibank.enumeration.AccountStatusEnum
 import cz.ememsoft.minibank.enumeration.AccountTypeEnum
 import cz.ememsoft.minibank.enumeration.CurrencyEnum
 import jakarta.validation.constraints.NotNull
@@ -17,6 +18,7 @@ import java.math.BigDecimal
  * @property balance The current balance of the account.
  * @property accountType The type of the account, represented as an [AccountTypeEnum].
  * @property currency The currency of the account, represented as a [CurrencyEnum].
+ * @property status The status of the account (ACTIVE, CLOSED, FROZEN, SUSPENDED).
  */
 data class AccountDto(
     val id: Long,
@@ -34,9 +36,12 @@ data class AccountDto(
     val accountType: AccountTypeEnum,
 
     @NotNull(message = "Currency must not be null")
-    val currency: CurrencyEnum
+    val currency: CurrencyEnum,
+
+    @NotNull(message = "Status must not be null")
+    val status: AccountStatusEnum = AccountStatusEnum.ACTIVE
 ) {
     override fun toString(): String {
-        return "AccountDto(id=$id, name='$name', clientId=$clientId, balance=$balance, accountType=$accountType, currency=$currency)"
+        return "AccountDto(id=$id, name='$name', clientId=$clientId, balance=$balance, accountType=$accountType, currency=$currency, status=$status)"
     }
 }

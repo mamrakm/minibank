@@ -5,6 +5,9 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
+import org.springframework.security.core.authority.SimpleGrantedAuthority
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
+import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
@@ -70,14 +73,24 @@ class SecurityConfig {
     }
 
     /**
-     * JWT Authentication Converter.
+     * JWT Authentication Converter using Spring's built-in converter.
      * 
-     * Converts JWT tokens from Keycloak into Spring Security authorities.
-     * Maps Keycloak realm roles to Spring Security roles.
+     * Much simpler than custom implementation - uses Spring Security's standard JWT handling.
+     * For Keycloak nested claims, we still need a small custom converter but much simpler.
      */
     @Bean
-    fun jwtAuthenticationConverter(): JwtAuthenticationConverter {
-        return JwtAuthenticationConverter()
+    fun jwtAuthenticationConverter(): ReactiveJwtAuthenticationConverterAdapter {
+        val jwtConverter = JwtAuthenticationConverter().apply {
+            setJwtGrantedAuthoritiesConverter { jwt ->
+                val realmAccess = jwt.getClaim<Map<String, Any>>("realm_access") ?: return@setJwtGrantedAuthoritiesConverter emptyList()
+                val roles = realmAccess["roles"] as? List<*> ?: return@setJwtGrantedAuthoritiesConverter emptyList()
+                
+                roles.filterIsInstance<String>()
+                    .map { SimpleGrantedAuthority("ROLE_$it") }
+            }
+        }
+        
+        return ReactiveJwtAuthenticationConverterAdapter(jwtConverter)
     }
 
     /**

@@ -16,7 +16,10 @@ CREATE TABLE IF NOT EXISTS bank.client (
                                            phone_number    VARCHAR(255),
                                            address         VARCHAR(255),
                                            date_of_birth   DATE,
-                                           personal_number UUID DEFAULT gen_random_uuid() NOT NULL UNIQUE
+                                           personal_number UUID DEFAULT gen_random_uuid() NOT NULL UNIQUE,
+                                           status          INTEGER DEFAULT 0 NOT NULL,
+                                           CONSTRAINT chk_client_status_valid
+                                               CHECK (status >= 0 AND status < 10)
 );
 
 -- Account table
@@ -27,6 +30,7 @@ CREATE TABLE IF NOT EXISTS bank.account (
                                             balance      DECIMAL(19, 4) DEFAULT 0.0000 NOT NULL,
                                             account_type INTEGER NOT NULL,
                                             currency     INTEGER NOT NULL,
+                                            status       INTEGER DEFAULT 0 NOT NULL,
                                             CONSTRAINT fk_account_client
                                                 FOREIGN KEY (client_id) REFERENCES bank.client (id) ON DELETE CASCADE,
                                             CONSTRAINT chk_account_balance_positive
@@ -36,7 +40,9 @@ CREATE TABLE IF NOT EXISTS bank.account (
                                             CONSTRAINT chk_account_type_valid
                                                 CHECK (account_type >= 0 AND account_type < 10),
                                             CONSTRAINT chk_currency_valid
-                                                CHECK (currency >= 0 AND currency < 10)
+                                                CHECK (currency >= 0 AND currency < 10),
+                                            CONSTRAINT chk_account_status_valid
+                                                CHECK (status >= 0 AND status < 10)
 );
 
 -- Transaction table
@@ -71,10 +77,12 @@ CREATE TABLE IF NOT EXISTS bank.transaction (
 CREATE INDEX IF NOT EXISTS idx_client_email ON bank.client (email);
 CREATE INDEX IF NOT EXISTS idx_client_personal_number ON bank.client (personal_number);
 CREATE INDEX IF NOT EXISTS idx_client_date_of_birth ON bank.client (date_of_birth);
+CREATE INDEX IF NOT EXISTS idx_client_status ON bank.client (status);
 
 CREATE INDEX IF NOT EXISTS idx_account_client_id ON bank.account (client_id);
 CREATE INDEX IF NOT EXISTS idx_account_currency ON bank.account (currency);
 CREATE INDEX IF NOT EXISTS idx_account_type ON bank.account (account_type);
+CREATE INDEX IF NOT EXISTS idx_account_status ON bank.account (status);
 
 CREATE INDEX IF NOT EXISTS idx_transaction_source_account ON bank.transaction (source_account_id);
 CREATE INDEX IF NOT EXISTS idx_transaction_target_account ON bank.transaction (target_account_id);
@@ -86,13 +94,15 @@ CREATE INDEX IF NOT EXISTS idx_transaction_amount ON bank.transaction (amount);
 -- Comments for documentation
 COMMENT ON SCHEMA bank IS 'Banking system schema with ordinal-based enum storage';
 
-COMMENT ON TABLE bank.client IS 'Bank customers with personal information';
+COMMENT ON TABLE bank.client IS 'Bank customers with personal information and soft delete support';
 COMMENT ON COLUMN bank.client.personal_number IS 'Unique UUID identifier for customer';
+COMMENT ON COLUMN bank.client.status IS 'Client status: 0=ACTIVE, 1=INACTIVE, 2=SUSPENDED';
 
-COMMENT ON TABLE bank.account IS 'Bank accounts with ordinal-based type and currency storage';
+COMMENT ON TABLE bank.account IS 'Bank accounts with ordinal-based type, currency and soft delete support';
 COMMENT ON COLUMN bank.account.balance IS 'Account balance (4 decimal precision, 0 to 999,999,999,999,999.9999)';
 COMMENT ON COLUMN bank.account.account_type IS 'Account type ordinal (0=CHECKING, 1=CURRENT, 2=SAVINGS, etc.)';
 COMMENT ON COLUMN bank.account.currency IS 'Currency ordinal (0=USD, 1=EUR, 2=GBP)';
+COMMENT ON COLUMN bank.account.status IS 'Account status: 0=ACTIVE, 1=CLOSED, 2=FROZEN, 3=SUSPENDED';
 
 COMMENT ON TABLE bank.transaction IS 'Money transfers with ordinal-based currency and status';
 COMMENT ON COLUMN bank.transaction.amount IS 'Transaction amount (4 decimal precision, 0.0001 to 999,999,999,999,999.9999)';

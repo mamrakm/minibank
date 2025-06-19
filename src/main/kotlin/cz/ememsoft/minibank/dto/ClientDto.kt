@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.dto
 
+import cz.ememsoft.minibank.enumeration.ClientStatusEnum
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
@@ -20,6 +21,7 @@ import java.util.UUID
  * @property address The address of the client.
  * @property dateOfBirth The date of birth of the client.
  * @property personalNumber The unique personal identifier (UUID) of the client.
+ * @property status The status of the client (ACTIVE, INACTIVE, SUSPENDED).
  */
 data class ClientDto(
     val id: Long,
@@ -45,9 +47,12 @@ data class ClientDto(
     val dateOfBirth: LocalDate?,
 
     @NotNull(message = "Personal number must not be null")
-    val personalNumber: UUID
+    val personalNumber: UUID,
+
+    @NotNull(message = "Status must not be null")
+    val status: ClientStatusEnum = ClientStatusEnum.ACTIVE
 ) {
     override fun toString(): String {
-        return "ClientDto(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phoneNumber='$phoneNumber', address='$address', dateOfBirth=$dateOfBirth, personalNumber=$personalNumber)"
+        return "ClientDto(id=$id, firstName='$firstName', lastName='$lastName', email='$email', phoneNumber='$phoneNumber', address='$address', dateOfBirth=$dateOfBirth, personalNumber=$personalNumber, status=$status)"
     }
 }

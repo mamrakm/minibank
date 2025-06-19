@@ -2,22 +2,23 @@ spring:
   application:
     name: minibank-test
   liquibase:
-    # Liquibase needs JDBC connection for schema migrations
-    url: jdbc:postgresql://localhost:5432/minibank-database?schema=bank
-    user: postgres
-    password: postgres
     change-log: classpath:db/changelog/db.changelog-master.yaml
     default-schema: bank
+    # Enable Liquibase for test environment
+    enabled: true
   r2dbc:
-    url: r2dbc:postgresql://localhost:5432/minibank_test?schema=bank
-    username: test_user
-    password: test_password
     pool:
-      initial-size: 5
-      max-size: 10
+      initial-size: 1
+      max-size: 2
       max-idle-time: 30m
-      validation-query: SELECT 1
-
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Disable OAuth2 for tests
+          issuer-uri: http://disabled-for-tests
+          # Mock JWK set for tests
+          jwk-set-uri: http://disabled-for-tests/jwks
   jackson:
     deserialization:
       FAIL_ON_UNKNOWN_PROPERTIES: false
@@ -37,13 +38,14 @@ logging:
   level:
     root: INFO
     cz.ememsoft.minibank: INFO
-    org.springframework.r2dbc: INFO
+    org.springframework.r2dbc: DEBUG
     org.springframework.transaction: INFO
     r2dbc.postgresql: INFO
     r2dbc.pool: INFO
     org.testcontainers: INFO
     reactor.netty: INFO
     io.r2dbc.postgresql: INFO
+    liquibase: INFO
 
 # Test-specific settings for Actuator endpoints
 management:

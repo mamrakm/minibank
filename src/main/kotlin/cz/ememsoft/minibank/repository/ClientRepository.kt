@@ -20,9 +20,21 @@ interface ClientRepository : R2dbcRepository<ClientEntity, Long> {
     fun findByEmail(email: String): Mono<ClientEntity>
 
     /**
+     * Finds an active client by their email address.
+     */
+    @Query("SELECT * FROM bank.client WHERE email = :email AND status = 0")
+    fun findActiveByEmail(email: String): Mono<ClientEntity>
+
+    /**
      * Finds clients by their first name (case-insensitive).
      */
     fun findByFirstNameIgnoreCase(firstName: String): Flux<ClientEntity>
+
+    /**
+     * Finds active clients by their first name (case-insensitive).
+     */
+    @Query("SELECT * FROM bank.client WHERE UPPER(first_name) = UPPER(:firstName) AND status = 0")
+    fun findActiveByFirstNameIgnoreCase(firstName: String): Flux<ClientEntity>
 
     /**
      * Inserts a new client into the database and returns the saved entity.
@@ -49,4 +61,26 @@ interface ClientRepository : R2dbcRepository<ClientEntity, Long> {
         personalNumber: String,
         lastName: String
     ): Mono<ClientEntity>
+
+    /**
+     * Finds an active client by their ID.
+     */
+    @Query("SELECT * FROM bank.client WHERE id = :id AND status = 0")
+    fun findActiveById(id: Long): Mono<ClientEntity>
+
+    /**
+     * Finds all active clients.
+     */
+    @Query("SELECT * FROM bank.client WHERE status = 0")
+    fun findAllActive(): Flux<ClientEntity>
+    
+    /**
+     * Finds clients by status.
+     */
+    @Query("SELECT * FROM bank.client WHERE status = :statusOrdinal")
+    fun findByStatusOrdinal(statusOrdinal: Int): Flux<ClientEntity>
 }
+
+// Extension function for enum-based status search
+fun ClientRepository.findByStatus(status: cz.ememsoft.minibank.enumeration.ClientStatusEnum): Flux<ClientEntity> =
+    findByStatusOrdinal(status.ordinal)

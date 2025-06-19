@@ -3,6 +3,7 @@ package cz.ememsoft.minibank.service
 import cz.ememsoft.minibank.api.account.request.CreateAccountRequestDto
 import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.entity.AccountEntity
+import cz.ememsoft.minibank.enumeration.AccountStatusEnum
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -61,4 +62,46 @@ interface AccountService {
      * @return A [Flux] emitting all corresponding [AccountDto] objects.
      */
     fun getAccountsByClientId(clientId: Long): Flux<AccountDto>
+    
+    // Administrative methods for managing accounts in any status
+    
+    /**
+     * Retrieves an account by its ID regardless of status (for administrative purposes).
+     *
+     * @param id The ID of the account to retrieve.
+     * @return A [Mono] emitting the corresponding [AccountDto], or an error if the account is not found.
+     */
+    fun getAccountByIdAdmin(id: Long): Mono<AccountDto>
+    
+    /**
+     * Retrieves all accounts in the system regardless of status (for administrative purposes).
+     *
+     * @return A [Flux] emitting all accounts as [AccountDto].
+     */
+    fun getAllAccountsAdmin(): Flux<AccountDto>
+    
+    /**
+     * Retrieves accounts by status (for administrative purposes).
+     *
+     * @param status The status to filter by.
+     * @return A [Flux] emitting accounts with the specified status as [AccountDto].
+     */
+    fun getAccountsByStatus(status: AccountStatusEnum): Flux<AccountDto>
+    
+    /**
+     * Retrieves accounts associated with a specific client ID regardless of status (for administrative purposes).
+     *
+     * @param clientId The ID of the client whose accounts are being retrieved.
+     * @return A [Flux] emitting all corresponding [AccountDto] objects.
+     */
+    fun getAccountsByClientIdAdmin(clientId: Long): Flux<AccountDto>
+    
+    /**
+     * Updates an account's status (for administrative purposes).
+     *
+     * @param id The ID of the account to update.
+     * @param newStatus The new status to set.
+     * @return A [Mono] emitting the updated [AccountDto], or an error if the account is not found.
+     */
+    fun updateAccountStatus(id: Long, newStatus: AccountStatusEnum): Mono<AccountDto>
 }

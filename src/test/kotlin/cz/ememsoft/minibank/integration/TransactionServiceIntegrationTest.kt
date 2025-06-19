@@ -24,6 +24,7 @@ class TransactionServiceIntegrationTest : TestBase() {
     @Autowired
     private lateinit var transactionService: TransactionService
 
+
     @Autowired
     private lateinit var clientRepository: ClientRepository
 

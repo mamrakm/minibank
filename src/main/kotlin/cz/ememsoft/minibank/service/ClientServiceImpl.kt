@@ -4,10 +4,12 @@ import cz.ememsoft.minibank.api.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.api.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
+import cz.ememsoft.minibank.enumeration.ClientStatusEnum
 import cz.ememsoft.minibank.exception.ClientNotFoundException
 import cz.ememsoft.minibank.exception.DuplicateClientException
 import cz.ememsoft.minibank.mapper.ClientMapper
 import cz.ememsoft.minibank.repository.ClientRepository
+import cz.ememsoft.minibank.repository.findByStatus
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -40,7 +42,7 @@ class ClientServiceImpl(
      */
     override fun getClient(id: Long): Mono<ClientDto> {
         logger.info { "Fetching client with ID: $id" }
-        return clientRepository.findById(id)
+        return clientRepository.findActiveById(id)
             .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
             .map { clientMapper.entityToDto(it) }
             .doOnSuccess { logger.debug { "Successfully retrieved client: $it" } }
@@ -53,11 +55,11 @@ class ClientServiceImpl(
      * @return A [Flux] emitting all clients as [ClientDto].
      */
     override fun getAllClients(): Flux<ClientDto> {
-        logger.info { "Fetching all clients" }
-        return clientRepository.findAll()
+        logger.info { "Fetching all active clients" }
+        return clientRepository.findAllActive()
             .map { clientMapper.entityToDto(it) }
-            .doOnComplete { logger.debug { "Finished fetching all clients" } }
-            .doOnError { logger.error(it) { "Error fetching all clients" } }
+            .doOnComplete { logger.debug { "Finished fetching all active clients" } }
+            .doOnError { logger.error(it) { "Error fetching all active clients" } }
     }
 
     override fun createClient(clientDto: CreateClientRequestDto): Mono<CreateClientResponseDto> {
@@ -100,7 +102,8 @@ class ClientServiceImpl(
                     phoneNumber = updatedClientDto.phoneNumber,
                     address = updatedClientDto.address,
                     dateOfBirth = updatedClientDto.dateOfBirth,
-                    personalNumber = existingClient.personalNumber
+                    personalNumber = existingClient.personalNumber,
+                    status = existingClient.status
                 )
                 logger.debug { "Updating client entity: $updatedEntity" }
                 clientRepository.save(updatedEntity)
@@ -111,35 +114,76 @@ class ClientServiceImpl(
     }
 
     override fun deleteClient(id: Long): Mono<Void> {
-        logger.info { "Deleting client with ID: $id" }
+        logger.info { "Soft deleting client with ID: $id" }
         return clientRepository.findById(id)
             .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
             .flatMap { client ->
-                client.id?.let { clientId ->
-                    clientRepository.deleteById(clientId)
-                } ?: Mono.empty()
+                val updatedClient = client.copy(status = ClientStatusEnum.INACTIVE)
+                clientRepository.save(updatedClient)
             }
-            .doOnSuccess { logger.info { "Client with ID $id deleted successfully" } }
-            .doOnError { logger.error(it) { "Error deleting client with ID: $id" } }
+            .then()
+            .doOnSuccess { logger.info { "Client with ID $id soft deleted successfully" } }
+            .doOnError { logger.error(it) { "Error soft deleting client with ID: $id" } }
     }
 
     override fun findClientByEmail(email: String): Mono<ClientDto> {
-        logger.info { "Searching for client with email: $email" }
-        return clientRepository.findByEmail(email)
+        logger.info { "Searching for active client with email: $email" }
+        return clientRepository.findActiveByEmail(email)
             .map { clientMapper.entityToDto(it) }
-            .doOnSuccess { it?.let { logger.info { "Client with email $email found" } } }
+            .doOnSuccess { it?.let { logger.info { "Active client with email $email found" } } }
             .switchIfEmpty(Mono.defer {
-                logger.warn { "Client with email $email not found" }
+                logger.warn { "Active client with email $email not found" }
                 Mono.empty()
             })
-            .doOnError { logger.error(it) { "Error searching for client with email: $email" } }
+            .doOnError { logger.error(it) { "Error searching for active client with email: $email" } }
     }
 
     override fun findClientsByFirstName(firstName: String): Flux<ClientDto> {
-        logger.info { "Searching for clients with first name: $firstName" }
-        return clientRepository.findByFirstNameIgnoreCase(firstName)
+        logger.info { "Searching for active clients with first name: $firstName" }
+        return clientRepository.findActiveByFirstNameIgnoreCase(firstName)
             .map { clientMapper.entityToDto(it) }
-            .doOnComplete { logger.debug { "Completed searching for clients with first name: $firstName" } }
-            .doOnError { logger.error(it) { "Error searching for clients with first name: $firstName" } }
+            .doOnComplete { logger.debug { "Completed searching for active clients with first name: $firstName" } }
+            .doOnError { logger.error(it) { "Error searching for active clients with first name: $firstName" } }
+    }
+
+    // Administrative methods for managing clients in any status
+
+    override fun getClientByIdAdmin(id: Long): Mono<ClientDto> {
+        logger.info { "Admin: Fetching client with ID: $id (any status)" }
+        return clientRepository.findById(id)
+            .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
+            .map { clientMapper.entityToDto(it) }
+            .doOnSuccess { logger.debug { "Admin: Successfully retrieved client: $it" } }
+            .doOnError { logger.error(it) { "Admin: Error retrieving client with ID: $id" } }
+    }
+
+    override fun getAllClientsAdmin(): Flux<ClientDto> {
+        logger.info { "Admin: Fetching all clients (any status)" }
+        return clientRepository.findAll()
+            .map { clientMapper.entityToDto(it) }
+            .doOnComplete { logger.debug { "Admin: Finished fetching all clients" } }
+            .doOnError { logger.error(it) { "Admin: Error fetching all clients" } }
+    }
+
+    override fun getClientsByStatus(status: ClientStatusEnum): Flux<ClientDto> {
+        logger.info { "Admin: Fetching clients with status: $status" }
+        return clientRepository.findByStatus(status)
+            .map { clientMapper.entityToDto(it) }
+            .doOnComplete { logger.debug { "Admin: Finished fetching clients with status: $status" } }
+            .doOnError { logger.error(it) { "Admin: Error fetching clients with status: $status" } }
+    }
+
+    override fun updateClientStatus(id: Long, newStatus: ClientStatusEnum): Mono<ClientDto> {
+        logger.info { "Admin: Updating client status for ID: $id to $newStatus" }
+        return clientRepository.findById(id)
+            .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
+            .flatMap { existingClient ->
+                val updatedClient = existingClient.copy(status = newStatus)
+                logger.debug { "Admin: Updating client status: $updatedClient" }
+                clientRepository.save(updatedClient)
+            }
+            .map { clientMapper.entityToDto(it) }
+            .doOnSuccess { logger.info { "Admin: Client status updated successfully for ID: $id to $newStatus" } }
+            .doOnError { logger.error(it) { "Admin: Error updating client status for ID: $id" } }
     }
 }

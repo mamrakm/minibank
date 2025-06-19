@@ -3,6 +3,7 @@ package cz.ememsoft.minibank.service
 import cz.ememsoft.minibank.api.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.api.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
+import cz.ememsoft.minibank.enumeration.ClientStatusEnum
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 
@@ -71,4 +72,38 @@ interface ClientService {
      * @return A [Flux] emitting clients matching the first name as [ClientDto].
      */
     fun findClientsByFirstName(firstName: String): Flux<ClientDto>
+    
+    // Administrative methods for managing clients in any status
+    
+    /**
+     * Retrieves a client by their ID regardless of status (for administrative purposes).
+     *
+     * @param id The unique identifier of the client to retrieve.
+     * @return A [Mono] emitting the corresponding [ClientDto], or an error if the client is not found.
+     */
+    fun getClientByIdAdmin(id: Long): Mono<ClientDto>
+    
+    /**
+     * Retrieves all clients in the system regardless of status (for administrative purposes).
+     *
+     * @return A [Flux] emitting all clients as [ClientDto].
+     */
+    fun getAllClientsAdmin(): Flux<ClientDto>
+    
+    /**
+     * Retrieves clients by status (for administrative purposes).
+     *
+     * @param status The status to filter by.
+     * @return A [Flux] emitting clients with the specified status as [ClientDto].
+     */
+    fun getClientsByStatus(status: ClientStatusEnum): Flux<ClientDto>
+    
+    /**
+     * Updates a client's status (for administrative purposes).
+     *
+     * @param id The ID of the client to update.
+     * @param newStatus The new status to set.
+     * @return A [Mono] emitting the updated [ClientDto], or an error if the client is not found.
+     */
+    fun updateClientStatus(id: Long, newStatus: ClientStatusEnum): Mono<ClientDto>
 }

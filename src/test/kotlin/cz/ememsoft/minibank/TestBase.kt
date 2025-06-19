@@ -1,7 +1,9 @@
 
 package cz.ememsoft.minibank
 
+import cz.ememsoft.minibank.config.TestSecurityConfig
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.context.annotation.Import
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
@@ -12,6 +14,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
+@Import(TestSecurityConfig::class)
 abstract class TestBase {
 
     companion object {
@@ -21,7 +24,8 @@ abstract class TestBase {
             withDatabaseName("testdb")
             withUsername("testuser")
             withPassword("testpass")
-            // Liquibase will handle schema initialization automatically
+            // Create schema during container startup
+            withInitScript("create_test_schema.sql")
             withReuse(true)
         }
 

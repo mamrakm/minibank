@@ -4,6 +4,7 @@ import cz.ememsoft.minibank.api.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.api.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
+import cz.ememsoft.minibank.enumeration.ClientStatusEnum
 import cz.ememsoft.minibank.exception.ClientNotFoundException
 import cz.ememsoft.minibank.exception.DuplicateClientException
 import cz.ememsoft.minibank.mapper.ClientMapper
@@ -54,7 +55,8 @@ ClientServiceImplTest {
             phoneNumber = "+1234567890",
             address = "123 Main St",
             dateOfBirth = LocalDate.of(1990, 1, 1),
-            personalNumber = sampleUuid
+            personalNumber = sampleUuid,
+            status = ClientStatusEnum.ACTIVE
         )
 
         sampleClientDto = ClientDto(
@@ -65,7 +67,8 @@ ClientServiceImplTest {
             phoneNumber = "+1234567890",
             address = "123 Main St",
             dateOfBirth = LocalDate.of(1990, 1, 1),
-            personalNumber = sampleUuid
+            personalNumber = sampleUuid,
+            status = ClientStatusEnum.ACTIVE
         )
 
         sampleCreateClientRequestDto = CreateClientRequestDto(
@@ -92,7 +95,7 @@ ClientServiceImplTest {
     @Test
     fun `getClient should return client when found`() {
         // Given
-        whenever(clientRepository.findById(1L)).thenReturn(Mono.just(sampleClientEntity))
+        whenever(clientRepository.findActiveById(1L)).thenReturn(Mono.just(sampleClientEntity))
         whenever(clientMapper.entityToDto(sampleClientEntity)).thenReturn(sampleClientDto)
 
         // When & Then
@@ -100,27 +103,27 @@ ClientServiceImplTest {
             .expectNext(sampleClientDto)
             .verifyComplete()
 
-        verify(clientRepository).findById(1L)
+        verify(clientRepository).findActiveById(1L)
         verify(clientMapper).entityToDto(sampleClientEntity)
     }
 
     @Test
     fun `getClient should throw ClientNotFoundException when not found`() {
         // Given
-        whenever(clientRepository.findById(1L)).thenReturn(Mono.empty())
+        whenever(clientRepository.findActiveById(1L)).thenReturn(Mono.empty())
 
         // When & Then
         StepVerifier.create(clientService.getClient(1L))
             .expectError(ClientNotFoundException::class.java)
             .verify()
 
-        verify(clientRepository).findById(1L)
+        verify(clientRepository).findActiveById(1L)
     }
 
     @Test
     fun `getAllClients should return all clients`() {
         // Given
-        whenever(clientRepository.findAll()).thenReturn(Flux.just(sampleClientEntity))
+        whenever(clientRepository.findAllActive()).thenReturn(Flux.just(sampleClientEntity))
         whenever(clientMapper.entityToDto(sampleClientEntity)).thenReturn(sampleClientDto)
 
         // When & Then
@@ -128,7 +131,7 @@ ClientServiceImplTest {
             .expectNext(sampleClientDto)
             .verifyComplete()
 
-        verify(clientRepository).findAll()
+        verify(clientRepository).findAllActive()
         verify(clientMapper).entityToDto(sampleClientEntity)
     }
 
@@ -202,17 +205,18 @@ ClientServiceImplTest {
     }
 
     @Test
-    fun `deleteClient should delete client when found`() {
+    fun `deleteClient should soft delete client when found`() {
         // Given
+        val inactiveClient = sampleClientEntity.copy(status = ClientStatusEnum.INACTIVE)
         whenever(clientRepository.findById(1L)).thenReturn(Mono.just(sampleClientEntity))
-        whenever(clientRepository.deleteById(1L)).thenReturn(Mono.empty())
+        whenever(clientRepository.save(any<ClientEntity>())).thenReturn(Mono.just(inactiveClient))
 
         // When & Then
         StepVerifier.create(clientService.deleteClient(1L))
             .verifyComplete()
 
         verify(clientRepository).findById(1L)
-        verify(clientRepository).deleteById(1L)
+        verify(clientRepository).save(any<ClientEntity>())
     }
 
     @Test
@@ -231,7 +235,7 @@ ClientServiceImplTest {
     @Test
     fun `findClientByEmail should return client when found`() {
         // Given
-        whenever(clientRepository.findByEmail("john.doe@example.com")).thenReturn(Mono.just(sampleClientEntity))
+        whenever(clientRepository.findActiveByEmail("john.doe@example.com")).thenReturn(Mono.just(sampleClientEntity))
         whenever(clientMapper.entityToDto(sampleClientEntity)).thenReturn(sampleClientDto)
 
         // When & Then
@@ -239,26 +243,26 @@ ClientServiceImplTest {
             .expectNext(sampleClientDto)
             .verifyComplete()
 
-        verify(clientRepository).findByEmail("john.doe@example.com")
+        verify(clientRepository).findActiveByEmail("john.doe@example.com")
         verify(clientMapper).entityToDto(sampleClientEntity)
     }
 
     @Test
     fun `findClientByEmail should return empty when not found`() {
         // Given
-        whenever(clientRepository.findByEmail("notfound@example.com")).thenReturn(Mono.empty())
+        whenever(clientRepository.findActiveByEmail("notfound@example.com")).thenReturn(Mono.empty())
 
         // When & Then
         StepVerifier.create(clientService.findClientByEmail("notfound@example.com"))
             .verifyComplete()
 
-        verify(clientRepository).findByEmail("notfound@example.com")
+        verify(clientRepository).findActiveByEmail("notfound@example.com")
     }
 
     @Test
     fun `findClientsByFirstName should return clients when found`() {
         // Given
-        whenever(clientRepository.findByFirstNameIgnoreCase("John")).thenReturn(Flux.just(sampleClientEntity))
+        whenever(clientRepository.findActiveByFirstNameIgnoreCase("John")).thenReturn(Flux.just(sampleClientEntity))
         whenever(clientMapper.entityToDto(sampleClientEntity)).thenReturn(sampleClientDto)
 
         // When & Then
@@ -266,19 +270,19 @@ ClientServiceImplTest {
             .expectNext(sampleClientDto)
             .verifyComplete()
 
-        verify(clientRepository).findByFirstNameIgnoreCase("John")
+        verify(clientRepository).findActiveByFirstNameIgnoreCase("John")
         verify(clientMapper).entityToDto(sampleClientEntity)
     }
 
     @Test
     fun `findClientsByFirstName should return empty when not found`() {
         // Given
-        whenever(clientRepository.findByFirstNameIgnoreCase("NotFound")).thenReturn(Flux.empty())
+        whenever(clientRepository.findActiveByFirstNameIgnoreCase("NotFound")).thenReturn(Flux.empty())
 
         // When & Then
         StepVerifier.create(clientService.findClientsByFirstName("NotFound"))
             .verifyComplete()
 
-        verify(clientRepository).findByFirstNameIgnoreCase("NotFound")
+        verify(clientRepository).findActiveByFirstNameIgnoreCase("NotFound")
     }
 }

@@ -1,5 +1,6 @@
 package cz.ememsoft.minibank.entity
 
+import cz.ememsoft.minibank.enumeration.ClientStatusEnum
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Past
@@ -90,5 +91,12 @@ data class ClientEntity(
      * Auto-generated UUID for secure customer referencing
      */
     @Column("personal_number")
-    val personalNumber: UUID? = null
+    val personalNumber: UUID? = null,
+
+    /**
+     * Client status for soft delete functionality
+     * Banking systems cannot delete client records for audit compliance
+     */
+    @Column("status")
+    val status: ClientStatusEnum = ClientStatusEnum.ACTIVE
 )

@@ -28,6 +28,7 @@ interface ClientMapper {
     @Mapping(source = "address", target = "address")
     @Mapping(source = "dateOfBirth", target = "dateOfBirth")
     @Mapping(source = "personalNumber", target = "personalNumber")
+    @Mapping(source = "status", target = "status")
     fun entityToDto(clientEntity: ClientEntity): ClientDto
 
     /**
@@ -41,6 +42,7 @@ interface ClientMapper {
     @Mapping(source = "address", target = "address")
     @Mapping(source = "dateOfBirth", target = "dateOfBirth")
     @Mapping(source = "personalNumber", target = "personalNumber")
+    @Mapping(source = "status", target = "status")
     fun dtoToEntity(clientDto: ClientDto): ClientEntity
 
     /**
@@ -56,6 +58,7 @@ interface ClientMapper {
     @Mapping(source = "phoneNumber", target = "phoneNumber")
     @Mapping(source = "address", target = "address")
     @Mapping(source = "dateOfBirth", target = "dateOfBirth")
+    @Mapping(target = "status", constant = "ACTIVE")
     fun createRequestToEntity(createClientRequestDto: CreateClientRequestDto): ClientEntity
 
     /**
