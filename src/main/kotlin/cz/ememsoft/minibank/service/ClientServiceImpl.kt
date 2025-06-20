@@ -3,7 +3,6 @@ package cz.ememsoft.minibank.service
 import cz.ememsoft.minibank.api.client.request.CreateClientRequestDto
 import cz.ememsoft.minibank.api.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
-import cz.ememsoft.minibank.entity.ClientEntity
 import cz.ememsoft.minibank.enumeration.ClientStatusEnum
 import cz.ememsoft.minibank.exception.ClientNotFoundException
 import cz.ememsoft.minibank.exception.DuplicateClientException
@@ -94,17 +93,7 @@ class ClientServiceImpl(
         return clientRepository.findById(id)
             .switchIfEmpty(Mono.error(ClientNotFoundException("Client with ID $id not found")))
             .flatMap { existingClient ->
-                val updatedEntity = ClientEntity(
-                    id = existingClient.id,
-                    firstName = updatedClientDto.firstName,
-                    lastName = updatedClientDto.lastName,
-                    email = updatedClientDto.email,
-                    phoneNumber = updatedClientDto.phoneNumber,
-                    address = updatedClientDto.address,
-                    dateOfBirth = updatedClientDto.dateOfBirth,
-                    personalNumber = existingClient.personalNumber,
-                    status = existingClient.status
-                )
+                val updatedEntity = clientMapper.mergeForUpdate(updatedClientDto, existingClient)
                 logger.debug { "Updating client entity: $updatedEntity" }
                 clientRepository.save(updatedEntity)
             }

@@ -5,9 +5,8 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity
 import org.springframework.security.config.web.server.ServerHttpSecurity
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter
-import org.springframework.security.oauth2.server.resource.authentication.ReactiveJwtAuthenticationConverterAdapter
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.server.SecurityWebFilterChain
 import org.springframework.web.cors.CorsConfiguration
 import org.springframework.web.cors.reactive.CorsConfigurationSource
@@ -16,8 +15,8 @@ import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource
 /**
  * Security configuration for the Minibank application.
  * 
- * Configures OAuth2 Resource Server with JWT token validation against Keycloak.
- * Implements role-based access control for banking operations.
+ * Configures JWT-based authentication with role-based access control.
+ * Supports CLIENT and ADMIN roles for different levels of access.
  */
 @Configuration
 @EnableWebFluxSecurity
@@ -28,9 +27,9 @@ class SecurityConfig {
      * Main security filter chain configuration.
      * 
      * Configures:
-     * - Public endpoints (health check, API docs)
-     * - Protected endpoints requiring authentication
-     * - OAuth2 resource server with JWT
+     * - Public endpoints (auth, health check, API docs)
+     * - Role-based access control for endpoints
+     * - JWT authentication
      * - CORS configuration
      */
     @Bean
@@ -42,55 +41,40 @@ class SecurityConfig {
                 exchanges
                     // Public endpoints - no authentication required
                     .pathMatchers(
+                        "/auth/**",
                         "/actuator/health",
                         "/actuator/health/**",
                         "/v3/api-docs/**",
                         "/v3/api-docs.yaml",
                         "/swagger-ui/**",
                         "/swagger-ui.html",
-                        "/webjars/**",
-                        "/auth/public"
+                        "/webjars/**"
                     ).permitAll()
                     
-                    // Client management - Admin or Bank Employee required
-                    .pathMatchers("/clients/**").hasAnyRole("ADMIN", "BANK_EMPLOYEE", "BANK_MANAGER")
+                    // Admin endpoints - only ADMIN role
+                    .pathMatchers("/admin/**").hasRole("ADMIN")
                     
-                    // Account management - Customer or higher
-                    .pathMatchers("/accounts/**").hasAnyRole("CUSTOMER", "PREMIUM_CUSTOMER", "BANK_EMPLOYEE", "BANK_MANAGER", "ADMIN")
+                    // Client endpoints - authenticated users can access their own data
+                    .pathMatchers("/clients/**").authenticated()
                     
-                    // Transaction operations - Customer or higher
-                    .pathMatchers("/transactions/**").hasAnyRole("CUSTOMER", "PREMIUM_CUSTOMER", "BANK_EMPLOYEE", "BANK_MANAGER", "ADMIN")
+                    // Account endpoints - authenticated users can access their own accounts
+                    .pathMatchers("/accounts/**").authenticated()
+                    
+                    // Transaction endpoints - authenticated users can access their own transactions
+                    .pathMatchers("/transactions/**").authenticated()
                     
                     // All other endpoints require authentication
                     .anyExchange().authenticated()
-            }
-            .oauth2ResourceServer { oauth2 ->
-                oauth2.jwt { jwt ->
-                    jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())
-                }
             }
             .build()
     }
 
     /**
-     * JWT Authentication Converter using Spring's built-in converter.
-     * 
-     * Much simpler than custom implementation - uses Spring Security's standard JWT handling.
-     * For Keycloak nested claims, we still need a small custom converter but much simpler.
+     * Password encoder bean for BCrypt password hashing.
      */
     @Bean
-    fun jwtAuthenticationConverter(): ReactiveJwtAuthenticationConverterAdapter {
-        val jwtConverter = JwtAuthenticationConverter().apply {
-            setJwtGrantedAuthoritiesConverter { jwt ->
-                val realmAccess = jwt.getClaim<Map<String, Any>>("realm_access") ?: return@setJwtGrantedAuthoritiesConverter emptyList()
-                val roles = realmAccess["roles"] as? List<*> ?: return@setJwtGrantedAuthoritiesConverter emptyList()
-                
-                roles.filterIsInstance<String>()
-                    .map { SimpleGrantedAuthority("ROLE_$it") }
-            }
-        }
-        
-        return ReactiveJwtAuthenticationConverterAdapter(jwtConverter)
+    fun passwordEncoder(): PasswordEncoder {
+        return BCryptPasswordEncoder()
     }
 
     /**

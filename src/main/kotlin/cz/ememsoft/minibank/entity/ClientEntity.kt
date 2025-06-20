@@ -1,6 +1,7 @@
 package cz.ememsoft.minibank.entity
 
 import cz.ememsoft.minibank.enumeration.ClientStatusEnum
+import cz.ememsoft.minibank.enumeration.UserRoleEnum
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.Past
@@ -9,6 +10,7 @@ import org.springframework.data.annotation.Id
 import org.springframework.data.relational.core.mapping.Column
 import org.springframework.data.relational.core.mapping.Table
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 /**
@@ -52,7 +54,7 @@ data class ClientEntity(
     val lastName: String,
 
     /**
-     * Primary email address for customer communication
+     * Primary email address for customer communication and authentication
      * Must be unique across all customers in the system
      */
     @Column("email")
@@ -63,6 +65,22 @@ data class ClientEntity(
         message = "Email format is invalid"
     )
     val email: String,
+
+    /**
+     * BCrypt encoded password hash for authentication
+     * Never store plain text passwords
+     */
+    @Column("password_hash")
+    @NotBlank(message = "Password hash must not be blank")
+    val passwordHash: String,
+
+    /**
+     * User role determining access level
+     * CLIENT: Can only access their own data
+     * ADMIN: Can access all data and admin endpoints
+     */
+    @Column("role")
+    val role: UserRoleEnum = UserRoleEnum.CLIENT,
 
     /**
      * Optional contact phone number
@@ -98,5 +116,24 @@ data class ClientEntity(
      * Banking systems cannot delete client records for audit compliance
      */
     @Column("status")
-    val status: ClientStatusEnum = ClientStatusEnum.ACTIVE
+    val status: ClientStatusEnum = ClientStatusEnum.ACTIVE,
+
+    /**
+     * Whether the account is enabled for login
+     * Can be used to disable accounts without changing status
+     */
+    @Column("enabled")
+    val enabled: Boolean = true,
+
+    /**
+     * Account creation timestamp
+     */
+    @Column("created_at")
+    val createdAt: LocalDateTime = LocalDateTime.now(),
+
+    /**
+     * Last successful login timestamp
+     */
+    @Column("last_login_at")
+    val lastLoginAt: LocalDateTime? = null
 )
