@@ -21,10 +21,6 @@ import reactor.core.publisher.Mono
 
 private val logger = KotlinLogging.logger {}
 
-/**
- * REST controller for client profile operations.
- * Authenticated users can access their own profile data.
- */
 @RestController
 @RequestMapping("/clients")
 @Validated
@@ -32,9 +28,6 @@ class ClientController(
     private val clientService: ClientService
 ) {
 
-    /**
-     * Get the current user's client profile.
-     */
     @GetMapping("/me", produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")
@@ -42,43 +35,31 @@ class ClientController(
         val keycloakUserId = jwt.subject
         logger.info { "Fetching client profile for Keycloak user: $keycloakUserId" }
         return clientService.getClientByKeycloakId(keycloakUserId)
-            .doOnSuccess { logger.debug { "Successfully fetched client profile" } }
-            .doOnError { logger.error(it) { "Error fetching client profile for user: $keycloakUserId" } }
     }
 
-    /**
-     * Update the current user's client profile.
-     */
     @PutMapping("/me", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
     @PreAuthorize("isAuthenticated()")
     fun updateMyProfile(@AuthenticationPrincipal jwt: Jwt, @Valid @RequestBody updatedClientDto: ClientDto): Mono<ClientDto> {
         val keycloakUserId = jwt.subject
         logger.info { "Updating client profile for Keycloak user: $keycloakUserId" }
-        
+
         return clientService.getClientByKeycloakId(keycloakUserId)
             .flatMap { currentProfile ->
                 clientService.updateClient(currentProfile.id, updatedClientDto)
             }
-            .doOnSuccess { logger.info { "Successfully updated client profile for user: $keycloakUserId" } }
-            .doOnError { logger.error(it) { "Error updating client profile for user: $keycloakUserId" } }
     }
 
-    /**
-     * Soft delete the current user's client profile.
-     */
     @DeleteMapping("/me")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @PreAuthorize("isAuthenticated()")
     fun deleteMyProfile(@AuthenticationPrincipal jwt: Jwt): Mono<Void> {
         val keycloakUserId = jwt.subject
         logger.info { "Deleting client profile for Keycloak user: $keycloakUserId" }
-        
+
         return clientService.getClientByKeycloakId(keycloakUserId)
             .flatMap { currentProfile ->
                 clientService.deleteClient(currentProfile.id)
             }
-            .doOnSuccess { logger.info { "Successfully deleted client profile for user: $keycloakUserId" } }
-            .doOnError { logger.error(it) { "Error deleting client profile for user: $keycloakUserId" } }
     }
 }

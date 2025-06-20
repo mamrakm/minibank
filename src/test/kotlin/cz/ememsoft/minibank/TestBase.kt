@@ -1,36 +1,21 @@
-
 package cz.ememsoft.minibank
 
-import cz.ememsoft.minibank.config.TestSecurityConfig
-import cz.ememsoft.minibank.enumeration.UserRoleEnum
+import dasniko.testcontainers.keycloak.KeycloakContainer
 import org.springframework.boot.test.context.SpringBootTest
-import org.springframework.context.annotation.Import
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
-import org.springframework.security.core.Authentication
-import org.springframework.security.core.authority.SimpleGrantedAuthority
-import org.springframework.security.core.context.SecurityContext
-import org.springframework.security.core.context.SecurityContextImpl
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
-import reactor.core.publisher.Mono
-import reactor.util.context.Context
 
 /**
- * Base class for integration tests with Testcontainers and security testing utilities.
- * 
- * Provides:
- * - PostgreSQL test container setup
- * - Security context management for different user roles
- * - JWT token generation utilities
- * - Test data creation helpers
+ * Abstract base class for all integration tests. It sets up and configures
+ * Testcontainers for PostgreSQL and Keycloak, providing a realistic environment
+ * for end-to-end testing.
  */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestSecurityConfig::class)
 @ActiveProfiles("test")
 abstract class TestBase {
 
@@ -41,121 +26,40 @@ abstract class TestBase {
             withDatabaseName("testdb")
             withUsername("testuser")
             withPassword("testpass")
-            // Create schema during container startup
-            withInitScript("create_test_schema.sql")
+            withInitScript("create_test_schema.sql") // Ensures the 'bank' schema is created
             withReuse(true)
         }
 
-        // Test user constants
-        const val TEST_CLIENT_ID = TestSecurityConfig.TEST_CLIENT_ID
-        const val TEST_CLIENT_KEYCLOAK_ID = "test-client-keycloak-id"
-        const val TEST_ADMIN_ID = TestSecurityConfig.TEST_ADMIN_ID
-        const val TEST_ADMIN_KEYCLOAK_ID = "test-admin-keycloak-id"
+        @Container
+        @JvmStatic
+        val keycloakContainer: KeycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:latest")
+            .withRealmImportFile("config/keycloak/minibank-realm.json")
+            .withReuse(true)
 
+        /**
+         * Dynamically sets the application properties at runtime to connect
+         * to the Testcontainers instances.
+         */
         @JvmStatic
         @DynamicPropertySource
         fun configureProperties(registry: DynamicPropertyRegistry) {
+            // PostgreSQL properties
             registry.add("spring.r2dbc.url") {
-                "r2dbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/testdb"
+                "r2dbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/${postgreSQLContainer.databaseName}"
             }
-            registry.add("spring.r2dbc.username") { "testuser" }
-            registry.add("spring.r2dbc.password") { "testpass" }
+            registry.add("spring.r2dbc.username") { postgreSQLContainer.username }
+            registry.add("spring.r2dbc.password") { postgreSQLContainer.password }
 
-            // Configure Liquibase for schema migrations (if needed)
-            registry.add("spring.liquibase.url") {
-                "jdbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/testdb"
-            }
-            registry.add("spring.liquibase.user") { "testuser" }
-            registry.add("spring.liquibase.password") { "testpass" }
+            // Liquibase properties (uses JDBC)
+            registry.add("spring.liquibase.url") { postgreSQLContainer.jdbcUrl }
+            registry.add("spring.liquibase.user") { postgreSQLContainer.username }
+            registry.add("spring.liquibase.password") { postgreSQLContainer.password }
             registry.add("spring.liquibase.default-schema") { "bank" }
+
+            // Keycloak properties for the OAuth2 Resource Server
+            registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") {
+                "${keycloakContainer.authServerUrl}realms/minibank"
+            }
         }
     }
-
-    /**
-     * Security testing utilities
-     */
-
-    /**
-     * Creates an authentication token for a client user.
-     */
-    fun createClientAuthentication(clientId: Long = TEST_CLIENT_ID): Authentication {
-        val authorities = listOf(SimpleGrantedAuthority("ROLE_CLIENT"))
-        return UsernamePasswordAuthenticationToken(clientId, null, authorities)
-    }
-
-    /**
-     * Creates an authentication token for an admin user.
-     */
-    fun createAdminAuthentication(adminId: Long = TEST_ADMIN_ID): Authentication {
-        val authorities = listOf(SimpleGrantedAuthority("ROLE_ADMIN"))
-        return UsernamePasswordAuthenticationToken(adminId, null, authorities)
-    }
-
-    /**
-     * Creates a security context for a client user.
-     */
-    fun createClientSecurityContext(clientId: Long = TEST_CLIENT_ID): SecurityContext {
-        val auth = createClientAuthentication(clientId)
-        return SecurityContextImpl(auth)
-    }
-
-    /**
-     * Creates a security context for an admin user.
-     */
-    fun createAdminSecurityContext(adminId: Long = TEST_ADMIN_ID): SecurityContext {
-        val auth = createAdminAuthentication(adminId)
-        return SecurityContextImpl(auth)
-    }
-
-    /**
-     * Creates a reactive context with client authentication.
-     */
-    fun withClientContext(clientId: Long = TEST_CLIENT_ID): Context {
-        return Context.of("SECURITY_CONTEXT_KEY", Mono.just(createClientSecurityContext(clientId)))
-    }
-
-    /**
-     * Creates a reactive context with admin authentication.
-     */
-    fun withAdminContext(adminId: Long = TEST_ADMIN_ID): Context {
-        return Context.of("SECURITY_CONTEXT_KEY", Mono.just(createAdminSecurityContext(adminId)))
-    }
-
-    /**
-     * Enables security for tests. Call this in tests that need to verify security behavior.
-     */
-    fun enableSecurity() {
-        System.setProperty("test.security.disabled", "false")
-    }
-
-    /**
-     * Disables security for tests. Call this in tests that only test business logic.
-     */
-    fun disableSecurity() {
-        System.setProperty("test.security.disabled", "true")
-    }
-
-    /**
-     * Test data creation helpers
-     */
-    
-    /**
-     * Creates test client entity data.
-     */
-    fun createTestClientData(
-        id: Long = 1L,
-        keycloakUserId: String = TEST_CLIENT_KEYCLOAK_ID,
-        email: String = "test@example.com",
-        role: UserRoleEnum = UserRoleEnum.CLIENT
-    ) = mapOf(
-        "id" to id,
-        "keycloak_user_id" to keycloakUserId,
-        "first_name" to "Test",
-        "last_name" to "User",
-        "email" to email,
-        "role" to role.ordinal,
-        "phone_number" to "+1234567890",
-        "address" to "123 Test St",
-        "status" to 0 // ACTIVE
-    )
 }

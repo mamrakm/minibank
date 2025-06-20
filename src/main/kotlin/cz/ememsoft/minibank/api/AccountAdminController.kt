@@ -4,10 +4,10 @@ import cz.ememsoft.minibank.dto.AccountDto
 import cz.ememsoft.minibank.enumeration.AccountStatusEnum
 import cz.ememsoft.minibank.mapper.AccountMapper
 import cz.ememsoft.minibank.service.AccountService
-import cz.ememsoft.minibank.service.SecurityService
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.http.HttpStatus
 import org.springframework.http.MediaType
+import org.springframework.security.access.prepost.PreAuthorize
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -29,63 +29,62 @@ private val logger = KotlinLogging.logger {}
 @RequestMapping("/admin/accounts")
 class AccountAdminController(
     private val accountService: AccountService,
-    private val accountMapper: AccountMapper,
-    private val securityService: SecurityService
+    private val accountMapper: AccountMapper
 ) {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     fun getAllAccountsAdmin(): Flux<AccountDto> {
         logger.info { "Admin: Fetching all accounts (any status)" }
-        return securityService.requireAdminRole()
-            .thenMany(accountService.getAllAccountsAdmin())
+        return accountService.getAllAccountsAdmin()
             .doOnError { logger.error(it) { "Admin: Error fetching all accounts" } }
     }
 
     @GetMapping("/{id}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PreAuthorize("hasRole('ADMIN')")
     fun getAccountByIdAdmin(@PathVariable id: Long): Mono<AccountDto> {
         logger.info { "Admin: Fetching account with ID: $id (any status)" }
-        return securityService.requireAdminRole()
-            .then(accountService.getAccountByIdAdmin(id))
+        return accountService.getAccountByIdAdmin(id)
             .doOnError { logger.error(it) { "Admin: Error fetching account with ID: $id" } }
     }
 
     @GetMapping("/by-status", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PreAuthorize("hasRole('ADMIN')")
     fun getAccountsByStatus(@RequestParam status: AccountStatusEnum): Flux<AccountDto> {
         logger.info { "Admin: Fetching accounts with status: $status" }
-        return securityService.requireAdminRole()
-            .thenMany(accountService.getAccountsByStatus(status))
+        return accountService.getAccountsByStatus(status)
             .doOnComplete { logger.info { "Admin: Successfully retrieved accounts with status: $status" } }
             .doOnError { logger.error(it) { "Admin: Error fetching accounts with status: $status" } }
     }
 
     @GetMapping("/client/{clientId}", produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PreAuthorize("hasRole('ADMIN')")
     fun getAccountsByClientIdAdmin(@PathVariable clientId: Long): Flux<AccountDto> {
         logger.info { "Admin: Fetching all accounts for client ID: $clientId (any status)" }
-        return securityService.requireAdminRole()
-            .thenMany(accountService.getAccountsByClientIdAdmin(clientId))
+        return accountService.getAccountsByClientIdAdmin(clientId)
             .doOnComplete { logger.info { "Admin: Accounts for client ID: $clientId fetched successfully" } }
             .doOnError { logger.error(it) { "Admin: Error fetching accounts for client ID: $clientId" } }
     }
 
     @PutMapping("/{id}/status", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
     @ResponseStatus(HttpStatus.OK)
+    @PreAuthorize("hasRole('ADMIN')")
     fun updateAccountStatus(@PathVariable id: Long, @RequestBody statusRequest: AccountStatusUpdateRequest): Mono<AccountDto> {
         logger.info { "Admin: Updating account status for ID: $id to ${statusRequest.status}" }
-        return securityService.requireAdminRole()
-            .then(accountService.updateAccountStatus(id, statusRequest.status))
+        return accountService.updateAccountStatus(id, statusRequest.status)
             .doOnSuccess { logger.info { "Admin: Account status updated successfully for ID: $id" } }
             .doOnError { logger.error(it) { "Admin: Error updating account status for ID: $id" } }
     }
 
     @PutMapping("/{id}", consumes = [MediaType.APPLICATION_JSON_VALUE], produces = [MediaType.APPLICATION_JSON_VALUE])
+    @PreAuthorize("hasRole('ADMIN')")
     fun updateAccountAdmin(
         @PathVariable id: Long,
         @RequestBody accountDto: AccountDto,
     ): Mono<AccountDto> {
         logger.info { "Admin: Updating account with ID: $id (any status)" }
-        return securityService.requireAdminRole()
-            .then(accountService.updateAccount(id, accountMapper.dtoToEntity(accountDto)))
+        return accountService.updateAccount(id, accountMapper.dtoToEntity(accountDto))
             .doOnSuccess { logger.info { "Admin: Account with ID: $id updated successfully" } }
             .doOnError { logger.error(it) { "Admin: Error updating account with ID: $id" } }
     }
