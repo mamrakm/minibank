@@ -36,7 +36,7 @@ class JwtAuthenticationFilter(
             
             authenticationService.validateToken(token)
                 .flatMap { clientId ->
-                    // Get client from database to retrieve current role and status
+                    // Get client from database to retrieve the current role and status
                     clientRepository.findById(clientId)
                         .switchIfEmpty(Mono.error(RuntimeException("Client not found: $clientId")))
                         .filter { client -> client.enabled }
@@ -44,7 +44,7 @@ class JwtAuthenticationFilter(
                         .map { client ->
                             logger.debug { "Authenticated client ID: $clientId, role: ${client.role}" }
                             
-                            // Create authorities based on actual user role
+                            // Create authorities based on an actual user role
                             val authorities = listOf(SimpleGrantedAuthority("ROLE_${client.role.name}"))
                             UsernamePasswordAuthenticationToken(clientId, null, authorities)
                         }

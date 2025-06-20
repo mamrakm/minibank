@@ -5,6 +5,7 @@ import cz.ememsoft.minibank.api.client.response.CreateClientResponseDto
 import cz.ememsoft.minibank.dto.ClientDto
 import cz.ememsoft.minibank.entity.ClientEntity
 import cz.ememsoft.minibank.enumeration.ClientStatusEnum
+import cz.ememsoft.minibank.enumeration.UserRoleEnum
 import cz.ememsoft.minibank.exception.ClientNotFoundException
 import cz.ememsoft.minibank.exception.DuplicateClientException
 import cz.ememsoft.minibank.mapper.ClientMapper
@@ -22,6 +23,7 @@ import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.test.StepVerifier
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.util.UUID
 
 @ExtendWith(MockitoExtension::class)
@@ -52,11 +54,16 @@ ClientServiceImplTest {
             firstName = "John",
             lastName = "Doe",
             email = "john.doe1@example.com",
+            passwordHash = "\$2a\$10\$dummyHashForTesting",
+            role = UserRoleEnum.CLIENT,
             phoneNumber = "+1234567890",
             address = "123 Main St",
             dateOfBirth = LocalDate.of(1990, 1, 1),
             personalNumber = sampleUuid,
-            status = ClientStatusEnum.ACTIVE
+            status = ClientStatusEnum.ACTIVE,
+            enabled = true,
+            createdAt = LocalDateTime.now(),
+            lastLoginAt = null
         )
 
         sampleClientDto = ClientDto(
@@ -64,11 +71,14 @@ ClientServiceImplTest {
             firstName = "John",
             lastName = "Doe",
             email = "john.doe2@example.com",
+            role = UserRoleEnum.CLIENT,
             phoneNumber = "+1234567890",
             address = "123 Main St",
             dateOfBirth = LocalDate.of(1990, 1, 1),
             personalNumber = sampleUuid,
-            status = ClientStatusEnum.ACTIVE
+            status = ClientStatusEnum.ACTIVE,
+            enabled = true,
+            createdAt = LocalDateTime.now()
         )
 
         sampleCreateClientRequestDto = CreateClientRequestDto(

@@ -19,7 +19,6 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
 import org.mockito.kotlin.any
@@ -44,10 +43,9 @@ class AuthenticationServiceTest {
     @Mock
     private lateinit var clientRepository: ClientRepository
 
-    @InjectMocks
     private lateinit var authenticationService: AuthenticationServiceImpl
 
-    private val jwtSecret = "test-secret-key-that-is-long-enough-for-jwt-signing-purposes"
+    private val jwtSecret = "test-secret-key-that-is-long-enough-for-jwt-signing-purposes-with-hs512-algorithm-requiring-at-least-512-bits"
     private val jwtExpiration = 3600L // 1 hour
     private val passwordEncoder = BCryptPasswordEncoder()
 
@@ -57,9 +55,8 @@ class AuthenticationServiceTest {
 
     @BeforeEach
     fun setUp() {
-        // Set private fields using reflection
-        ReflectionTestUtils.setField(authenticationService, "jwtSecret", jwtSecret)
-        ReflectionTestUtils.setField(authenticationService, "jwtExpiration", jwtExpiration)
+        // Create the service instance manually
+        authenticationService = AuthenticationServiceImpl(clientRepository, jwtSecret, jwtExpiration)
 
         val sampleUuid = UUID.fromString("550e8400-e29b-41d4-a716-446655440000")
         val now = LocalDateTime.now()

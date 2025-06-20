@@ -10,12 +10,9 @@ import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.core.context.SecurityContext
 import org.springframework.security.core.context.SecurityContextImpl
-import org.springframework.security.test.context.support.ReactiveSecurityContextTestExecutionListener
-import org.springframework.security.test.context.support.WithSecurityContextTestExecutionListener
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
-import org.springframework.test.context.TestExecutionListeners
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -35,13 +32,6 @@ import reactor.util.context.Context
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
 @Import(TestSecurityConfig::class)
-@TestExecutionListeners(
-    listeners = [
-        WithSecurityContextTestExecutionListener::class,
-        ReactiveSecurityContextTestExecutionListener::class
-    ],
-    mergeMode = TestExecutionListeners.MergeMode.MERGE_WITH_DEFAULTS
-)
 abstract class TestBase {
 
     companion object {
