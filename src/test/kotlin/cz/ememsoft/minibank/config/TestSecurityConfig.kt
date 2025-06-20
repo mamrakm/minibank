@@ -16,10 +16,7 @@ import org.springframework.security.web.server.SecurityWebFilterChain
 import reactor.core.publisher.Mono
 
 /**
- * Test security configuration that supports multiple testing scenarios:
- * 1. Permit-all mode for basic functionality tests
- * 2. Role-based authentication for security tests
- * 3. Mock users for different permission levels
+ * Test security configuration that replaces OAuth2 for testing.
  */
 @TestConfiguration
 @EnableWebFluxSecurity
@@ -42,36 +39,18 @@ class TestSecurityConfig {
     }
 
     /**
-     * Security filter chain for tests - can be configured via system properties
-     * to enable/disable security for different test scenarios.
+     * Test security filter chain that permits all requests.
+     * This replaces the OAuth2 configuration for tests.
      */
-    @Bean
+    @Bean("securityWebFilterChain")
     @Primary
-    fun springSecurityFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
-        // Check if security should be disabled for basic functionality tests
-        val securityDisabled = System.getProperty("test.security.disabled", "false").toBoolean()
-        
-        return if (securityDisabled) {
-            // Permit all for basic functionality tests
-            http
-                .authorizeExchange { exchanges ->
-                    exchanges.anyExchange().permitAll()
-                }
-                .csrf { it.disable() }
-                .build()
-        } else {
-            // Role-based security for security tests
-            http
-                .csrf { it.disable() }
-                .authorizeExchange { exchanges ->
-                    exchanges
-                        .pathMatchers("/auth/**", "/actuator/health", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
-                        .pathMatchers("/admin/**").hasRole("ADMIN")
-                        .anyExchange().authenticated()
-                }
-                .authenticationManager(testAuthenticationManager())
-                .build()
-        }
+    fun testSecurityWebFilterChain(http: ServerHttpSecurity): SecurityWebFilterChain {
+        return http
+            .csrf { it.disable() }
+            .authorizeExchange { exchanges ->
+                exchanges.anyExchange().permitAll()
+            }
+            .build()
     }
 
     /**

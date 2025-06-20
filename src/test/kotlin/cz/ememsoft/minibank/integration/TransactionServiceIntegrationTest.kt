@@ -59,51 +59,47 @@ class TransactionServiceIntegrationTest : TestBase() {
         // Disable security for integration test setup
         disableSecurity()
 
-        // Create a source client with authentication fields using raw SQL
-        val sourcePersonalNumber = UUID.randomUUID()
+        // Create a source client using raw SQL with new schema
+        val sourceKeycloakUserId = "test-source-keycloak-${UUID.randomUUID()}"
         sourceClientId = databaseClient.sql(
             """
-            INSERT INTO bank.client (first_name, last_name, email, password_hash, role, phone_number, address, date_of_birth, personal_number, status, enabled, created_at)
-            VALUES (:firstName, :lastName, :email, :passwordHash, :role, :phoneNumber, :address, :dateOfBirth, :personalNumber, :status, :enabled, :createdAt)
+            INSERT INTO bank.client (keycloak_user_id, first_name, last_name, email, role, phone_number, address, date_of_birth, status, created_at)
+            VALUES (:keycloakUserId, :firstName, :lastName, :email, :role, :phoneNumber, :address, :dateOfBirth, :status, :createdAt)
             RETURNING id
         """
         )
+            .bind("keycloakUserId", sourceKeycloakUserId)
             .bind("firstName", "John")
             .bind("lastName", "Doe")
             .bind("email", "john.doe@example.com")
-            .bind("passwordHash", "\$2a\$10\$dummyHashForTesting")
             .bind("role", 0) // CLIENT role ordinal
             .bind("phoneNumber", "+1234567890")
             .bind("address", "123 Main St")
             .bind("dateOfBirth", LocalDate.of(1990, 1, 1))
-            .bind("personalNumber", sourcePersonalNumber)
             .bind("status", 0) // ACTIVE status ordinal
-            .bind("enabled", true)
             .bind("createdAt", java.time.LocalDateTime.now())
             .map { row -> row.get("id", Long::class.javaObjectType) }
             .one()
             .block() ?: error("Failed to retrieve source client ID or ID was null after insert")
 
-        // Create a target client with authentication fields using raw SQL
-        val targetPersonalNumber = UUID.randomUUID()
+        // Create a target client using raw SQL with new schema
+        val targetKeycloakUserId = "test-target-keycloak-${UUID.randomUUID()}"
         targetClientId = databaseClient.sql(
             """
-            INSERT INTO bank.client (first_name, last_name, email, password_hash, role, phone_number, address, date_of_birth, personal_number, status, enabled, created_at)
-            VALUES (:firstName, :lastName, :email, :passwordHash, :role, :phoneNumber, :address, :dateOfBirth, :personalNumber, :status, :enabled, :createdAt)
+            INSERT INTO bank.client (keycloak_user_id, first_name, last_name, email, role, phone_number, address, date_of_birth, status, created_at)
+            VALUES (:keycloakUserId, :firstName, :lastName, :email, :role, :phoneNumber, :address, :dateOfBirth, :status, :createdAt)
             RETURNING id
         """
         )
+            .bind("keycloakUserId", targetKeycloakUserId)
             .bind("firstName", "Jane")
             .bind("lastName", "Smith")
             .bind("email", "jane.smith@example.com")
-            .bind("passwordHash", "\$2a\$10\$dummyHashForTesting")
             .bind("role", 0) // CLIENT role ordinal
             .bind("phoneNumber", "+0987654321")
             .bind("address", "456 Oak Ave")
             .bind("dateOfBirth", LocalDate.of(1985, 5, 15))
-            .bind("personalNumber", targetPersonalNumber)
             .bind("status", 0) // ACTIVE status ordinal
-            .bind("enabled", true)
             .bind("createdAt", java.time.LocalDateTime.now())
             .map { row -> row.get("id", Long::class.javaObjectType) }
             .one()

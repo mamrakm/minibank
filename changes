@@ -1,0 +1,6 @@
+Now implement the proposed the changes. If you see any other space for improvement do it. After you implement changes in code make sure it is
+buildable. Then create a new image with ./mvnw spring-boot:build-image and run application with `docker compose down -v && docker compose up -d` and
+try to send few curl request just to check if authentication really works. After that go to fix all tests, unit tests and integration tests. I want
+you to create new ClientIntegrationTest and AccountIntegrationTest. As final step update test_minibank_api_auth shell script with changes requiring
+authentication and add test for each api endpoint and especially check authentication and scenario when multiple users are logged in and are able to
+list their's accounts but none of them can see accounts of other users.

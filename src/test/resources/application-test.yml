@@ -1,0 +1,29 @@
+spring:
+  liquibase:
+    default-schema: bank
+    change-log: classpath:db/changelog/db.changelog-master.yaml
+  main:
+    allow-bean-definition-overriding: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: # Empty to disable OAuth2
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.oauth2.resource.reactive.ReactiveOAuth2ResourceServerAutoConfiguration
+
+# Disable JMX for tests
+spring.jmx.enabled: false
+
+# Test-specific configuration
+test:
+  security:
+    disabled: true
+
+# Logging
+logging:
+  level:
+    cz.ememsoft.minibank: INFO
+    org.springframework.security: INFO
+    org.testcontainers: INFO

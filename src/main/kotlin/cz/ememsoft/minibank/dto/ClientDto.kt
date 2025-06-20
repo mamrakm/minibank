@@ -7,29 +7,18 @@ import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.util.UUID
 
 /**
- * Data Transfer Object (DTO) for representing a client.
+ * Data Transfer Object (DTO) for representing a client profile.
  *
  * This DTO is used to transfer client data between different layers of the application.
- * It excludes sensitive authentication data like password hash.
- *
- * @property id The unique identifier for the client.
- * @property firstName The first name of the client.
- * @property lastName The last name of the client.
- * @property email The email address of the client.
- * @property role The user role (CLIENT or ADMIN).
- * @property phoneNumber The phone number of the client.
- * @property address The address of the client.
- * @property dateOfBirth The date of birth of the client.
- * @property personalNumber The unique personal identifier (UUID) of the client.
- * @property status The status of the client (ACTIVE, INACTIVE, SUSPENDED).
- * @property enabled Whether the account is enabled for login.
- * @property createdAt Account creation timestamp.
+ * Updated for Keycloak integration - authentication is handled by Keycloak.
  */
 data class ClientDto(
     val id: Long,
+
+    @NotNull(message = "Keycloak User ID must not be null")
+    val keycloakUserId: String,
 
     @NotNull(message = "First name must not be null")
     val firstName: String,
@@ -54,19 +43,9 @@ data class ClientDto(
 
     val dateOfBirth: LocalDate?,
 
-    @NotNull(message = "Personal number must not be null")
-    val personalNumber: UUID,
-
     @NotNull(message = "Status must not be null")
     val status: ClientStatusEnum = ClientStatusEnum.ACTIVE,
 
-    @NotNull(message = "Enabled must not be null")
-    val enabled: Boolean = true,
-
     @NotNull(message = "Created at must not be null")
     val createdAt: LocalDateTime
-) {
-    override fun toString(): String {
-        return "ClientDto(id=$id, firstName='$firstName', lastName='$lastName', email='$email', role=$role, phoneNumber='$phoneNumber', address='$address', dateOfBirth=$dateOfBirth, personalNumber=$personalNumber, status=$status, enabled=$enabled, createdAt=$createdAt)"
-    }
-}
+)

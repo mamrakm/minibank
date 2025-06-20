@@ -30,8 +30,8 @@ import reactor.util.context.Context
  */
 @Testcontainers
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
 @Import(TestSecurityConfig::class)
+@ActiveProfiles("test")
 abstract class TestBase {
 
     companion object {
@@ -45,6 +45,12 @@ abstract class TestBase {
             withInitScript("create_test_schema.sql")
             withReuse(true)
         }
+
+        // Test user constants
+        const val TEST_CLIENT_ID = TestSecurityConfig.TEST_CLIENT_ID
+        const val TEST_CLIENT_KEYCLOAK_ID = "test-client-keycloak-id"
+        const val TEST_ADMIN_ID = TestSecurityConfig.TEST_ADMIN_ID
+        const val TEST_ADMIN_KEYCLOAK_ID = "test-admin-keycloak-id"
 
         @JvmStatic
         @DynamicPropertySource
@@ -62,21 +68,17 @@ abstract class TestBase {
             registry.add("spring.liquibase.user") { "testuser" }
             registry.add("spring.liquibase.password") { "testpass" }
             registry.add("spring.liquibase.default-schema") { "bank" }
-            
-            // Configure JWT settings for tests
-            registry.add("minibank.jwt.secret") { "test-secret-key-that-is-long-enough-for-jwt-signing" }
-            registry.add("minibank.jwt.expiration") { "3600000" } // 1 hour
         }
     }
 
     /**
      * Security testing utilities
      */
-    
+
     /**
      * Creates an authentication token for a client user.
      */
-    fun createClientAuthentication(clientId: Long = TestSecurityConfig.TEST_CLIENT_ID): Authentication {
+    fun createClientAuthentication(clientId: Long = TEST_CLIENT_ID): Authentication {
         val authorities = listOf(SimpleGrantedAuthority("ROLE_CLIENT"))
         return UsernamePasswordAuthenticationToken(clientId, null, authorities)
     }
@@ -84,7 +86,7 @@ abstract class TestBase {
     /**
      * Creates an authentication token for an admin user.
      */
-    fun createAdminAuthentication(adminId: Long = TestSecurityConfig.TEST_ADMIN_ID): Authentication {
+    fun createAdminAuthentication(adminId: Long = TEST_ADMIN_ID): Authentication {
         val authorities = listOf(SimpleGrantedAuthority("ROLE_ADMIN"))
         return UsernamePasswordAuthenticationToken(adminId, null, authorities)
     }
@@ -92,7 +94,7 @@ abstract class TestBase {
     /**
      * Creates a security context for a client user.
      */
-    fun createClientSecurityContext(clientId: Long = TestSecurityConfig.TEST_CLIENT_ID): SecurityContext {
+    fun createClientSecurityContext(clientId: Long = TEST_CLIENT_ID): SecurityContext {
         val auth = createClientAuthentication(clientId)
         return SecurityContextImpl(auth)
     }
@@ -100,7 +102,7 @@ abstract class TestBase {
     /**
      * Creates a security context for an admin user.
      */
-    fun createAdminSecurityContext(adminId: Long = TestSecurityConfig.TEST_ADMIN_ID): SecurityContext {
+    fun createAdminSecurityContext(adminId: Long = TEST_ADMIN_ID): SecurityContext {
         val auth = createAdminAuthentication(adminId)
         return SecurityContextImpl(auth)
     }
@@ -108,14 +110,14 @@ abstract class TestBase {
     /**
      * Creates a reactive context with client authentication.
      */
-    fun withClientContext(clientId: Long = TestSecurityConfig.TEST_CLIENT_ID): Context {
+    fun withClientContext(clientId: Long = TEST_CLIENT_ID): Context {
         return Context.of("SECURITY_CONTEXT_KEY", Mono.just(createClientSecurityContext(clientId)))
     }
 
     /**
      * Creates a reactive context with admin authentication.
      */
-    fun withAdminContext(adminId: Long = TestSecurityConfig.TEST_ADMIN_ID): Context {
+    fun withAdminContext(adminId: Long = TEST_ADMIN_ID): Context {
         return Context.of("SECURITY_CONTEXT_KEY", Mono.just(createAdminSecurityContext(adminId)))
     }
 
@@ -142,20 +144,18 @@ abstract class TestBase {
      */
     fun createTestClientData(
         id: Long = 1L,
+        keycloakUserId: String = TEST_CLIENT_KEYCLOAK_ID,
         email: String = "test@example.com",
-        role: UserRoleEnum = UserRoleEnum.CLIENT,
-        enabled: Boolean = true
+        role: UserRoleEnum = UserRoleEnum.CLIENT
     ) = mapOf(
         "id" to id,
-        "firstName" to "Test",
-        "lastName" to "User",
+        "keycloak_user_id" to keycloakUserId,
+        "first_name" to "Test",
+        "last_name" to "User",
         "email" to email,
-        "passwordHash" to "\$2a\$10\$dummyHashForTesting",
-        "role" to role,
-        "phoneNumber" to "+1234567890",
+        "role" to role.ordinal,
+        "phone_number" to "+1234567890",
         "address" to "123 Test St",
-        "personalNumber" to "123456789",
-        "enabled" to enabled,
-        "status" to "ACTIVE"
+        "status" to 0 // ACTIVE
     )
 }

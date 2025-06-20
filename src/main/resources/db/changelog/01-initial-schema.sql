@@ -7,22 +7,19 @@ CREATE SCHEMA IF NOT EXISTS bank;
 -- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
--- Client table with authentication fields
+-- Client table with Keycloak integration
 CREATE TABLE IF NOT EXISTS bank.client (
                                            id              BIGSERIAL PRIMARY KEY,
+                                           keycloak_user_id VARCHAR(255) NOT NULL UNIQUE,
                                            first_name      VARCHAR(255) NOT NULL,
                                            last_name       VARCHAR(255) NOT NULL,
                                            email           VARCHAR(255) NOT NULL UNIQUE,
-                                           password_hash   VARCHAR(255) NOT NULL,
                                            role            INTEGER DEFAULT 0 NOT NULL,
                                            phone_number    VARCHAR(255),
                                            address         VARCHAR(255),
                                            date_of_birth   DATE,
-                                           personal_number UUID DEFAULT gen_random_uuid() NOT NULL UNIQUE,
                                            status          INTEGER DEFAULT 0 NOT NULL,
-                                           enabled         BOOLEAN DEFAULT TRUE NOT NULL,
                                            created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,
-                                           last_login_at   TIMESTAMP,
                                            CONSTRAINT chk_client_status_valid
                                                CHECK (status >= 0 AND status < 10),
                                            CONSTRAINT chk_client_role_valid
@@ -82,11 +79,10 @@ CREATE TABLE IF NOT EXISTS bank.transaction (
 
 -- Indexes for performance
 CREATE INDEX IF NOT EXISTS idx_client_email ON bank.client (email);
-CREATE INDEX IF NOT EXISTS idx_client_personal_number ON bank.client (personal_number);
+CREATE INDEX IF NOT EXISTS idx_client_keycloak_user_id ON bank.client (keycloak_user_id);
 CREATE INDEX IF NOT EXISTS idx_client_date_of_birth ON bank.client (date_of_birth);
 CREATE INDEX IF NOT EXISTS idx_client_status ON bank.client (status);
 CREATE INDEX IF NOT EXISTS idx_client_role ON bank.client (role);
-CREATE INDEX IF NOT EXISTS idx_client_enabled ON bank.client (enabled);
 CREATE INDEX IF NOT EXISTS idx_client_created_at ON bank.client (created_at);
 
 CREATE INDEX IF NOT EXISTS idx_account_client_id ON bank.account (client_id);
@@ -104,14 +100,11 @@ CREATE INDEX IF NOT EXISTS idx_transaction_amount ON bank.transaction (amount);
 -- Comments for documentation
 COMMENT ON SCHEMA bank IS 'Banking system schema with ordinal-based enum storage';
 
-COMMENT ON TABLE bank.client IS 'Bank customers with personal information, authentication, and soft delete support';
-COMMENT ON COLUMN bank.client.personal_number IS 'Unique UUID identifier for customer';
-COMMENT ON COLUMN bank.client.password_hash IS 'BCrypt encoded password for authentication';
-COMMENT ON COLUMN bank.client.role IS 'User role: 0=CLIENT, 1=ADMIN';
+COMMENT ON TABLE bank.client IS 'Bank customers linked to Keycloak users with profile information and soft delete support';
+COMMENT ON COLUMN bank.client.keycloak_user_id IS 'Keycloak user ID (sub claim) linking to identity provider';
+COMMENT ON COLUMN bank.client.role IS 'User role: 0=CLIENT, 1=ADMIN (managed within application)';
 COMMENT ON COLUMN bank.client.status IS 'Client status: 0=ACTIVE, 1=INACTIVE, 2=SUSPENDED';
-COMMENT ON COLUMN bank.client.enabled IS 'Whether account is enabled for login';
-COMMENT ON COLUMN bank.client.created_at IS 'Account creation timestamp';
-COMMENT ON COLUMN bank.client.last_login_at IS 'Last successful login timestamp';
+COMMENT ON COLUMN bank.client.created_at IS 'Profile creation timestamp';
 
 COMMENT ON TABLE bank.account IS 'Bank accounts with ordinal-based type, currency and soft delete support';
 COMMENT ON COLUMN bank.account.balance IS 'Account balance (4 decimal precision, 0 to 999,999,999,999,999.9999)';
