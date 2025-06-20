@@ -24,7 +24,6 @@ class TransactionServiceIntegrationTest : TestBase() {
     @Autowired
     private lateinit var transactionService: TransactionService
 
-
     @Autowired
     private lateinit var clientRepository: ClientRepository
 
@@ -59,7 +58,7 @@ class TransactionServiceIntegrationTest : TestBase() {
     private fun setupTestData() {
         // Disable security for integration test setup
         disableSecurity()
-        
+
         // Create a source client with authentication fields using raw SQL
         val sourcePersonalNumber = UUID.randomUUID()
         sourceClientId = databaseClient.sql(
