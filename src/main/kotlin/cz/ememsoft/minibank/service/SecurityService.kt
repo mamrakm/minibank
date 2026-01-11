@@ -5,6 +5,7 @@ import cz.ememsoft.minibank.exception.ClientUnauthorizedException
 import cz.ememsoft.minibank.repository.ClientRepository
 import io.github.oshai.kotlinlogging.KotlinLogging
 import org.springframework.security.core.context.ReactiveSecurityContextHolder
+import org.springframework.security.oauth2.jwt.Jwt
 import org.springframework.stereotype.Service
 import reactor.core.publisher.Mono
 
@@ -23,10 +24,14 @@ class SecurityService(
      */
     fun getAuthenticatedClientId(): Mono<Long> {
         return ReactiveSecurityContextHolder.getContext()
-            .map { it.authentication?.principal as? Long }
-            .filter { it != null }
-            .cast(Long::class.java)
+            .mapNotNull { it.authentication?.principal as? Jwt }
+            .map { it.subject }
             .switchIfEmpty(Mono.error(ClientUnauthorizedException("No authenticated user found")))
+            .flatMap { keycloakUserId ->
+                clientRepository.findByKeycloakUserId(keycloakUserId)
+                    .map { it.id }
+                    .switchIfEmpty(Mono.error(ClientUnauthorizedException("Authenticated client not found")))
+            }
     }
 
     /**

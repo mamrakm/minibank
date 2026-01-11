@@ -60,6 +60,13 @@ abstract class TestBase {
             registry.add("spring.security.oauth2.resourceserver.jwt.issuer-uri") {
                 "${keycloakContainer.authServerUrl}realms/minibank"
             }
+
+            val keycloakBaseUrl = keycloakContainer.authServerUrl.removeSuffix("/")
+            registry.add("keycloak.base-url") { keycloakBaseUrl }
+            registry.add("keycloak.realm") { "minibank" }
+            registry.add("keycloak.client-id") { "minibank-api" }
+            registry.add("keycloak.client-secret") { "minibank-secret" }
+            registry.add("keycloak.admin-realm") { "master" }
         }
     }
 }

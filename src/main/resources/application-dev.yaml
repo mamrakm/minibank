@@ -37,6 +37,13 @@ spring:
         allow-core-thread-timeout: true
       thread-name-prefix: "DevAsyncExecutor-"
 
+keycloak:
+  base-url: http://localhost:8080
+  realm: minibank
+  client-id: minibank-api
+  client-secret: minibank-secret
+  admin-realm: master
+
 server:
   port: 8082
 

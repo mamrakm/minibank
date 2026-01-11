@@ -24,3 +24,10 @@ spring:
         queue-capacity: 25    # Size of the queue for pending tasks
         allow-core-thread-timeout: true # Allow core threads to time out
       thread-name-prefix: "AsyncExecutor-" # Custom thread name prefix
+
+keycloak:
+  base-url: http://localhost:8080
+  realm: minibank
+  client-id: minibank-api
+  client-secret: minibank-secret
+  admin-realm: master

@@ -94,6 +94,11 @@ services:
       # OAuth2 Configuration (using keycloak service name for internal communication)
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI: http://keycloak:8080/realms/minibank
       SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_JWK_SET_URI: http://keycloak:8080/realms/minibank/protocol/openid-connect/certs
+      KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_REALM: minibank
+      KEYCLOAK_CLIENT_ID: minibank-api
+      KEYCLOAK_CLIENT_SECRET: minibank-secret
+      KEYCLOAK_ADMIN_REALM: master
 
       # Management/Actuator Configuration
 #      MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: health,info,metrics
