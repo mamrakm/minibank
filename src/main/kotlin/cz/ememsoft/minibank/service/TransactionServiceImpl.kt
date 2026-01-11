@@ -169,12 +169,9 @@ class TransactionServiceImpl(
             .flatMap { pendingTransaction: TransactionEntity ->
                 completeTransaction(pendingTransaction, sourceAccount, targetAccount, request.amount)
                     .onErrorResume { error ->
-                        // If completing the transaction fails, mark it as failed and re-throw
+                        // If completing the transaction fails, re-throw
                         logger.error(error) { "Transaction ${pendingTransaction.id} failed during completion" }
-                        transactionProcessor.failTransaction(
-                            pendingTransaction,
-                            error.message ?: "Transaction completion failed"
-                        ).then(Mono.error(error))
+                        Mono.error(error)
                     }
             }
             .map { completedTransaction ->

@@ -32,7 +32,7 @@ abstract class TestBase {
 
         @Container
         @JvmStatic
-        val keycloakContainer: KeycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:latest")
+        val keycloakContainer: KeycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:25.0.6")
             .withRealmImportFile("config/keycloak/minibank-realm.json")
             .withReuse(true)
 
@@ -43,6 +43,12 @@ abstract class TestBase {
         @JvmStatic
         @DynamicPropertySource
         fun configureProperties(registry: DynamicPropertyRegistry) {
+            if (!postgreSQLContainer.isRunning) {
+                postgreSQLContainer.start()
+            }
+            if (!keycloakContainer.isRunning) {
+                keycloakContainer.start()
+            }
             // PostgreSQL properties
             registry.add("spring.r2dbc.url") {
                 "r2dbc:postgresql://${postgreSQLContainer.host}:${postgreSQLContainer.firstMappedPort}/${postgreSQLContainer.databaseName}"
