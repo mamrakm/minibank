@@ -32,7 +32,7 @@ abstract class TestBase {
 
         @Container
         @JvmStatic
-        val keycloakContainer: KeycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:latest")
+        val keycloakContainer: KeycloakContainer = KeycloakContainer("quay.io/keycloak/keycloak:25.0.6")
             .withRealmImportFile("config/keycloak/minibank-realm.json")
             .withReuse(true)
 
