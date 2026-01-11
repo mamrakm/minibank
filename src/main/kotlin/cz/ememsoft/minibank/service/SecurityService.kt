@@ -24,8 +24,7 @@ class SecurityService(
      */
     fun getAuthenticatedClientId(): Mono<Long> {
         return ReactiveSecurityContextHolder.getContext()
-            .mapNotNull { it.authentication?.principal as? Jwt }
-            .map { it.subject }
+            .mapNotNull { (it.authentication?.principal as? Jwt)?.subject }
             .switchIfEmpty(Mono.error(ClientUnauthorizedException("No authenticated user found")))
             .flatMap { keycloakUserId ->
                 clientRepository.findByKeycloakUserId(keycloakUserId)
