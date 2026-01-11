@@ -185,6 +185,8 @@ class TransactionServiceTest {
             .thenReturn(Mono.just(pendingTransaction))
         whenever(transactionProcessor.updateAccountBalances(eq(sourceAccount), eq(targetAccount), any()))
             .thenReturn(Mono.error(completionError))
+        whenever(transactionProcessor.completeTransaction(pendingTransaction))
+            .thenReturn(Mono.just(completedTransaction))
         whenever(transactionProcessor.failTransaction(eq(pendingTransaction), any()))
             .thenReturn(Mono.just(pendingTransaction.withStatus(TransactionStatusEnum.FAILED)))
 
