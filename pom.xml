@@ -315,6 +315,13 @@
             <version>${mockito-kotlin.version}</version>
             <scope>test</scope>
         </dependency>
+        <!-- Kotlin test assertions -->
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test</artifactId>
+            <version>${kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <!-- =================================================================== -->
